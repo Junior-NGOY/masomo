@@ -1,5 +1,6 @@
+import Login from "@/components/frontend/auth/login";
 import React from "react";
 
 export default function page() {
-  return <h1>Welcome to login !</h1>;
+  return <Login />;
 }

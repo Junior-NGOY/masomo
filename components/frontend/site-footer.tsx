@@ -65,8 +65,8 @@ export default function SiteFooter() {
           <div className="space-y-4">
             <h3 className="text-lg font-bold">Get In Touch</h3>
             <div className="space-y-2 text-sm">
-              <p>support@pagedone.com</p>
-              <p>+91 945 658 3256</p>
+              <p>ngoylunda@gmail.com</p>
+              <p>+243 85 322 22 99</p>
               <p>61-A, Elm street, Gujarat, India.</p>
             </div>
           </div>
