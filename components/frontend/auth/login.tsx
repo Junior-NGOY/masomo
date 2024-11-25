@@ -9,6 +9,7 @@ import CustomCarousel from "../custome-caroussel";
 import Logo from "@/components/logo";
 import PasswordInput from "@/components/FormInputs/PasswordInput";
 import { Lock, LogIn, Mail } from "lucide-react";
+
 export type RegisterInputProps = {
   fullName: string;
   email: string;
@@ -39,13 +40,6 @@ export default function Login() {
             <h1 className="text-3xl font-bold">Login to your Account</h1>
           </div>
           <form className="grid gap-4" onSubmit={handleSubmit(onSubmit)}>
-            {/*      <TextInput
-              label="Full Name"
-              register={register}
-              name="fullName"
-              errors={errors}
-              placeholder="eg John Doe"
-            /> */}
             <TextInput
               label="Email Address"
               register={register}
@@ -63,14 +57,7 @@ export default function Login() {
               errors={errors}
               placeholder=""
             /> */}
-            {/*   <TextInput
-              label="Password"
-              register={register}
-              name="password"
-              type="password"
-              errors={errors}
-              placeholder="******"
-            /> */}
+
             <PasswordInput
               label="Password"
               register={register}

@@ -50,9 +50,11 @@ import {
   Forward,
   Frame,
   GalleryVerticalEnd,
+  GraduationCap,
   LayoutDashboard,
   LogOut,
   Map,
+  MessagesSquare,
   MoreHorizontal,
   Package,
   PieChart,
@@ -61,7 +63,10 @@ import {
   ShoppingCart,
   Sparkles,
   SquareTerminal,
-  Trash2
+  Trash2,
+  User,
+  UserCog,
+  Users
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Logo from "@/components/logo";
@@ -98,56 +103,68 @@ const data = {
       items: [
         {
           title: "Overview",
-          url: "/dashboard"
+          url: "/dashboard/overview"
         }
       ]
     },
     {
       title: "Student Management",
-      url: "#",
-      icon: Bot,
+      url: "/dashboard/students",
+      icon: Users,
       items: [
         {
-          title: "Genesis",
-          url: "#"
+          title: "Student Directory",
+          url: "/dashboard/students"
         },
         {
-          title: "Explorer",
-          url: "#"
+          title: "Fees",
+          url: "/dashboard/students/fees"
         },
         {
-          title: "Quantum",
-          url: "#"
+          title: "Student Ids",
+          url: "/dashboard/students/ids"
+        },
+        {
+          title: "Attendance",
+          url: "/dashboard/students/attendance"
         }
       ]
     },
     {
       title: "Academics",
-      url: "#",
-      icon: BookOpen,
+      url: "/dashboard/academics",
+      icon: GraduationCap,
       items: [
         {
-          title: "Introduction",
-          url: "#"
+          title: "Classes",
+          url: "/dashboard/academics/classes"
         },
         {
-          title: "Get Started",
-          url: "#"
+          title: "Streams/Sections",
+          url: "/dashboard/academics/classes"
         },
         {
-          title: "Tutorials",
-          url: "#"
+          title: "TimeTable",
+          url: "/dashboard/academics/timetable"
         },
         {
-          title: "Changelog",
-          url: "#"
+          title: "Examinations",
+          url: "/dashboard/academics/examinations"
+        },
+        {
+          title: "Assignments",
+          url: "/dashboard/academics/assignements"
+        },
+        {
+          title: "Report Cards",
+          url: "/dashboard/academics/report"
         }
       ]
     },
     {
       title: "Staff Management",
       url: "#",
-      icon: Settings2,
+      icon: UserCog,
       items: [
         {
           title: "General",
@@ -168,21 +185,36 @@ const data = {
       ]
     },
     {
+      title: "Users",
+      url: "/user",
+      icon: Users,
+      items: [
+        {
+          title: "Parent",
+          url: "/dashboard/users/parents"
+        },
+        {
+          title: "Secretary",
+          url: "/dashboard/users/secretary"
+        }
+      ]
+    },
+    {
       title: "Communication",
-      url: "#",
-      icon: Settings2,
+      url: "/",
+      icon: MessagesSquare,
       items: [
         {
           title: "General",
-          url: "#"
+          url: "/communication/"
         },
         {
           title: "Team",
-          url: "#"
+          url: "/communication/"
         },
         {
           title: "Billing",
-          url: "#"
+          url: "/communication/"
         },
         {
           title: "Limits",
@@ -193,23 +225,23 @@ const data = {
     {
       title: "Finance",
       url: "#",
-      icon: Settings2,
+      icon: DollarSign,
       items: [
         {
           title: "General",
-          url: "#"
+          url: "/finance/"
         },
         {
           title: "Team",
-          url: "#"
+          url: "/finance/"
         },
         {
           title: "Billing",
-          url: "#"
+          url: "/finance/"
         },
         {
           title: "Limits",
-          url: "#"
+          url: "/finance/"
         }
       ]
     },

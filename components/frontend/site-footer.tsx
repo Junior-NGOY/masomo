@@ -25,7 +25,7 @@ export default function SiteFooter() {
                 <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z" />
                 <polyline points="14 2 14 8 20 8" />
               </svg>
-              <span className="text-xl font-bold">Pagedone</span>
+              <span className="text-xl font-bold">PowerSoft</span>
             </div>
             <p className="text-sm text-white/90">
               From admissions to academics, simplify every aspect of school
@@ -67,7 +67,7 @@ export default function SiteFooter() {
             <div className="space-y-2 text-sm">
               <p>ngoylunda@gmail.com</p>
               <p>+243 85 322 22 99</p>
-              <p>61-A, Elm street, Gujarat, India.</p>
+              <p>24, Av. Dilolo, Q/ Kalubwe, C/Lubumbashi.</p>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4 sm:grid-cols-2">
