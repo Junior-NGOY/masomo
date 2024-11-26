@@ -41,7 +41,6 @@ export default function AdmissionTabs() {
                 Bulk Student Admission
               </TabsTrigger>
             </TabsList>
-
             <Card className="border-t-4 border-blue-600 shadow">
               <CardContent className="">
                 <TabsContent value="single">
