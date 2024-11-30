@@ -6,14 +6,14 @@ import TextInput from "../FormInputs/TextInput";
 import SubmitButton from "../FormInputs/SubmitButton";
 import { Send } from "lucide-react";
 import { useRouter } from "next/navigation";
-import TextArea from "../FormInputs/TextAreaInput";
 import PhoneInput from "../FormInputs/PhoneInput";
 import FormSelectInput from "../FormInputs/FormSelectInput";
+import toast from "react-hot-toast";
+import { createContact } from "@/actions/admin";
 
 export type ContactProps = {
   fullName: string;
   email: string;
-  password: string;
   phone: string;
   school: string;
   country: string;
@@ -23,24 +23,26 @@ export type ContactProps = {
   media: string;
   message: string;
 };
+
 const ContactUs: React.FC = () => {
-  const [selectedCountry, setSelectedCountry] = useState<any>("congo");
-  const [selectedRole, setSelectedRole] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [Loading, setLoading] = useState(false);
   const {
     register,
     handleSubmit,
     reset,
     formState: { errors }
   } = useForm<ContactProps>();
-  const router = useRouter();
-  async function onSubmit(data: ContactProps) {
-    console.log(data);
-  }
   const countries = [
-    { name: "congolais" },
-    { name: "Kinshasa" },
-    { name: "criser" }
+    { label: "congolais", value: "congolais" },
+    { label: "Kinshasa", value: "Kinshasa" },
+    { label: "role", value: "role" },
+    { label: "role1", value: "role1" }
+  ];
+  const medias = [
+    { label: "Facebook", value: "Facebook" },
+    { label: "WhatsApp", value: "WhatsApp" },
+    { label: "Instagram", value: "Instagram" },
+    { label: "Google", value: "Google" }
   ];
   const roles = [
     { label: "congolais", value: "congolais" },
@@ -48,6 +50,36 @@ const ContactUs: React.FC = () => {
     { label: "role", value: "role" },
     { label: "role1", value: "role1" }
   ];
+  //const router = useRouter();
+  const [selectedCountry, setSelectedCountry] = useState<any>(countries[0]);
+  const [selectedRole, setSelectedRole] = useState<any>(roles[0]);
+  const [selectedMedia, setSelectedMedia] = useState<any>(medias[0]);
+  async function onSubmit(data: ContactProps) {
+    data.country = selectedCountry.value;
+    data.role = selectedRole.value;
+    data.media = selectedMedia.value;
+    data.students = Number(data.students);
+    try {
+      setLoading(true);
+
+      console.log(data);
+      const res = await createContact(data);
+      console.log(res);
+      setLoading(false);
+      // Toast
+      toast.success("Your request has been Successfully submitted!");
+      //reset
+      reset();
+
+      //route
+      //router.push("/dashboard/school-onboarding");
+    } catch (error) {
+      setLoading(false);
+      console.log(error);
+    }
+    console.log(data);
+  }
+
   return (
     <section className="bg-gray-100 py-16 px-4">
       <div className="max-w-6xl mx-auto">
@@ -64,7 +96,7 @@ const ContactUs: React.FC = () => {
               <TextInput
                 label="Your Full name"
                 register={register}
-                name="name"
+                name="fullName"
                 errors={errors}
                 placeholder="Eg. john doe"
               />
@@ -94,7 +126,7 @@ const ContactUs: React.FC = () => {
                   placeholder="Eg. Imara collège"
                 />
                 <FormSelectInput
-                  options={roles}
+                  options={countries}
                   label="Country"
                   option={selectedCountry}
                   setOption={setSelectedCountry}
@@ -104,7 +136,7 @@ const ContactUs: React.FC = () => {
                 <TextInput
                   label="School Website / Social Mediage Page(fb, linkedin)"
                   register={register}
-                  name="schoolpage"
+                  name="schoolPage"
                   errors={errors}
                   placeholder="Eg. www.imara.com"
                 />
@@ -125,22 +157,22 @@ const ContactUs: React.FC = () => {
                 />
                 <FormSelectInput
                   label="Please select media did hear about us"
-                  options={roles}
-                  option={selectedRole}
-                  setOption={setSelectedRole}
+                  options={medias}
+                  option={selectedMedia}
+                  setOption={setSelectedMedia}
                 />
               </div>
               <TextInput
                 label="Please share with us the key pain points you want to solve"
                 register={register}
-                name="students"
+                name="message"
                 errors={errors}
                 placeholder="Eg. 300"
               />
               <SubmitButton
                 buttonIcon={Send}
                 title="Submit"
-                loading={isLoading}
+                loading={Loading}
                 loadingTitle="Sending please wait..."
               />
             </form>

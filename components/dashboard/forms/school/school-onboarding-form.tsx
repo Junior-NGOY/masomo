@@ -2,27 +2,16 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-
-import FormFooter from "../FormFooter";
 import ImageInput from "@/components/FormInputs/ImageInput";
-
 import TextInput from "@/components/FormInputs/TextInput";
 import SubmitButton from "@/components/FormInputs/SubmitButton";
 import { Send } from "lucide-react";
+import toast from "react-hot-toast";
+import { createSchool } from "@/actions/schools";
 
-export type SelectOptionProps = {
-  label: string;
-  value: string;
-};
-type ParentFormProps = {
-  editingId?: string | undefined;
-  initialData?: any | undefined | null;
-};
-export type ParentProps = {
+export type SchoolProps = {
   name: string;
-  email: string;
-  password: string;
-  imageUrl: string;
+  logo: string;
 };
 export default function SchoolOnboardingForm() {
   const {
@@ -30,9 +19,9 @@ export default function SchoolOnboardingForm() {
     handleSubmit,
     reset,
     formState: { errors }
-  } = useForm<ParentProps>({
+  } = useForm<SchoolProps>({
     defaultValues: {
-      name: ""
+      //name: ""
     }
   });
   const router = useRouter();
@@ -41,11 +30,21 @@ export default function SchoolOnboardingForm() {
   const initialImage = "/images/student.png";
   const [imageUrl, setImageUrl] = useState(initialImage);
 
-  async function saveStudent(data: ParentProps) {
+  async function saveSchool(data: SchoolProps) {
     try {
       setLoading(true);
-      data.imageUrl = imageUrl;
+      data.logo = imageUrl;
       console.log(data);
+      const res = await createSchool(data);
+      console.log(res);
+      setLoading(false);
+      // Toast
+      toast.success("Successfully Created!");
+      //reset
+      reset();
+      setImageUrl(initialImage);
+      //route
+      //router.push("/dashboard/school-onboarding");
     } catch (error) {
       setLoading(false);
       console.log(error);
@@ -53,7 +52,7 @@ export default function SchoolOnboardingForm() {
   }
 
   return (
-    <form className="" onSubmit={handleSubmit(saveStudent)}>
+    <form className="" onSubmit={handleSubmit(saveSchool)}>
       <div className="text-center">
         <h2 className="scroll-m-20 border-b pb-2 text-2xl font-semibold tracking-tight first:mt-0">
           Welcome to Masomo,
@@ -70,7 +69,7 @@ export default function SchoolOnboardingForm() {
                 register={register}
                 errors={errors}
                 label="School Name"
-                name="schoolname"
+                name="name"
               />
             </div>
             <div className="grid   gap-3">

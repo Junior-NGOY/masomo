@@ -51,6 +51,7 @@ import {
   Frame,
   GalleryVerticalEnd,
   GraduationCap,
+  Key,
   LayoutDashboard,
   LogOut,
   Map,
@@ -71,9 +72,9 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Logo from "@/components/logo";
 
-const data = {
+const sidebarLinks = {
   user: {
-    name: "shadcn",
+    name: "PowerSoft",
     email: "m@example.com",
     avatar: "/avatars/shadcn.jpg"
   },
@@ -245,29 +246,7 @@ const data = {
         }
       ]
     },
-    {
-      title: "Transport",
-      url: "#",
-      icon: Settings2,
-      items: [
-        {
-          title: "General",
-          url: "#"
-        },
-        {
-          title: "Team",
-          url: "#"
-        },
-        {
-          title: "Billing",
-          url: "#"
-        },
-        {
-          title: "Limits",
-          url: "#"
-        }
-      ]
-    },
+
     {
       title: "Ressources",
       url: "#",
@@ -336,6 +315,17 @@ const data = {
           url: "#"
         }
       ]
+    },
+    {
+      title: "Admin only",
+      url: "/dashboard/admin",
+      icon: Key,
+      items: [
+        {
+          title: "Contacts",
+          url: "/dashboard/admin/contacts"
+        }
+      ]
     }
   ],
   projects: [
@@ -357,7 +347,7 @@ const data = {
   ]
 };
 export default function AppSidebar() {
-  const [activeTeam, setActiveTeam] = React.useState(data.teams[0]);
+  const [activeTeam, setActiveTeam] = React.useState(sidebarLinks.teams[0]);
   return (
     <Sidebar collapsible="icon">
       <SidebarHeader>
@@ -383,7 +373,7 @@ export default function AppSidebar() {
                 <DropdownMenuLabel className="text-xs text-muted-foreground">
                   Teams
                 </DropdownMenuLabel>
-                {data.teams.map((team, index) => (
+                {sidebarLinks.teams.map((team, index) => (
                   <DropdownMenuItem
                     key={team.name}
                     onClick={() => setActiveTeam(team)}
@@ -414,7 +404,7 @@ export default function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupLabel>Enseignants</SidebarGroupLabel>
           <SidebarMenu>
-            {data.navMain.map((item) => (
+            {sidebarLinks.navMain.map((item) => (
               <Collapsible
                 key={item.title}
                 asChild
@@ -450,7 +440,7 @@ export default function AppSidebar() {
         <SidebarGroup className="group-data-[collapsible=icon]:hidden">
           <SidebarGroupLabel>Elèves</SidebarGroupLabel>
           <SidebarMenu>
-            {data.projects.map((item) => {
+            {sidebarLinks.projects.map((item) => {
               const Icon = item.icon;
               return (
                 <SidebarMenuItem key={item.name}>
@@ -509,14 +499,19 @@ export default function AppSidebar() {
                   className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
                 >
                   <Avatar className="h-8 w-8 rounded-lg">
-                    <AvatarImage src={data.user.avatar} alt={data.user.name} />
+                    <AvatarImage
+                      src={sidebarLinks.user.avatar}
+                      alt={sidebarLinks.user.name}
+                    />
                     <AvatarFallback className="rounded-lg">CN</AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
                     <span className="truncate font-semibold">
-                      {data.user.name}
+                      {sidebarLinks.user.name}
                     </span>
-                    <span className="truncate text-xs">{data.user.email}</span>
+                    <span className="truncate text-xs">
+                      {sidebarLinks.user.email}
+                    </span>
                   </div>
                   <ChevronsUpDown className="ml-auto size-4" />
                 </SidebarMenuButton>
@@ -531,17 +526,17 @@ export default function AppSidebar() {
                   <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                     <Avatar className="h-8 w-8 rounded-lg">
                       <AvatarImage
-                        src={data.user.avatar}
-                        alt={data.user.name}
+                        src={sidebarLinks.user.avatar}
+                        alt={sidebarLinks.user.name}
                       />
                       <AvatarFallback className="rounded-lg">CN</AvatarFallback>
                     </Avatar>
                     <div className="grid flex-1 text-left text-sm leading-tight">
                       <span className="truncate font-semibold">
-                        {data.user.name}
+                        {sidebarLinks.user.name}
                       </span>
                       <span className="truncate text-xs">
-                        {data.user.email}
+                        {sidebarLinks.user.email}
                       </span>
                     </div>
                   </div>
