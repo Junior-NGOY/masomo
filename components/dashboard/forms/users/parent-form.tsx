@@ -9,6 +9,8 @@ import TextArea from "@/components/FormInputs/TextAreaInput";
 import TextInput from "@/components/FormInputs/TextInput";
 import PasswordInput from "@/components/FormInputs/PasswordInput";
 import FormSelectInput from "@/components/FormInputs/FormSelectInput";
+import { createParent } from "@/actions/parents";
+import toast from "react-hot-toast";
 
 export type SelectOptionProps = {
   label: string;
@@ -19,59 +21,68 @@ type ParentFormProps = {
   initialData?: any | undefined | null;
 };
 export type ParentProps = {
-  name: string;
+  title: string;
+  firstname: string;
+  lastname: string;
+  relationship: string;
   email: string;
-  password: string;
+  NIN: string;
+  gender: string;
+  dob: string;
+  phone: string;
+  nationality: string;
+  whatsappNo: string;
   imageUrl: string;
+  contactMethod: string;
+  occupation: string;
+  address: string;
+  password: string;
 };
 export default function ParentForm({
   editingId,
   initialData
 }: ParentFormProps) {
   //parents
-  const parents = [
+  const title = [
     {
-      label: "Junior ",
-      value: "123456"
+      label: "Mr.",
+      value: "Mr."
     },
     {
-      label: "Junior ngoy ",
-      value: "123455"
+      label: "Mrs.",
+      value: "Mrs"
     }
   ];
-  const [selectedParent, setSelectedParent] = useState<any>(null);
+  const [selectedTitle, setSelectedTitle] = useState<any>(null);
   //classes
-  const classes = [
+  const relationship = [
     {
-      label: "Junior ",
-      value: "123456"
+      label: "Père",
+      value: "Pere"
     },
     {
-      label: "Junior ngoy ",
-      value: "123455"
+      label: "Mère",
+      value: "Mere"
+    },
+    {
+      label: "Oncle",
+      value: "Oncle"
+    },
+    {
+      label: "Tante",
+      value: "Tante"
+    },
+    {
+      label: "Frère",
+      value: "Frere"
+    },
+    {
+      label: "Soeur",
+      value: "Soeur"
     }
   ];
-  const [selectedClass, setSelectedClass] = useState<any>(null);
-  //sections / streams
-  const streams = [
-    {
-      label: "S1A",
-      value: "123456"
-    },
-    {
-      label: "S1B",
-      value: "123455"
-    },
-    {
-      label: "S2A",
-      value: "123455"
-    },
-    {
-      label: "S2B",
-      value: "123455"
-    }
-  ];
-  const [selectedStream, setSelectedStream] = useState<any>(null);
+  const [selectedRelationship, setSelectedRelationship] = useState<any>(null);
+
   //Genders
   const genders = [
     {
@@ -83,10 +94,19 @@ export default function ParentForm({
       value: "Male"
     }
   ];
-  const [selectedGender, setSelectedGender] = useState<any>(null);
+  const [selectedGender, setSelectedGender] = useState<any>(genders[0]);
 
-  //Nationality
-  const countries = [
+  //Contact Methodes
+  const contactMethods = [
+    { value: "Téléphone", label: "Téléphone" },
+    { value: "WhatsApp", label: "WhatsApp" },
+    { value: "Facebook", label: "Facebook" }
+  ];
+  const [selectedContactMethod, setSelectedContactMethod] = useState<any>(
+    contactMethods[0]
+  );
+  const initialCountryCode = "CD";
+  const nationalities = [
     { value: "fr", label: "France", code: "FR" },
     { value: "de", label: "Allemagne", code: "DE" },
     { value: "it", label: "Italie", code: "IT" },
@@ -98,21 +118,12 @@ export default function ParentForm({
     { value: "cn", label: "Chine", code: "CN" },
     { value: "au", label: "Australie", code: "AU" }
   ];
-  const initialCountryCode = "CD";
-  const initialCountry = countries.find(
+  const [selectedNationality, setSelectedNationality] = useState<any>(
+    nationalities[0]
+  );
+  const initialCountry = nationalities.find(
     (item) => item.code === initialCountryCode
   );
-  const nationalities = [
-    {
-      label: "CD",
-      value: "RDC"
-    },
-    {
-      label: "COD",
-      value: "DRC"
-    }
-  ];
-  const [selectedNationality, setSelectedNationality] = useState<any>(null);
 
   const {
     register,
@@ -121,7 +132,7 @@ export default function ParentForm({
     formState: { errors }
   } = useForm<ParentProps>({
     defaultValues: {
-      name: ""
+      firstname: ""
     }
   });
   const router = useRouter();
@@ -130,10 +141,15 @@ export default function ParentForm({
   const initialImage = initialData?.imageUrl || "/images/student.png";
   const [imageUrl, setImageUrl] = useState(initialImage);
 
-  async function saveStudent(data: ParentProps) {
+  async function saveParent(data: ParentProps) {
     try {
       setLoading(true);
       data.imageUrl = imageUrl;
+      data.title = selectedTitle.value;
+      data.relationship = selectedRelationship.value;
+      data.nationality = selectedNationality.value;
+      data.contactMethod = selectedContactMethod.value;
+      data.gender = selectedGender.value;
       console.log(data);
       if (editingId) {
         /*   await updateCategoryById(editingId, data);
@@ -146,15 +162,15 @@ export default function ParentForm({
         router.push("/dashboard/categories");
         setImageUrl("/placeholder.svg"); */
       } else {
-        /* await createCategory(data);
+        const res = await createParent(data);
         setLoading(false);
         // Toast
         toast.success("Successfully Created!");
         //reset
         reset();
-        setImageUrl("/placeholder.svg");
+        //setImageUrl("/placeholder.svg");
         //route
-        router.push("/dashboard/categories"); */
+        router.push("/dashboard/users/parents");
       }
     } catch (error) {
       setLoading(false);
@@ -172,7 +188,7 @@ export default function ParentForm({
   // }
 
   return (
-    <form className="" onSubmit={handleSubmit(saveStudent)}>
+    <form className="" onSubmit={handleSubmit(saveParent)}>
       <FormHeader
         href="/parents"
         parent=""
@@ -187,41 +203,41 @@ export default function ParentForm({
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
               <FormSelectInput
                 label="Titre"
-                options={parents}
-                option={selectedParent}
-                setOption={setSelectedParent}
+                options={title}
+                option={selectedTitle}
+                setOption={setSelectedTitle}
               />
               <TextInput
                 register={register}
                 errors={errors}
                 label="Prénom"
-                name="name"
+                name="firstname"
               />
               <TextInput
                 register={register}
                 errors={errors}
                 label="Nom"
-                name="name"
+                name="lastname"
               />
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
               <FormSelectInput
                 label="Relation"
-                options={parents}
-                option={selectedParent}
-                setOption={setSelectedParent}
+                options={relationship}
+                option={selectedRelationship}
+                setOption={setSelectedRelationship}
               />
               <TextInput
                 register={register}
                 errors={errors}
                 label="Num carte nationale/passeport"
-                name="dob"
+                name="NIN"
               />
               <FormSelectInput
                 label=" Sexe"
-                options={streams}
-                option={selectedStream}
-                setOption={setSelectedStream}
+                options={genders}
+                option={selectedGender}
+                setOption={setSelectedGender}
               />
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -232,26 +248,28 @@ export default function ParentForm({
                 name="dob"
                 type="date"
               />
-              <PasswordInput
-                register={register}
-                errors={errors}
-                label="Téléphone"
-                name="phonenumber"
-              />
+
               <FormSelectInput
                 label="Nationalité"
-                options={genders}
-                option={selectedGender}
-                setOption={setSelectedGender}
+                options={nationalities}
+                option={selectedNationality}
+                setOption={setSelectedNationality}
                 isSearchable={false}
+              />
+              <TextInput
+                register={register}
+                errors={errors}
+                label="Phone"
+                name="phone"
               />
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
               <TextInput
                 register={register}
                 errors={errors}
-                label="Phone"
-                name="phone"
+                label="Whatsapp n°"
+                name="whatsappNo"
+                type="tel"
               />
               <TextInput
                 register={register}
@@ -263,8 +281,8 @@ export default function ParentForm({
               <TextInput
                 register={register}
                 errors={errors}
-                label="Whatsapp n°"
-                name="whatsapp No"
+                label="Profession"
+                name="occupation"
               />
             </div>
             {/*  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -283,46 +301,37 @@ export default function ParentForm({
            
             </div> */}
             <div className="grid md:grid-cols-2 gap-3">
-              <div className="">
+              <div className="grid gap-3">
+                <FormSelectInput
+                  label="Selectionnez la methode de contact préférée"
+                  options={contactMethods}
+                  option={selectedContactMethod}
+                  setOption={setSelectedContactMethod}
+                />
+                <TextArea
+                  register={register}
+                  errors={errors}
+                  label="Adresse"
+                  name="address"
+                />
                 <div className="grid gap-3">
-                  <FormSelectInput
-                    label="Selectionnez la methode de contact préférée"
-                    options={countries}
-                    option={selectedNationality}
-                    setOption={setSelectedNationality}
-                  />
-                  <TextInput
-                    register={register}
-                    errors={errors}
-                    label="Profession"
-                    name="profession"
-                  />
-
-                  <div className="grid gap-3">
-                    <TextArea
-                      register={register}
-                      errors={errors}
-                      label="Adresse"
-                      name="adress"
-                    />
-                  </div>
                   <PasswordInput
                     register={register}
                     errors={errors}
                     label="Mot de passe portail parent"
-                    name="passwordparent"
+                    name="password"
                     toolTipText="password will be used by the parent on the student portail"
                   />
                 </div>
-                <div className="grid ">
-                  <ImageInput
-                    title="Image de profile de parent"
-                    imageUrl={imageUrl}
-                    setImageUrl={setImageUrl}
-                    endpoint="studentProfileImage"
-                    className="object-contain"
-                  />
-                </div>
+              </div>
+              <div className="grid   ">
+                <ImageInput
+                  title="Image de profile de parent"
+                  imageUrl={imageUrl}
+                  setImageUrl={setImageUrl}
+                  endpoint="parentProfileImage"
+                  className="object-contain"
+                />
               </div>
             </div>
           </div>

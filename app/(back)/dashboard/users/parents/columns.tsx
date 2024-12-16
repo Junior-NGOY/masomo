@@ -4,49 +4,48 @@ import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Student } from "@/types/types";
+import { Parent } from "@/types/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ContactInfoModal } from "@/components/DataTableComponents/ContactCard";
+import { ParentInfoModal } from "@/components/dashboard/modals/parent-info-modal";
 import Image from "next/image";
-import DateColumn from "@/components/DataTableColumns/DateColumn";
-import ActionColumn from "@/components/DataTableColumns/ActionColumn";
-import { StudentInfoModal } from "@/components/dashboard/modals/student-info-modal";
 
-export const columns: ColumnDef<Student>[] = [
+export const columns: ColumnDef<Parent>[] = [
   {
-    accessorKey: "student",
-    header: "Name",
+    accessorKey: "image",
+    header: "View",
     cell: ({ row }) => {
-      const student = row.original;
+      const parent = row.original;
       return (
         <div className="flex items-center gap-1">
           <Image
-            src={student.imageUrl}
-            alt={student.firstName}
+            src={parent.imageUrl}
+            alt={parent.firstname}
             width={512}
             height={512}
             className="w-10 h-10 rounded-full"
           />
           <div className="">
             <h2 className="font-medium capitalize">
-              {student.firstName.toLowerCase()} {student.lastName.toLowerCase()}
+              {parent.firstname.toLowerCase()} {parent.lastname.toLowerCase()}
             </h2>
-            <p className="text-xm text-muted-foreground">{student.email}</p>
+            <p className="text-xm text-muted-foreground">
+              {parent.relationship}
+            </p>
           </div>
         </div>
       );
     }
   },
   {
-    accessorKey: "class-stream",
-    header: "Details",
+    accessorKey: "parents",
+    header: "Contacts",
     cell: ({ row }) => {
       const parent = row.original;
       return (
         <div className="">
-          <h2 className="font-medium">{parent.classTitle ?? ""}</h2>
-          <p className="text-xm text-muted-foreground">
-            {parent.streamTitle ?? ""}
-          </p>
+          <h2 className="font-medium">{parent.email.toLowerCase()}</h2>
+          <p className="text-xm text-muted-foreground">{parent.phone}</p>
         </div>
       );
     }
@@ -89,18 +88,18 @@ export const columns: ColumnDef<Student>[] = [
   }, */
 
   {
-    accessorKey: "classId",
-    header: "Class"
+    accessorKey: "nationality",
+    header: "Country"
   },
   {
-    id: "action",
+    id: "actions",
     cell: ({ row }) => {
-      const student = row.original;
+      const parent = row.original;
       return (
         <Button
           variant="outline"
           size="sm"
-          onClick={() => console.log("View", student.classId)}
+          onClick={() => console.log("View", parent.createdAt)}
         >
           View
         </Button>
@@ -111,30 +110,11 @@ export const columns: ColumnDef<Student>[] = [
     accessorKey: "view",
     header: "View",
     cell: ({ row }) => (
-      <StudentInfoModal
-        // onEdit={() => ""}
-        // onDelete={() => ""}
-        student={row.original}
+      <ParentInfoModal
+        onEdit={() => ""}
+        onDelete={() => ""}
+        parent={row.original}
       />
     )
-  },
-  {
-    accessorKey: "createdAt",
-    header: "Date Created",
-    cell: ({ row }) => <DateColumn row={row} accessorKey="createdAt" />
-  },
-  {
-    id: "actions",
-    cell: ({ row }) => {
-      const student = row.original;
-      return (
-        <ActionColumn
-          row={row}
-          model="student"
-          editEndpoint={`#`}
-          id={student.id}
-        />
-      );
-    }
   }
 ];

@@ -10,8 +10,12 @@ import { UserPlus, Users } from "lucide-react";
 import SingleStudentForm from "@/components/dashboard/forms/students/student-form";
 import BulkStudentForm from "@/components/dashboard/forms/students/bulk-student-form";
 import { InfoBanner } from "@/components/ui/info-banner";
+import { getAllClasses } from "@/actions/classes";
+import { getAllParents } from "@/actions/parents";
 
-export default function AdmissionTabs() {
+export default async function AdmissionTabs() {
+  const classes = (await getAllClasses()) || [];
+  const parents = (await getAllParents()) || [];
   return (
     <div className="container mx-auto p-6">
       <Card className="w-full max-w-5xl mx-auto">
@@ -48,7 +52,7 @@ export default function AdmissionTabs() {
                     message="Veuillez vous assurer que vous avez déjà créé le parent, la classe et le flux pour cet élève."
                     type="warning"
                   />
-                  <SingleStudentForm />
+                  <SingleStudentForm classes={classes} parents={parents} />
                 </TabsContent>
                 <TabsContent value="bulk">
                   <BulkStudentForm />

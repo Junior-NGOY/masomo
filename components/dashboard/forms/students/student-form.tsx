@@ -1,14 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle
-} from "@/components/ui/card";
-
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
@@ -19,6 +10,9 @@ import TextArea from "@/components/FormInputs/TextAreaInput";
 import TextInput from "@/components/FormInputs/TextInput";
 import PasswordInput from "@/components/FormInputs/PasswordInput";
 import FormSelectInput from "@/components/FormInputs/FormSelectInput";
+import { Class, Parent } from "@/types/types";
+import { createStudent } from "@/actions/students";
+import toast from "react-hot-toast";
 
 export type SelectOptionProps = {
   label: string;
@@ -27,61 +21,63 @@ export type SelectOptionProps = {
 type SingleStudentFormProps = {
   editingId?: string | undefined;
   initialData?: any | undefined | null;
+  classes: Class[];
+  parents: Parent[];
 };
 export type StudentProps = {
   name: string;
+  firstName: string;
+  lastName: string;
   email: string;
+  parentId: string;
+  parentName?: string;
+  classTitle?: string;
+  classId: string;
+  streamTitle?: string;
+  streamId: string;
   password: string;
   imageUrl: string;
+  phone: string;
+  state: string;
+  BCN: string; // Birth Certificate Number
+  nationality: string;
+  religion: string;
+  gender: string;
+  dob: string;
+  rollNo: string;
+  regNo: string;
+  admissionDate: string;
+  address: string;
 };
 export default function SingleStudentForm({
+  parents,
+  classes,
   editingId,
   initialData
 }: SingleStudentFormProps) {
   //parents
-  const parents = [
-    {
-      label: "Junior ",
-      value: "123456"
-    },
-    {
-      label: "Junior ngoy ",
-      value: "123455"
-    }
-  ];
+  const parentOptions = parents.map((parent) => {
+    return {
+      label: `${parent.firstname} ${parent.lastname}`,
+      value: parent.id
+    };
+  });
   const [selectedParent, setSelectedParent] = useState<any>(null);
   //classes
-  const classes = [
-    {
-      label: "Junior ",
-      value: "123456"
-    },
-    {
-      label: "Junior ngoy ",
-      value: "123455"
-    }
-  ];
-  const [selectedClass, setSelectedClass] = useState<any>(null);
+  const classOptions = classes.map((item) => {
+    return {
+      label: item.title,
+      value: item.id
+    };
+  });
+  const [selectedClass, setSelectedClass] = useState<any>(classOptions[0]);
+  const classId = selectedClass?.value ?? "";
+  const streams = classes.find((item) => item.id === classId)?.streams || [];
   //sections / streams
-  const streams = [
-    {
-      label: "S1A",
-      value: "123456"
-    },
-    {
-      label: "S1B",
-      value: "123455"
-    },
-    {
-      label: "S2A",
-      value: "123455"
-    },
-    {
-      label: "S2B",
-      value: "123455"
-    }
-  ];
-  const [selectedStream, setSelectedStream] = useState<any>(null);
+  const streamsOptions = streams.map((item) => {
+    return { label: item.title, value: item.id };
+  });
+  const [selectedStream, setSelectedStream] = useState<any>(streams[0]);
   //Genders
   const genders = [
     {
@@ -122,7 +118,9 @@ export default function SingleStudentForm({
       value: "DRC"
     }
   ];
-  const [selectedNationality, setSelectedNationality] = useState<any>(null);
+  const [selectedNationality, setSelectedNationality] = useState<any>(
+    nationalities[0]
+  );
 
   const {
     register,
@@ -144,6 +142,14 @@ export default function SingleStudentForm({
     try {
       setLoading(true);
       data.imageUrl = imageUrl;
+      data.parentId = selectedParent.value;
+      data.parentName = selectedParent.label;
+      data.classTitle = selectedClass.label;
+      data.classId = selectedClass.value;
+      data.streamId = selectedStream.value;
+      data.streamTitle = selectedStream.label;
+      data.gender = selectedGender.value;
+      data.nationality = selectedNationality.value;
       console.log(data);
       if (editingId) {
         /*   await updateCategoryById(editingId, data);
@@ -156,15 +162,15 @@ export default function SingleStudentForm({
         router.push("/dashboard/categories");
         setImageUrl("/placeholder.svg"); */
       } else {
-        /* await createCategory(data);
+        const res = await createStudent(data);
         setLoading(false);
         // Toast
         toast.success("Successfully Created!");
         //reset
         reset();
-        setImageUrl("/placeholder.svg");
+        //setImageUrl("/placeholder.svg");
         //route
-        router.push("/dashboard/categories"); */
+        router.push("/dashboard/students");
       }
     } catch (error) {
       setLoading(false);
@@ -198,14 +204,14 @@ export default function SingleStudentForm({
               <TextInput
                 register={register}
                 errors={errors}
-                label="First name"
-                name="firstname"
+                label="First Name"
+                name="firstName"
               />
               <TextInput
                 register={register}
                 errors={errors}
-                label="Student name"
-                name="name"
+                label="Student Name"
+                name="lastName"
               />
               <TextInput
                 register={register}
@@ -218,7 +224,7 @@ export default function SingleStudentForm({
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
               <FormSelectInput
                 label="Parent"
-                options={parents}
+                options={parentOptions}
                 option={selectedParent}
                 setOption={setSelectedParent}
                 toolTipText="Add New Parent"
@@ -226,15 +232,15 @@ export default function SingleStudentForm({
               />
               <FormSelectInput
                 label="Classes"
-                options={streams}
-                option={selectedParent}
-                setOption={setSelectedParent}
+                options={classOptions}
+                option={selectedClass}
+                setOption={setSelectedClass}
                 toolTipText="Add New Class"
                 href="/dashboard/academics/classes"
               />
               <FormSelectInput
                 label=" Stream/Section"
-                options={streams}
+                options={streamsOptions}
                 option={selectedStream}
                 setOption={setSelectedStream}
                 toolTipText="Add New Stream"
@@ -252,16 +258,15 @@ export default function SingleStudentForm({
               <TextInput
                 register={register}
                 errors={errors}
-                label="Date of Birth"
-                name="dob"
+                label="Date of admission"
+                name="admissionDate"
                 type="date"
               />
-              <PasswordInput
+              <TextInput
                 register={register}
                 errors={errors}
-                label="Password"
-                name="password"
-                type="password"
+                label="Student Name"
+                name="name"
               />
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -289,13 +294,14 @@ export default function SingleStudentForm({
                 register={register}
                 errors={errors}
                 label="Roll N°"
-                name="roll No"
+                name="rollNo"
               />
               <TextInput
                 register={register}
                 errors={errors}
-                label="Birth Certificate N°"
-                name="certificate"
+                label="Date of Birth"
+                name="dob"
+                type="date"
               />
               <FormSelectInput
                 label="Religion"
@@ -310,20 +316,20 @@ export default function SingleStudentForm({
                   register={register}
                   errors={errors}
                   label="Roll N°"
-                  name="roll No"
+                  name="rollNo"
                 />
                 <TextInput
                   register={register}
                   errors={errors}
                   label="Birth Certificate N°"
-                  name="certificate"
+                  name="BCN"
                 />
                 <div className="grid gap-3">
                   <TextArea
                     register={register}
                     errors={errors}
-                    label="Adresse"
-                    name="adress"
+                    label="Addresse"
+                    name="address"
                   />
                 </div>
               </div>

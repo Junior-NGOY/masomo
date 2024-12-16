@@ -17,9 +17,8 @@ import {
   DialogTitle,
   DialogTrigger
 } from "@/components/ui/dialog";
-export type ClassProps = {
-  name: string;
-};
+import { createClass } from "@/actions/classes";
+import { ClassCreateProps } from "@/types/types";
 
 export default function ClassForm({
   userId,
@@ -35,27 +34,28 @@ export default function ClassForm({
     handleSubmit,
     reset,
     formState: { errors }
-  } = useForm<ClassProps>({
+  } = useForm<ClassCreateProps>({
     defaultValues: {
-      name: initialContent || ""
+      title: initialContent || ""
     }
   });
 
   const [loading, setLoading] = useState(false);
 
-  async function saveFolder(data: ClassProps) {
+  async function saveClass(data: ClassCreateProps) {
     //data.userId = userId;
     try {
       setLoading(true);
       if (editingId) {
-        /* await updateFolderById(editingId, data);
-        setLoading(false);
+        //await updateClassById(editingId, data);
+        //setLoading(false);
         // Toast
-        toast.success("Updated Successfully!"); */
+        toast.success("Updated Successfully!");
       } else {
-        /*  await createFolder(data);
+        await createClass(data);
         setLoading(false);
-        toast.success("Successfully Created!"); */
+        toast.success("Successfully Created!");
+        reset();
       }
     } catch (error) {
       setLoading(false);
@@ -90,7 +90,7 @@ export default function ClassForm({
                 Please Write your Comment here, with respect
               </DialogDescription> */}
             </DialogHeader>
-            <form className="" onSubmit={handleSubmit(saveFolder)}>
+            <form className="" onSubmit={handleSubmit(saveClass)}>
               <div className="">
                 <div className="space-y-3">
                   <div className="grid gap-3">
@@ -98,7 +98,7 @@ export default function ClassForm({
                       register={register}
                       errors={errors}
                       label=""
-                      name="name"
+                      name="title"
                       icon={Check}
                     />
                     {/* <IconInput

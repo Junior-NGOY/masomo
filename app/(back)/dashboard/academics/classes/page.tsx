@@ -1,6 +1,8 @@
+import { getAllClasses } from "@/actions/classes";
 import { ClassListing } from "@/components/dashboard/class-listing";
 import React from "react";
 
-export default function page() {
-  return <ClassListing />;
+export default async function page() {
+  const classes = (await getAllClasses()) || [];
+  return <ClassListing classes={classes} />;
 }
