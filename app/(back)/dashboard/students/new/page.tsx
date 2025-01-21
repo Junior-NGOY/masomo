@@ -12,10 +12,12 @@ import BulkStudentForm from "@/components/dashboard/forms/students/bulk-student-
 import { InfoBanner } from "@/components/ui/info-banner";
 import { getAllClasses } from "@/actions/classes";
 import { getAllParents } from "@/actions/parents";
+import { getStudentNextSequence } from "@/actions/students";
 
 export default async function AdmissionTabs() {
   const classes = (await getAllClasses()) || [];
   const parents = (await getAllParents()) || [];
+  const nextSequence = (await getStudentNextSequence()) || 0;
   return (
     <div className="container mx-auto p-6">
       <Card className="w-full max-w-5xl mx-auto">
@@ -52,7 +54,11 @@ export default async function AdmissionTabs() {
                     message="Veuillez vous assurer que vous avez déjà créé le parent, la classe et le flux pour cet élève."
                     type="warning"
                   />
-                  <SingleStudentForm classes={classes} parents={parents} />
+                  <SingleStudentForm
+                    nextSeq={nextSequence}
+                    classes={classes}
+                    parents={parents}
+                  />
                 </TabsContent>
                 <TabsContent value="bulk">
                   <BulkStudentForm />

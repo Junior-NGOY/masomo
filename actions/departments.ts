@@ -2,9 +2,9 @@
 import axios from "axios";
 import { api } from "./schools";
 import {
-  Class,
-  ClassBrief,
-  ClassCreateProps,
+  Department,
+  DepartmentBrief,
+  DepartmentCreateProps,
   Stream,
   StreamCreateProps
 } from "@/types/types";
@@ -12,16 +12,17 @@ import { revalidatePath } from "next/cache";
 
 //const BASE_API_URL = process.env.API_URL || "";
 
-export async function createClass(data: ClassCreateProps) {
+export async function createDepartment(data: DepartmentCreateProps) {
   try {
     //send the data to the api
-    const response = await api.post("/classes", data);
-    revalidatePath("/dashboard/academics/classes");
+    const response = await api.post("/departments", data);
+    revalidatePath("/dashboard/academics/departments");
     return response.data;
   } catch (error: any) {
     if (axios.isAxiosError(Error)) {
       //type-safe error
-      const message = error.response?.data?.message || "Failed to create class";
+      const message =
+        error.response?.data?.message || "Failed to create department";
       throw new Error(message);
     }
     throw error;
@@ -29,39 +30,24 @@ export async function createClass(data: ClassCreateProps) {
   }
 }
 
-export async function deleteClass(id: string) {
+export async function deleteDepartment(id: string) {
   console.log("deleted", id);
   return {
     ok: true
   };
 }
 
-export async function getAllClasses() {
+export async function getAllDepartments() {
   try {
     //send the data to the api
-    const response = await api.get("/classes");
-    const classes = response.data;
-    return classes as Class[];
+    const response = await api.get("/departments");
+    const departments = response.data;
+    return departments as Department[];
   } catch (error: any) {
     if (axios.isAxiosError(Error)) {
       //type-safe error
-      const message = error.response?.data?.message || "Failed to get class";
-      throw new Error(message);
-    }
-    throw error;
-    console.log(error);
-  }
-}
-export async function getBriefClasses() {
-  try {
-    //send the data to the api
-    const response = await api.get("/classes/brief");
-    const classes = response.data;
-    return classes as ClassBrief[];
-  } catch (error: any) {
-    if (axios.isAxiosError(Error)) {
-      //type-safe error
-      const message = error.response?.data?.message || "Failed to get class";
+      const message =
+        error.response?.data?.message || "Failed to get department";
       throw new Error(message);
     }
     throw error;
@@ -92,17 +78,16 @@ export async function deleteStream(id: string) {
   };
 }
 
-export async function getAllStreams() {
+export async function getBriefDepartments() {
   try {
     //send the data to the api
-    const response = await api.get("/streams");
-    const streams = response.data;
-    return streams as Stream[];
+    const response = await api.get("/departments/brief");
+    const departments = response.data;
+    return departments as DepartmentBrief[];
   } catch (error: any) {
     if (axios.isAxiosError(Error)) {
       //type-safe error
-      const message =
-        error.response?.data?.message || "Failed to create stream";
+      const message = error.response?.data?.message || "Failed to create brief";
       throw new Error(message);
     }
     throw error;

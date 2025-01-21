@@ -11,6 +11,7 @@ type RadioInputProps = {
   label: string;
   name: string;
   errors: any;
+  defaultOption?: string;
 };
 export default function RadioInput({
   radioOptions,
@@ -18,6 +19,7 @@ export default function RadioInput({
   label,
   name,
   errors,
+  defaultOption = radioOptions[0]?.id
 }: RadioInputProps) {
   return (
     <div className="grid gap-3 pt-4">
@@ -36,6 +38,7 @@ export default function RadioInput({
                   id={item.id}
                   type="radio"
                   value={item.id}
+                  defaultChecked={item.id === defaultOption}
                   className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-700 dark:focus:ring-offset-gray-700 focus:ring-2 dark:bg-gray-600 dark:border-gray-500"
                 />
                 <label

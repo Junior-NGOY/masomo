@@ -4,6 +4,7 @@ import { api } from "./schools";
 
 import { Contact, Parent } from "@/types/types";
 import { ParentProps } from "@/components/dashboard/forms/users/parent-form";
+import { revalidatePath } from "next/cache";
 
 //const BASE_API_URL = process.env.API_URL || "";
 
@@ -11,6 +12,7 @@ export async function createParent(data: ParentProps) {
   try {
     //send the data to the api
     const response = await api.post("/parents", data);
+    revalidatePath("/dashboard/users/parents");
     return response.data;
   } catch (error: any) {
     if (axios.isAxiosError(Error)) {

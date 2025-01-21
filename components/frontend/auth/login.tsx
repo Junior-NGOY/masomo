@@ -8,13 +8,20 @@ import SubmitButton from "@/components/FormInputs/SubmitButton";
 import CustomCarousel from "../custome-caroussel";
 import Logo from "@/components/logo";
 import PasswordInput from "@/components/FormInputs/PasswordInput";
-import { Lock, LogIn, Mail } from "lucide-react";
+import { Lock, LogIn, Mail, RollerCoaster, Router } from "lucide-react";
+import { loginUser } from "@/actions/auth";
+import { User } from "@/types/types";
+import { useUserSession } from "@/store/auth";
 
-export type RegisterInputProps = {
+/* export type RegisterInputProps = {
   fullName: string;
   email: string;
   password: string;
   phone: string;
+}; */
+export type LoginInputProps = {
+  email: string;
+  password: string;
 };
 export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
@@ -23,10 +30,39 @@ export default function Login() {
     handleSubmit,
     reset,
     formState: { errors }
-  } = useForm<RegisterInputProps>();
+  } = useForm<LoginInputProps>();
+  const { setUser } = useUserSession();
   const router = useRouter();
-  async function onSubmit(data: RegisterInputProps) {
-    console.log(data);
+  async function onSubmit(data: LoginInputProps) {
+    try {
+      setIsLoading(true);
+      console.log("data Mining", data);
+      const sessionData = await loginUser(data);
+      // save data in Zustand
+      setUser(sessionData?.user as User);
+      const role = sessionData?.user.role;
+      // user the route according the role
+      setIsLoading(false);
+      if (role === "SUPER_ADMIN") {
+        router.push("/school-onboarding");
+      } else {
+        router.push("/dashboard");
+      }
+    } catch (error: any) {
+      setIsLoading(false);
+      if (error.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        console.log("Error response:", error.response);
+      } else if (error.request) {
+        // The request was made but no response was received
+        console.log("Error request:", error.request);
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        console.log("Error message:", error.message);
+      }
+      console.log(error.config);
+    }
   }
   return (
     <div className="w-full lg:grid h-screen lg:min-h-[600px] lg:grid-cols-2 relative ">

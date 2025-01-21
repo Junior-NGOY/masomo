@@ -4,6 +4,7 @@ import { api } from "./schools";
 
 import { StudentProps } from "@/components/dashboard/forms/students/student-form";
 import { Student } from "@/types/types";
+import { revalidatePath } from "next/cache";
 
 //const BASE_API_URL = process.env.API_URL || "";
 
@@ -31,6 +32,24 @@ export async function deleteStudent(id: string) {
   };
 }
 
+export async function getStudentNextSequence() {
+  try {
+    //send the data to the api
+    const response = await api.get("/students/seq");
+    revalidatePath("/dashboard/students");
+    const nextSeq = response.data;
+    return nextSeq as number;
+  } catch (error: any) {
+    /* if (axios.isAxiosError(Error)) {
+      //type-safe error
+      const message =
+        error.response?.data?.message || "Failed to create parent";
+      throw new Error(message);
+    }
+    throw error; */
+    console.log(error);
+  }
+}
 export async function getAllStudents() {
   try {
     //send the data to the api

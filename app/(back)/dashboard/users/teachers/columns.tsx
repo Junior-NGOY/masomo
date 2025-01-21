@@ -4,49 +4,48 @@ import { ColumnDef } from "@tanstack/react-table";
 import { ArrowUpDown } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Student } from "@/types/types";
+import { Parent, Teacher } from "@/types/types";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { ParentInfoModal } from "@/components/dashboard/modals/parent-info-modal";
 import Image from "next/image";
-import DateColumn from "@/components/DataTableColumns/DateColumn";
-import ActionColumn from "@/components/DataTableColumns/ActionColumn";
-import { StudentInfoModal } from "@/components/dashboard/modals/student-info-modal";
+import { TeacherInfoModal } from "@/components/dashboard/modals/teacher-info-modal";
 
-export const columns: ColumnDef<Student>[] = [
+export const columns: ColumnDef<Teacher>[] = [
   {
-    accessorKey: "student",
-    header: "Name",
+    accessorKey: "image",
+    header: "View",
     cell: ({ row }) => {
-      const student = row.original;
+      const teacher = row.original;
       return (
         <div className="flex items-center gap-1">
           <Image
-            src={student.imageUrl}
-            alt={student.firstName}
+            src={teacher.imageUrl}
+            alt={teacher.firstName}
             width={512}
             height={512}
             className="w-10 h-10 rounded-full"
           />
           <div className="">
             <h2 className="font-medium capitalize">
-              {student.firstName.toLowerCase()} {student.lastName.toLowerCase()}
+              {teacher.firstName.toLowerCase()} {teacher.lastName.toLowerCase()}
             </h2>
-            <p className="text-xm text-muted-foreground">{student.email}</p>
+            <p className="text-xm text-muted-foreground">
+              {teacher.employeeId}
+            </p>
           </div>
         </div>
       );
     }
   },
   {
-    accessorKey: "class-stream",
-    header: "Classe",
+    accessorKey: "parents",
+    header: "Contacts",
     cell: ({ row }) => {
-      const class_section = row.original;
+      const teacher = row.original;
       return (
         <div className="">
-          <h2 className="font-medium">{class_section.classTitle ?? ""}</h2>
-          <p className="text-xm text-muted-foreground">
-            {class_section.streamTitle ?? ""}
-          </p>
+          <h2 className="font-medium">{teacher.email.toLowerCase()}</h2>
+          <p className="text-xm text-muted-foreground">{teacher.phone}</p>
         </div>
       );
     }
@@ -89,27 +88,18 @@ export const columns: ColumnDef<Student>[] = [
   }, */
 
   {
-    accessorKey: "rollNumber",
-    header: "Matricule",
-    cell: ({ row }) => {
-      const rollNo = row.original;
-      return (
-        <div className="">
-          <h2 className="font-medium">{rollNo.regNo ?? ""}</h2>
-          <p className="text-xm text-muted-foreground">{rollNo.rollNo ?? ""}</p>
-        </div>
-      );
-    }
+    accessorKey: "nationality",
+    header: "Country"
   },
   {
-    id: "action",
+    id: "actions",
     cell: ({ row }) => {
-      const student = row.original;
+      const teacher = row.original;
       return (
         <Button
           variant="outline"
           size="sm"
-          onClick={() => console.log("View", student.classId)}
+          onClick={() => console.log("View", teacher.createdAt)}
         >
           View
         </Button>
@@ -120,30 +110,11 @@ export const columns: ColumnDef<Student>[] = [
     accessorKey: "view",
     header: "View",
     cell: ({ row }) => (
-      <StudentInfoModal
-        // onEdit={() => ""}
-        // onDelete={() => ""}
-        student={row.original}
+      <TeacherInfoModal
+        onEdit={() => ""}
+        onDelete={() => ""}
+        teacher={row.original}
       />
     )
-  },
-  {
-    accessorKey: "createdAt",
-    header: "Date Created",
-    cell: ({ row }) => <DateColumn row={row} accessorKey="createdAt" />
-  },
-  {
-    id: "actions",
-    cell: ({ row }) => {
-      const student = row.original;
-      return (
-        <ActionColumn
-          row={row}
-          model="student"
-          editEndpoint={`#`}
-          id={student.id}
-        />
-      );
-    }
   }
 ];

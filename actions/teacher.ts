@@ -1,23 +1,23 @@
 "use server";
 import axios from "axios";
 import { api } from "./schools";
-import { ContactProps } from "@/components/frontend/contact-us";
-import { Contact } from "@/types/types";
+
+import { Teacher, TeacherCreateProps } from "@/types/types";
 import { revalidatePath } from "next/cache";
 
 //const BASE_API_URL = process.env.API_URL || "";
 
-export async function createContact(data: ContactProps) {
+export async function createTeacher(data: TeacherCreateProps) {
   try {
     //send the data to the api
-    const response = await api.post("/contacts", data);
-    revalidatePath("/dashboard/admin/contacts");
+    const response = await api.post("/teachers", data);
+    revalidatePath("/dashboard/users/teachers");
     return response.data;
   } catch (error: any) {
     if (axios.isAxiosError(Error)) {
       //type-safe error
       const message =
-        error.response?.data?.message || "Failed to create contact";
+        error.response?.data?.message || "Failed to create teacher";
       throw new Error(message);
     }
     throw error;
@@ -25,24 +25,24 @@ export async function createContact(data: ContactProps) {
   }
 }
 
-export async function deleteContact(id: string) {
+export async function deleteTeacher(id: string) {
   console.log("deleted", id);
   return {
     ok: true
   };
 }
 
-export async function getAllContacts() {
+export async function getAllTeachers() {
   try {
     //send the data to the api
-    const response = await api.get("/contacts");
-    const contacts = response.data;
-    return contacts as Contact[];
+    const response = await api.get("/teachers");
+    const teachers = response.data;
+    return teachers as Teacher[];
   } catch (error: any) {
     if (axios.isAxiosError(Error)) {
       //type-safe error
       const message =
-        error.response?.data?.message || "Failed to create contact";
+        error.response?.data?.message || "Failed to create teacher";
       throw new Error(message);
     }
     throw error;

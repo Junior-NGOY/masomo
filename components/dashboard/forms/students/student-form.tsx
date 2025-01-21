@@ -13,6 +13,9 @@ import FormSelectInput from "@/components/FormInputs/FormSelectInput";
 import { Class, Parent } from "@/types/types";
 import { createStudent } from "@/actions/students";
 import toast from "react-hot-toast";
+import RadioInput from "@/components/FormInputs/RadioInput";
+import { generateRegistrationNumber } from "@/lib/generateRegNo";
+import { generateRollNumber } from "@/lib/generateRoll";
 
 export type SelectOptionProps = {
   label: string;
@@ -23,6 +26,7 @@ type SingleStudentFormProps = {
   initialData?: any | undefined | null;
   classes: Class[];
   parents: Parent[];
+  nextSeq: number;
 };
 export type StudentProps = {
   name: string;
@@ -30,6 +34,7 @@ export type StudentProps = {
   lastName: string;
   email: string;
   parentId: string;
+  studentType: string;
   parentName?: string;
   classTitle?: string;
   classId: string;
@@ -52,6 +57,7 @@ export type StudentProps = {
 export default function SingleStudentForm({
   parents,
   classes,
+  nextSeq,
   editingId,
   initialData
 }: SingleStudentFormProps) {
@@ -90,7 +96,17 @@ export default function SingleStudentForm({
     }
   ];
   const [selectedGender, setSelectedGender] = useState<any>(null);
-
+  //Student types
+  const studentTypes = [
+    {
+      label: "Private Student",
+      id: "PS"
+    },
+    {
+      label: "Sponsored Student",
+      id: "SS"
+    }
+  ];
   //Nationality
   const countries = [
     { value: "fr", label: "France", code: "FR" },
@@ -162,6 +178,11 @@ export default function SingleStudentForm({
         router.push("/dashboard/categories");
         setImageUrl("/placeholder.svg"); */
       } else {
+        const rollNo = generateRollNumber();
+        const studentType = data.studentType as "PS" | "SS";
+        const regNo = generateRegistrationNumber("BU", studentType, nextSeq);
+        data.regNo = regNo;
+        data.rollNo = rollNo;
         const res = await createStudent(data);
         setLoading(false);
         // Toast
@@ -281,6 +302,7 @@ export default function SingleStudentForm({
                 errors={errors}
                 label="Password"
                 name="password"
+                type="password"
               />
               <FormSelectInput
                 label="Nationality"
@@ -290,12 +312,12 @@ export default function SingleStudentForm({
               />
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-3">
-              <TextInput
+              {/*    <TextInput
                 register={register}
                 errors={errors}
                 label="Roll N°"
                 name="rollNo"
-              />
+              /> */}
               <TextInput
                 register={register}
                 errors={errors}
@@ -312,11 +334,13 @@ export default function SingleStudentForm({
             </div>
             <div className="grid md:grid-cols-2 gap-3">
               <div className="grid gap-3">
-                <TextInput
+                <RadioInput
+                  radioOptions={studentTypes}
                   register={register}
+                  label="Student type"
+                  name="studentType"
                   errors={errors}
-                  label="Roll N°"
-                  name="rollNo"
+                  //defaulValue="PS"
                 />
                 <TextInput
                   register={register}
