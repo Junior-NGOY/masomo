@@ -2,6 +2,7 @@
 import axios from "axios";
 import { SchoolProps } from "@/components/dashboard/forms/school/school-onboarding-form";
 import { revalidatePath } from "next/cache";
+import { School } from "@/types/types";
 
 const BASE_API_URL = process.env.API_URL || "";
 export const api = axios.create({
@@ -15,7 +16,7 @@ export async function createSchool(data: SchoolProps) {
     //send the data to the api
     const response = await api.post("/schools", data);
     revalidatePath("/dashboard/admin/schools");
-    return response.data;
+    return response.data as School;
   } catch (error: any) {
     if (axios.isAxiosError(Error)) {
       //type-safe error

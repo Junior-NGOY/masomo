@@ -44,7 +44,7 @@ export default function SchoolOnboardingForm() {
       reset();
       setImageUrl(initialImage);
       //route
-      //router.push("/dashboard/school-onboarding");
+      router.push(`/school-admin/${res.id}?name=${res.name}`);
     } catch (error) {
       setLoading(false);
       console.log(error);

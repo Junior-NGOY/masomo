@@ -276,3 +276,10 @@ export interface User {
   schoolName?: string | null;
   updatedAt: string;
 }
+
+export type School = {
+  id: string;
+  name: string;
+  logo: string | null;
+  slug: string;
+};
