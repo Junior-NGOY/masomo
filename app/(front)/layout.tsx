@@ -1,5 +1,5 @@
-import SiteFooter from "@/components/frontend/site-footer";
-import SiteHeader from "@/components/site-header";
+import ModernFooter from "@/components/modern-footer";
+import ModernHeader from "@/components/modern-header";
 import React from "react";
 
 export default function FontLayout({
@@ -9,9 +9,9 @@ export default function FontLayout({
 }>) {
   return (
     <div>
-      <SiteHeader />
+      <ModernHeader />
       {children}
-      <SiteFooter />
+      <ModernFooter />
     </div>
   );
 }

@@ -1,0 +1,99 @@
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="800" height="600" fill="#faf5ff"/>
+  
+  <!-- Computer Screen -->
+  <rect x="50" y="80" width="700" height="440" rx="20" fill="#1f2937"/>
+  <rect x="70" y="100" width="660" height="380" rx="10" fill="#ffffff"/>
+  
+  <!-- Header -->
+  <rect x="70" y="100" width="660" height="60" fill="#8b5cf6"/>
+  <text x="90" y="130" fill="white" font-family="Arial, sans-serif" font-size="18" font-weight="bold">Hub de Communication - Messages</text>
+  
+  <!-- Sidebar -->
+  <rect x="90" y="180" width="180" height="280" fill="#f8fafc" stroke="#e2e8f0"/>
+  <text x="110" y="200" fill="#1f2937" font-family="Arial, sans-serif" font-size="14" font-weight="bold">Contacts</text>
+  
+  <!-- Contact List -->
+  <g>
+    <!-- Parent 1 -->
+    <rect x="100" y="210" width="160" height="35" fill="#ffffff" stroke="#e2e8f0"/>
+    <circle cx="115" cy="227" r="10" fill="#3b82f6"/>
+    <text x="108" y="232" fill="white" font-family="Arial, sans-serif" font-size="10" font-weight="bold">MK</text>
+    <text x="135" y="227" fill="#1f2937" font-family="Arial, sans-serif" font-size="12">Mme Kasongo</text>
+    <text x="135" y="238" fill="#64748b" font-family="Arial, sans-serif" font-size="10">Parent - 6ème A</text>
+    <circle cx="245" cy="220" r="4" fill="#10b981"/>
+    
+    <!-- Teacher 1 -->
+    <rect x="100" y="250" width="160" height="35" fill="#ffffff" stroke="#e2e8f0"/>
+    <circle cx="115" cy="267" r="10" fill="#ef4444"/>
+    <text x="108" y="272" fill="white" font-family="Arial, sans-serif" font-size="10" font-weight="bold">AM</text>
+    <text x="135" y="267" fill="#1f2937" font-family="Arial, sans-serif" font-size="12">Prof. Mulamba</text>
+    <text x="135" y="278" fill="#64748b" font-family="Arial, sans-serif" font-size="10">Enseignant Math</text>
+    <circle cx="245" cy="260" r="4" fill="#10b981"/>
+    
+    <!-- Direction -->
+    <rect x="100" y="290" width="160" height="35" fill="#ffffff" stroke="#e2e8f0"/>
+    <circle cx="115" cy="307" r="10" fill="#f59e0b"/>
+    <text x="108" y="312" fill="white" font-family="Arial, sans-serif" font-size="10" font-weight="bold">DJ</text>
+    <text x="135" y="307" fill="#1f2937" font-family="Arial, sans-serif" font-size="12">Dir. Josephine</text>
+    <text x="135" y="318" fill="#64748b" font-family="Arial, sans-serif" font-size="10">Direction</text>
+    <circle cx="245" cy="300" r="4" fill="#f59e0b"/>
+    
+    <!-- Group -->
+    <rect x="100" y="330" width="160" height="35" fill="#ffffff" stroke="#e2e8f0"/>
+    <circle cx="115" cy="347" r="10" fill="#8b5cf6"/>
+    <text x="108" y="352" fill="white" font-family="Arial, sans-serif" font-size="10" font-weight="bold">6A</text>
+    <text x="135" y="347" fill="#1f2937" font-family="Arial, sans-serif" font-size="12">Groupe 6ème A</text>
+    <text x="135" y="358" fill="#64748b" font-family="Arial, sans-serif" font-size="10">25 participants</text>
+    <rect x="235" y="340" width="15" height="12" rx="6" fill="#dc2626"/>
+    <text x="240" y="348" fill="white" font-family="Arial, sans-serif" font-size="8">3</text>
+  </g>
+  
+  <!-- Chat Area -->
+  <rect x="280" y="180" width="430" height="280" fill="#ffffff" stroke="#e2e8f0"/>
+  
+  <!-- Chat Header -->
+  <rect x="280" y="180" width="430" height="40" fill="#f1f5f9" stroke="#e2e8f0"/>
+  <circle cx="300" cy="200" r="12" fill="#3b82f6"/>
+  <text x="292" y="206" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">MK</text>
+  <text x="320" y="197" fill="#1f2937" font-family="Arial, sans-serif" font-size="14" font-weight="bold">Mme Kasongo</text>
+  <text x="320" y="210" fill="#64748b" font-family="Arial, sans-serif" font-size="11">En ligne</text>
+  
+  <!-- Messages -->
+  <g>
+    <!-- Message 1 -->
+    <rect x="290" y="235" width="200" height="30" rx="15" fill="#3b82f6"/>
+    <text x="300" y="250" fill="white" font-family="Arial, sans-serif" font-size="11">Bonjour Mme Kasongo, comment</text>
+    <text x="300" y="260" fill="white" font-family="Arial, sans-serif" font-size="11">va Jean ce trimestre?</text>
+    <text x="295" y="275" fill="#64748b" font-family="Arial, sans-serif" font-size="9">14:30</text>
+    
+    <!-- Message 2 -->
+    <rect x="480" y="285" width="220" height="40" rx="15" fill="#f1f5f9"/>
+    <text x="490" y="300" fill="#1f2937" font-family="Arial, sans-serif" font-size="11">Bonjour Prof! Jean se porte bien.</text>
+    <text x="490" y="310" fill="#1f2937" font-family="Arial, sans-serif" font-size="11">Ses notes en maths se sont</text>
+    <text x="490" y="320" fill="#1f2937" font-family="Arial, sans-serif" font-size="11">améliorées, merci!</text>
+    <text x="685" y="335" fill="#64748b" font-family="Arial, sans-serif" font-size="9">14:32</text>
+    
+    <!-- Message 3 -->
+    <rect x="290" y="345" width="180" height="30" rx="15" fill="#3b82f6"/>
+    <text x="300" y="360" fill="white" font-family="Arial, sans-serif" font-size="11">Parfait! Il progresse bien.</text>
+    <text x="300" y="370" fill="white" font-family="Arial, sans-serif" font-size="11">Continuons ainsi 👍</text>
+    <text x="295" y="385" fill="#64748b" font-family="Arial, sans-serif" font-size="9">14:35</text>
+  </g>
+  
+  <!-- Input Area -->
+  <rect x="290" y="420" width="350" height="30" rx="15" fill="#f8fafc" stroke="#e2e8f0"/>
+  <text x="305" y="438" fill="#9ca3af" font-family="Arial, sans-serif" font-size="12">Tapez votre message...</text>
+  <rect x="650" y="425" width="50" height="20" rx="10" fill="#3b82f6"/>
+  <text x="667" y="437" fill="white" font-family="Arial, sans-serif" font-size="11">Envoyer</text>
+  
+  <!-- Notification -->
+  <rect x="520" y="150" width="200" height="50" rx="8" fill="#10b981" opacity="0.9"/>
+  <text x="535" y="170" fill="white" font-family="Arial, sans-serif" font-size="12" font-weight="bold">📢 Nouveau message</text>
+  <text x="535" y="185" fill="white" font-family="Arial, sans-serif" font-size="11">Dir. Josephine dans Groupe 6A</text>
+  
+  <!-- Footer -->
+  <rect x="50" y="520" width="700" height="50" fill="#374151"/>
+  <text x="400" y="548" fill="white" font-family="Arial, sans-serif" font-size="14" text-anchor="middle">Communication instantanée - Masomo Pro</text>
+</svg>

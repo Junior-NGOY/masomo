@@ -1,0 +1,181 @@
+<svg width="800" height="600" viewBox="0 0 800 600" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="800" height="600" fill="#f1f5f9"/>
+  
+  <!-- Modern classroom floor -->
+  <rect x="0" y="450" width="800" height="150" fill="#e2e8f0"/>
+  
+  <!-- Interactive whiteboard -->
+  <rect x="50" y="80" width="250" height="180" fill="#ffffff" stroke="#3b82f6" stroke-width="4" rx="8"/>
+  <rect x="60" y="90" width="230" height="160" fill="#1e293b" rx="4"/>
+  
+  <!-- Digital content on board -->
+  <rect x="80" y="110" width="80" height="60" fill="#3b82f6" rx="4"/>
+  <text x="120" y="145" font-family="Arial, sans-serif" font-size="10" fill="#ffffff" text-anchor="middle">Vidéo</text>
+  <text x="120" y="155" font-family="Arial, sans-serif" font-size="10" fill="#ffffff" text-anchor="middle">Interactive</text>
+  
+  <rect x="180" y="110" width="80" height="60" fill="#10b981" rx="4"/>
+  <text x="220" y="135" font-family="Arial, sans-serif" font-size="8" fill="#ffffff" text-anchor="middle">Quiz</text>
+  <text x="220" y="145" font-family="Arial, sans-serif" font-size="8" fill="#ffffff" text-anchor="middle">Temps réel</text>
+  <text x="220" y="155" font-family="Arial, sans-serif" font-size="8" fill="#ffffff" text-anchor="middle">Score: 95%</text>
+  
+  <!-- Progress bar -->
+  <rect x="80" y="190" width="180" height="8" fill="#475569" rx="4"/>
+  <rect x="80" y="190" width="144" height="8" fill="#f59e0b" rx="4"/>
+  <text x="80" y="215" font-family="Arial, sans-serif" font-size="8" fill="#94a3b8">Progression: 80%</text>
+  
+  <!-- Student 1 with tablet -->
+  <g transform="translate(400, 300)">
+    <!-- Head -->
+    <circle cx="0" cy="0" r="20" fill="#f4a261"/>
+    <!-- Hair -->
+    <path d="M -15 -10 Q 0 -25 15 -10 Q 12 -20 0 -20 Q -12 -20 -15 -10 Z" fill="#2d1810"/>
+    <!-- Eyes focused -->
+    <circle cx="-6" cy="-3" r="2" fill="#000"/>
+    <circle cx="6" cy="-3" r="2" fill="#000"/>
+    <!-- Concentrated expression -->
+    <path d="M -8 5 Q 0 10 8 5" stroke="#000" stroke-width="1.5" fill="none"/>
+    
+    <!-- Body -->
+    <rect x="-15" y="20" width="30" height="45" fill="#3b82f6" rx="8"/>
+    <!-- Arms -->
+    <rect x="-35" y="30" width="15" height="25" fill="#3b82f6" rx="7"/>
+    <rect x="20" y="30" width="15" height="25" fill="#3b82f6" rx="7"/>
+    <!-- Hands holding tablet -->
+    <circle cx="-30" cy="60" r="6" fill="#d4a574"/>
+    <circle cx="30" cy="60" r="6" fill="#d4a574"/>
+    
+    <!-- Tablet -->
+    <rect x="-20" y="55" width="40" height="28" fill="#1f2937" rx="4"/>
+    <rect x="-18" y="57" width="36" height="24" fill="#3b82f6" rx="2"/>
+    <text x="0" y="67" font-family="Arial, sans-serif" font-size="6" fill="#ffffff" text-anchor="middle">Masomo Pro</text>
+    <text x="0" y="75" font-family="Arial, sans-serif" font-size="5" fill="#ffffff" text-anchor="middle">Exercices</text>
+    
+    <!-- Legs -->
+    <rect x="-10" y="65" width="8" height="30" fill="#1e293b" rx="4"/>
+    <rect x="2" y="65" width="8" height="30" fill="#1e293b" rx="4"/>
+    <!-- Shoes -->
+    <ellipse cx="-6" cy="98" rx="6" ry="3" fill="#000"/>
+    <ellipse cx="6" cy="98" rx="6" ry="3" fill="#000"/>
+  </g>
+  
+  <!-- Student 2 with laptop -->
+  <g transform="translate(550, 320)">
+    <!-- Head -->
+    <circle cx="0" cy="0" r="20" fill="#8b5a3c"/>
+    <!-- Hair -->
+    <path d="M -15 -10 Q 0 -25 15 -10 Q 12 -20 0 -20 Q -12 -20 -15 -10 Z" fill="#6b4423"/>
+    <!-- Eyes -->
+    <circle cx="-6" cy="-3" r="2" fill="#000"/>
+    <circle cx="6" cy="-3" r="2" fill="#000"/>
+    <!-- Smile -->
+    <path d="M -8 5 Q 0 12 8 5" stroke="#000" stroke-width="1.5" fill="none"/>
+    
+    <!-- Body -->
+    <rect x="-15" y="20" width="30" height="45" fill="#10b981" rx="8"/>
+    <!-- Arms -->
+    <rect x="-35" y="30" width="15" height="25" fill="#10b981" rx="7"/>
+    <rect x="20" y="30" width="15" height="25" fill="#10b981" rx="7"/>
+    <!-- Hands typing -->
+    <circle cx="-25" cy="65" r="5" fill="#8b5a3c"/>
+    <circle cx="25" cy="65" r="5" fill="#8b5a3c"/>
+    
+    <!-- Laptop -->
+    <rect x="-25" y="60" width="50" height="30" fill="#6b7280" rx="3"/>
+    <rect x="-23" y="62" width="46" height="20" fill="#1f2937" rx="2"/>
+    <rect x="-21" y="64" width="42" height="16" fill="#059669" rx="1"/>
+    <text x="0" y="72" font-family="Arial, sans-serif" font-size="5" fill="#ffffff" text-anchor="middle">Cours en ligne</text>
+    <text x="0" y="78" font-family="Arial, sans-serif" font-size="4" fill="#ffffff" text-anchor="middle">Mathématiques</text>
+    
+    <!-- Laptop keyboard -->
+    <rect x="-20" y="83" width="40" height="8" fill="#374151" rx="1"/>
+    
+    <!-- Legs -->
+    <rect x="-10" y="65" width="8" height="30" fill="#1e293b" rx="4"/>
+    <rect x="2" y="65" width="8" height="30" fill="#1e293b" rx="4"/>
+    <!-- Shoes -->
+    <ellipse cx="-6" cy="98" rx="6" ry="3" fill="#000"/>
+    <ellipse cx="6" cy="98" rx="6" ry="3" fill="#000"/>
+  </g>
+  
+  <!-- Student 3 with smartphone -->
+  <g transform="translate(700, 310)">
+    <!-- Head -->
+    <circle cx="0" cy="0" r="20" fill="#e29578"/>
+    <!-- Hair -->
+    <path d="M -15 -10 Q 0 -25 15 -10 Q 12 -20 0 -20 Q -12 -20 -15 -10 Z" fill="#8b4513"/>
+    <!-- Eyes -->
+    <circle cx="-6" cy="-3" r="2" fill="#000"/>
+    <circle cx="6" cy="-3" r="2" fill="#000"/>
+    <!-- Surprised expression -->
+    <circle cx="0" cy="6" r="3" fill="none" stroke="#000" stroke-width="1"/>
+    
+    <!-- Body -->
+    <rect x="-15" y="20" width="30" height="45" fill="#f59e0b" rx="8"/>
+    <!-- Arms -->
+    <rect x="-35" y="30" width="15" height="25" fill="#f59e0b" rx="7"/>
+    <rect x="20" y="30" width="15" height="25" fill="#f59e0b" rx="7"/>
+    <!-- Hand holding phone -->
+    <circle cx="0" cy="50" r="6" fill="#e29578"/>
+    
+    <!-- Smartphone -->
+    <rect x="-6" y="45" width="12" height="20" fill="#1f2937" rx="2"/>
+    <rect x="-5" y="46" width="10" height="16" fill="#8b5cf6" rx="1"/>
+    <text x="0" y="52" font-family="Arial, sans-serif" font-size="3" fill="#ffffff" text-anchor="middle">App</text>
+    <text x="0" y="56" font-family="Arial, sans-serif" font-size="3" fill="#ffffff" text-anchor="middle">Éducative</text>
+    
+    <!-- Legs -->
+    <rect x="-10" y="65" width="8" height="30" fill="#1e293b" rx="4"/>
+    <rect x="2" y="65" width="8" height="30" fill="#1e293b" rx="4"/>
+    <!-- Shoes -->
+    <ellipse cx="-6" cy="98" rx="6" ry="3" fill="#000"/>
+    <ellipse cx="6" cy="98" rx="6" ry="3" fill="#000"/>
+  </g>
+  
+  <!-- Modern desks -->
+  <rect x="350" y="380" width="80" height="50" fill="#94a3b8" rx="8"/>
+  <rect x="500" y="400" width="80" height="50" fill="#94a3b8" rx="8"/>
+  <rect x="650" y="390" width="80" height="50" fill="#94a3b8" rx="8"/>
+  
+  <!-- Desk surfaces -->
+  <rect x="355" y="375" width="70" height="40" fill="#e2e8f0" rx="5"/>
+  <rect x="505" y="395" width="70" height="40" fill="#e2e8f0" rx="5"/>
+  <rect x="655" y="385" width="70" height="40" fill="#e2e8f0" rx="5"/>
+  
+  <!-- WiFi symbols -->
+  <g transform="translate(320, 100)">
+    <path d="M 0 20 Q 10 10 20 20" stroke="#10b981" stroke-width="2" fill="none"/>
+    <path d="M -5 25 Q 10 5 25 25" stroke="#10b981" stroke-width="2" fill="none"/>
+    <path d="M -10 30 Q 10 0 30 30" stroke="#10b981" stroke-width="2" fill="none"/>
+    <circle cx="10" cy="25" r="2" fill="#10b981"/>
+  </g>
+  
+  <!-- Digital learning icons -->
+  <g transform="translate(750, 120)">
+    <circle cx="0" cy="0" r="15" fill="#3b82f6"/>
+    <text x="0" y="5" font-family="Arial, sans-serif" font-size="12" fill="#ffffff" text-anchor="middle">📱</text>
+  </g>
+  
+  <g transform="translate(750, 160)">
+    <circle cx="0" cy="0" r="15" fill="#10b981"/>
+    <text x="0" y="5" font-family="Arial, sans-serif" font-size="12" fill="#ffffff" text-anchor="middle">💻</text>
+  </g>
+  
+  <g transform="translate(750, 200)">
+    <circle cx="0" cy="0" r="15" fill="#f59e0b"/>
+    <text x="0" y="5" font-family="Arial, sans-serif" font-size="12" fill="#ffffff" text-anchor="middle">🎓</text>
+  </g>
+  
+  <!-- Progress indicators -->
+  <rect x="400" y="450" width="100" height="6" fill="#e2e8f0" rx="3"/>
+  <rect x="400" y="450" width="75" height="6" fill="#10b981" rx="3"/>
+  <text x="450" y="475" font-family="Arial, sans-serif" font-size="10" fill="#64748b" text-anchor="middle">75% complété</text>
+  
+  <rect x="550" y="470" width="100" height="6" fill="#e2e8f0" rx="3"/>
+  <rect x="550" y="470" width="90" height="6" fill="#3b82f6" rx="3"/>
+  <text x="600" y="495" font-family="Arial, sans-serif" font-size="10" fill="#64748b" text-anchor="middle">90% complété</text>
+  
+  <!-- Title -->
+  <text x="400" y="40" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#1e293b" text-anchor="middle">Apprentissage Interactif</text>
+  <text x="400" y="65" font-family="Arial, sans-serif" font-size="14" fill="#64748b" text-anchor="middle">Technologie au service de l'éducation</text>
+</svg>

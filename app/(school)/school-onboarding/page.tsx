@@ -5,11 +5,11 @@ import { redirect } from "next/navigation";
 import React from "react";
 
 export default async function page() {
-  const user = await getServerUser();
+/*   const user = await getServerUser();
   const role = user?.role;
   if (!user || role !== "SUPER_ADMIN") {
     redirect("/login");
-  }
+  } */
   return (
     <div className="max-w-3xl mx-auto py-16">
       <Card className="border-t-4 border-blue-600 shadow">

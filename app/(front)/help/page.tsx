@@ -7,8 +7,8 @@ export default function page() {
     <div className="py-12">
       <SectionHeader
         title=""
-        heading="Help Center and Ressources"
-        description="Trouvez des réponses, apprenez les meilleures pratiques et découvrez comment tirer la meilleure partie de votre système MasomoPro. Parcourez notre foire aux questions ou explorez nos articles utiles pour améliorer votre expérience."
+        heading="Centre d'Aide Masomo Pro"
+        description="Trouvez des réponses, apprenez les meilleures pratiques et découvrez comment tirer le meilleur parti de votre système de gestion scolaire Masomo Pro. Parcourez notre foire aux questions ou explorez nos guides détaillés."
       />
       <HelpPage />
     </div>

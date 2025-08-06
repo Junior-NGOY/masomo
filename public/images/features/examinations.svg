@@ -1,0 +1,182 @@
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="headerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#1e40af;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f8fafc;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="examGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#f59e0b;stop-opacity:0.2" />
+      <stop offset="100%" style="stop-color:#f59e0b;stop-opacity:0.1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="800" height="600" fill="#f1f5f9"/>
+  
+  <!-- Header -->
+  <rect x="0" y="0" width="800" height="60" fill="url(#headerGrad)"/>
+  
+  <!-- Logo -->
+  <circle cx="30" cy="30" r="15" fill="white" fill-opacity="0.2"/>
+  <text x="30" y="35" text-anchor="middle" fill="white" font-size="10" font-weight="bold">MS</text>
+  
+  <!-- Title -->
+  <text x="60" y="35" fill="white" font-size="16" font-weight="bold">MASOMO PRO - Examens & Évaluations</text>
+  
+  <!-- User Profile -->
+  <circle cx="750" cy="30" r="15" fill="white" fill-opacity="0.2"/>
+  <text x="750" y="35" text-anchor="middle" fill="white" font-size="10">👤</text>
+  
+  <!-- Navigation -->
+  <rect x="0" y="60" width="200" height="540" fill="white" stroke="#e2e8f0"/>
+  
+  <!-- Nav Items -->
+  <rect x="10" y="80" width="180" height="35" fill="#fef3c7" rx="5"/>
+  <text x="20" y="100" fill="#d97706" font-size="12" font-weight="bold">📝 Examens</text>
+  
+  <text x="20" y="130" fill="#64748b" font-size="12">📊 Évaluations</text>
+  <text x="20" y="160" fill="#64748b" font-size="12">📅 Calendrier</text>
+  <text x="20" y="190" fill="#64748b" font-size="12">📋 Copies</text>
+  <text x="20" y="220" fill="#64748b" font-size="12">📈 Résultats</text>
+  <text x="20" y="250" fill="#64748b" font-size="12">🏆 Classements</text>
+  
+  <!-- Main Content Area -->
+  <rect x="200" y="60" width="600" height="540" fill="#f8fafc"/>
+  
+  <!-- Content Header -->
+  <rect x="210" y="70" width="580" height="60" fill="white" stroke="#e2e8f0" rx="8"/>
+  <text x="225" y="95" fill="#1e293b" font-size="18" font-weight="bold">Examens & Évaluations</text>
+  <text x="225" y="115" fill="#64748b" font-size="12">Gestion complète des examens, corrections et résultats</text>
+  
+  <!-- Create Exam Button -->
+  <rect x="650" y="80" width="80" height="30" fill="#f59e0b" rx="4"/>
+  <text x="690" y="98" text-anchor="middle" fill="white" font-size="11" font-weight="bold">+ Créer</text>
+  
+  <!-- Filter Tabs -->
+  <rect x="220" y="150" width="360" height="40" fill="white" stroke="#e2e8f0" rx="6"/>
+  
+  <rect x="230" y="160" width="80" height="20" fill="#f59e0b" rx="3"/>
+  <text x="270" y="172" text-anchor="middle" fill="white" font-size="10" font-weight="bold">En cours</text>
+  
+  <rect x="320" y="160" width="80" height="20" fill="#f8fafc" rx="3"/>
+  <text x="360" y="172" text-anchor="middle" fill="#64748b" font-size="10">Programmés</text>
+  
+  <rect x="410" y="160" width="80" height="20" fill="#f8fafc" rx="3"/>
+  <text x="450" y="172" text-anchor="middle" fill="#64748b" font-size="10">Terminés</text>
+  
+  <rect x="500" y="160" width="70" height="20" fill="#f8fafc" rx="3"/>
+  <text x="535" y="172" text-anchor="middle" fill="#64748b" font-size="10">Archivés</text>
+  
+  <!-- Exam Status Panel -->
+  <rect x="590" y="150" width="180" height="280" fill="white" stroke="#e2e8f0" rx="8"/>
+  
+  <!-- Status Header -->
+  <rect x="600" y="160" width="160" height="30" fill="#f8fafc" rx="4"/>
+  <text x="610" y="178" fill="#1e293b" font-size="12" font-weight="bold">🎯 Statut Actuel</text>
+  
+  <!-- Active Exam -->
+  <rect x="605" y="200" width="150" height="70" fill="url(#examGrad)" stroke="#f59e0b" rx="4"/>
+  <text x="615" y="220" fill="#d97706" font-size="11" font-weight="bold">📝 Examen en cours</text>
+  <text x="615" y="235" fill="#1e293b" font-size="10">Mathématiques - 6ème A</text>
+  <text x="615" y="250" fill="#64748b" font-size="9">⏰ 45 min restantes</text>
+  
+  <rect x="665" y="220" width="80" height="15" fill="#fef3c7" rx="2"/>
+  <text x="705" y="230" text-anchor="middle" fill="#d97706" font-size="8">28/30 copies</text>
+  
+  <!-- Upcoming Exams -->
+  <rect x="605" y="280" width="150" height="50" fill="url(#cardGrad)" stroke="#e2e8f0" rx="4"/>
+  <text x="615" y="300" fill="#3b82f6" font-size="11" font-weight="bold">📅 Prochains</text>
+  <text x="615" y="315" fill="#64748b" font-size="9">Français - Demain 08:00</text>
+  <text x="615" y="325" fill="#64748b" font-size="9">Sciences - Jeudi 10:00</text>
+  
+  <!-- Correction Status -->
+  <rect x="605" y="340" width="150" height="50" fill="url(#cardGrad)" stroke="#e2e8f0" rx="4"/>
+  <text x="615" y="360" fill="#dc2626" font-size="11" font-weight="bold">📋 À corriger</text>
+  <text x="615" y="375" fill="#64748b" font-size="9">Histoire - 25 copies</text>
+  <text x="615" y="385" fill="#64748b" font-size="9">Anglais - 18 copies</text>
+  
+  <!-- Recent Results -->
+  <rect x="605" y="400" width="150" height="50" fill="url(#cardGrad)" stroke="#e2e8f0" rx="4"/>
+  <text x="615" y="420" fill="#16a34a" font-size="11" font-weight="bold">✅ Résultats</text>
+  <text x="615" y="435" fill="#64748b" font-size="9">Géographie - Publiés</text>
+  <text x="615" y="445" fill="#64748b" font-size="9">Physique - En attente</text>
+  
+  <!-- Exam Schedule -->
+  <rect x="220" y="200" width="360" height="170" fill="white" stroke="#e2e8f0" rx="8"/>
+  
+  <!-- Schedule Header -->
+  <rect x="230" y="210" width="340" height="30" fill="#f8fafc" rx="4"/>
+  <text x="240" y="228" fill="#1e293b" font-size="12" font-weight="bold">📅 Planning des Examens</text>
+  
+  <!-- Schedule Items -->
+  <rect x="235" y="250" width="330" height="25" fill="#fef3c7" rx="3"/>
+  <text x="245" y="260" fill="#d97706" font-size="10" font-weight="bold">Aujourd'hui</text>
+  <text x="245" y="270" fill="#1e293b" font-size="10">08:00 - Math (6ème A) - Salle 101</text>
+  <text x="510" y="265" fill="#f59e0b" font-size="10">⏳ En cours</text>
+  
+  <rect x="235" y="280" width="330" height="25" fill="#eff6ff" rx="3"/>
+  <text x="245" y="290" fill="#3b82f6" font-size="10" font-weight="bold">Demain</text>
+  <text x="245" y="300" fill="#1e293b" font-size="10">08:00 - Français (6ème A) - Salle 101</text>
+  <text x="510" y="295" fill="#64748b" font-size="10">⏸️ Programmé</text>
+  
+  <rect x="235" y="310" width="330" height="25" fill="#eff6ff" rx="3"/>
+  <text x="245" y="320" fill="#3b82f6" font-size="10" font-weight="bold">Jeudi</text>
+  <text x="245" y="330" fill="#1e293b" font-size="10">10:00 - Sciences (6ème A) - Salle 102</text>
+  <text x="510" y="325" fill="#64748b" font-size="10">⏸️ Programmé</text>
+  
+  <rect x="235" y="340" width="330" height="25" fill="#f0fdf4" rx="3"/>
+  <text x="245" y="350" fill="#16a34a" font-size="10" font-weight="bold">Vendredi</text>
+  <text x="245" y="360" fill="#1e293b" font-size="10">14:00 - Anglais (6ème A) - Salle 103</text>
+  <text x="510" y="355" fill="#64748b" font-size="10">⏸️ Programmé</text>
+  
+  <!-- Exam Details -->
+  <rect x="220" y="380" width="360" height="160" fill="white" stroke="#e2e8f0" rx="8"/>
+  
+  <!-- Details Header -->
+  <rect x="230" y="390" width="340" height="30" fill="#f8fafc" rx="4"/>
+  <text x="240" y="408" fill="#1e293b" font-size="12" font-weight="bold">📊 Détails Examen Actuel</text>
+  
+  <!-- Exam Info -->
+  <rect x="235" y="430" width="160" height="100" fill="#f8fafc" rx="4"/>
+  <text x="245" y="450" fill="#1e293b" font-size="11" font-weight="bold">Mathématiques - 6ème A</text>
+  <text x="245" y="465" fill="#64748b" font-size="9">📅 Date: 12 Novembre 2024</text>
+  <text x="245" y="480" fill="#64748b" font-size="9">⏰ Durée: 2 heures</text>
+  <text x="245" y="495" fill="#64748b" font-size="9">👥 Élèves: 30</text>
+  <text x="245" y="510" fill="#64748b" font-size="9">📍 Salle: 101</text>
+  
+  <!-- Progress -->
+  <rect x="405" y="430" width="160" height="100" fill="#f8fafc" rx="4"/>
+  <text x="415" y="450" fill="#1e293b" font-size="11" font-weight="bold">Progression</text>
+  
+  <!-- Progress Bar -->
+  <rect x="415" y="465" width="140" height="8" fill="#e2e8f0" rx="4"/>
+  <rect x="415" y="465" width="130" height="8" fill="#f59e0b" rx="4"/>
+  <text x="485" y="485" text-anchor="middle" fill="#d97706" font-size="10" font-weight="bold">93%</text>
+  
+  <text x="415" y="500" fill="#64748b" font-size="9">✅ Copies remises: 28/30</text>
+  <text x="415" y="515" fill="#64748b" font-size="9">⏰ Temps restant: 45 min</text>
+  
+  <!-- Quick Actions -->
+  <rect x="235" y="550" width="330" height="25" fill="#f8fafc" rx="3"/>
+  
+  <rect x="245" y="555" width="70" height="15" fill="#16a34a" rx="2"/>
+  <text x="280" y="565" text-anchor="middle" fill="white" font-size="8" font-weight="bold">Surveiller</text>
+  
+  <rect x="325" y="555" width="70" height="15" fill="#3b82f6" rx="2"/>
+  <text x="360" y="565" text-anchor="middle" fill="white" font-size="8" font-weight="bold">Corrections</text>
+  
+  <rect x="405" y="555" width="70" height="15" fill="#f59e0b" rx="2"/>
+  <text x="440" y="565" text-anchor="middle" fill="white" font-size="8" font-weight="bold">Statistiques</text>
+  
+  <rect x="485" y="555" width="70" height="15" fill="#64748b" rx="2"/>
+  <text x="520" y="565" text-anchor="middle" fill="white" font-size="8" font-weight="bold">Exporter</text>
+  
+  <!-- Footer Status -->
+  <rect x="220" y="570" width="550" height="20" fill="#f8fafc" rx="3"/>
+  <text x="230" y="583" fill="#64748b" font-size="10">⚡ Surveillance active - 3 surveillants connectés</text>
+  <text x="620" y="583" fill="#22c55e" font-size="10">● Système opérationnel</text>
+</svg>

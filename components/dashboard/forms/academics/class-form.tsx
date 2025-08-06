@@ -19,9 +19,9 @@ import {
 } from "@/components/ui/dialog";
 import { createClass } from "@/actions/classes";
 import { ClassCreateProps } from "@/types/types";
+import useSchoolStore from "@/store/school";
 
 export default function ClassForm({
-  userId,
   initialContent,
   editingId
 }: {
@@ -41,9 +41,10 @@ export default function ClassForm({
   });
 
   const [loading, setLoading] = useState(false);
-
+  const { school } = useSchoolStore();
   async function saveClass(data: ClassCreateProps) {
     //data.userId = userId;
+    data.schoolId = school?.id ?? "";
     try {
       setLoading(true);
       if (editingId) {

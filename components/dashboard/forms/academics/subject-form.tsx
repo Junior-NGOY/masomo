@@ -18,7 +18,7 @@ import {
   DialogTrigger
 } from "@/components/ui/dialog";
 
-import { SubjectCreateProps } from "@/types/types";
+import { SubjectCreateProps, SubjectCategory, SubjectType } from "@/types/types";
 
 import FormSelectInput from "@/components/FormInputs/FormSelectInput";
 import { DepartmentOption } from "../../subject-listing";
@@ -44,49 +44,44 @@ export default function SubjectForm({
     defaultValues: {
       name: initialContent || ""
     }
-  });
-  const types = [
+  });  const types = [
     {
       label: "THEORY",
-      value: "THEORY"
+      value: SubjectType.THEORY
     },
     {
       label: "PRACTICAL",
-      value: "PRACTICAL"
+      value: SubjectType.PRACTICAL
     },
     {
       label: "BOTH",
-      value: "BOTH"
+      value: SubjectType.BOTH
     }
   ];
   const categories = [
     {
       label: "CORE",
-      value: "CORE"
+      value: SubjectCategory.CORE
     },
     {
       label: "ELECTIVE",
-      value: "ELECTIVE"
+      value: SubjectCategory.ELECTIVE
     },
     {
       label: "ADDITIONAL",
-      value: "ADDITIONAL"
+      value: SubjectCategory.ADDITIONAL
     },
     {
       label: "VOCATIONAL",
-      value: "VOCATIONAL"
+      value: SubjectCategory.VOCATIONAL
     },
     {
       label: "LANGUAGE",
-      value: "LANGUAGE"
-    },
-    {
-      label: "VOCATIONAL",
-      value: "VOCATIONAL"
+      value: SubjectCategory.LANGUAGE
     },
     {
       label: "EXTRA_CURRICULAR",
-      value: "EXTRA_CURRICULAR"
+      value: SubjectCategory.EXTRA_CURRICULAR
     }
   ];
   const [selectedCategory, setSelectedCategory] = useState<any>(categories[0]);

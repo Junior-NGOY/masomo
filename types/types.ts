@@ -1,3 +1,32 @@
+// Ajout des enums cohérents avec le backend
+export enum UserRole {
+  SUPER_ADMIN = "SUPER_ADMIN",
+  ADMIN = "ADMIN",
+  TEACHER = "TEACHER",
+  STUDENT = "STUDENT",
+  PARENT = "PARENT"
+}
+
+export enum SubjectCategory {
+  CORE = "CORE",
+  ELECTIVE = "ELECTIVE",
+  ADDITIONAL = "ADDITIONAL",
+  VOCATIONAL = "VOCATIONAL",
+  LANGUAGE = "LANGUAGE",
+  EXTRA_CURRICULAR = "EXTRA_CURRICULAR"
+}
+
+export enum SubjectType {
+  THEORY = "THEORY",
+  PRACTICAL = "PRACTICAL",
+  BOTH = "BOTH"
+}
+
+export enum Gender {
+  MALE = "MALE",
+  FEMALE = "FEMALE"
+}
+
 export type Contact = {
   id: string;
   avatar: string;
@@ -84,25 +113,26 @@ export type StreamWithCount = {
 
 export type ClassCreateProps = {
   title: string;
-  //slug: string;
+  schoolId: string;
 };
 export type DepartmentCreateProps = {
   name: string;
+  schoolId: string;
 };
 
 export type SubjectCreateProps = {
   name: string;
   code: string;
   shortName: string;
-  category: string;
-  type: string;
+  category: SubjectCategory;
+  type: SubjectType;
   departmentId: string;
   departmentName: string;
 };
 export type StreamCreateProps = {
   title: string;
-  // slug: string;
   classId: string;
+  schoolId: string;
 };
 
 export type Parent = {
@@ -181,28 +211,9 @@ export type Subject = {
   isOptional: boolean;
   hasTheory: boolean;
   hasPractical: boolean;
-
   // If practical
   labRequired: boolean;
 };
-enum SubjectCategory {
-  CORE = "CORE",
-  ELECTIVE = "ELECTIVE",
-  ADDITIONAL = "ADDITIONAL",
-  VOCATIONAL = "VOCATIONAL",
-  LANGUAGE = "LANGUAGE",
-  EXTRA_CURRICULAR = "EXTRA_CURRICULAR"
-}
-enum SubjectType {
-  THEORY = "THEORY",
-  PRACTICAL = "PRACTICAL",
-  BOTH = "BOTH"
-}
-export enum Gender {
-  Male = "MALE",
-  Female = "FEMALE"
-  // Other = "Other"
-}
 
 export type TeacherCreateProps = {
   title: string;
@@ -231,6 +242,9 @@ export type TeacherCreateProps = {
   imageUrl: string;
   experience: number;
   address: string;
+  schoolId: string;
+  // Ajout pour cohérence avec le backend
+  userId?: string;
 };
 export type Teacher = {
   id: string;
@@ -271,7 +285,7 @@ export interface User {
   image?: string | null;
   name: string;
   phone?: string | null;
-  role: "SUPER_ADMIN" | "ADMIN" | "TEACHER" | "STUDENT" | "PARENT";
+  role: UserRole;
   schoolId?: string | null;
   schoolName?: string | null;
   updatedAt: string;
@@ -282,4 +296,15 @@ export type School = {
   name: string;
   logo: string | null;
   slug: string;
+};
+
+export type UserCreateProps = {
+  email: string;
+  password: string;
+  role: UserRole;
+  name: string;
+  phone?: string;
+  image?: string;
+  schoolId?: string;
+  schoolName?: string;
 };

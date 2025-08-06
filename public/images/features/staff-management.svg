@@ -1,0 +1,214 @@
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="headerGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#1e40af;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#f8fafc;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="activeGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#22c55e;stop-opacity:0.1" />
+      <stop offset="100%" style="stop-color:#22c55e;stop-opacity:0.2" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="800" height="600" fill="#f1f5f9"/>
+  
+  <!-- Header -->
+  <rect x="0" y="0" width="800" height="60" fill="url(#headerGrad)"/>
+  
+  <!-- Logo -->
+  <circle cx="30" cy="30" r="15" fill="white" fill-opacity="0.2"/>
+  <text x="30" y="35" text-anchor="middle" fill="white" font-size="10" font-weight="bold">MS</text>
+  
+  <!-- Title -->
+  <text x="60" y="35" fill="white" font-size="16" font-weight="bold">MASOMO PRO - Gestion du Personnel</text>
+  
+  <!-- User Profile -->
+  <circle cx="750" cy="30" r="15" fill="white" fill-opacity="0.2"/>
+  <text x="750" y="35" text-anchor="middle" fill="white" font-size="10">👤</text>
+  
+  <!-- Navigation -->
+  <rect x="0" y="60" width="200" height="540" fill="white" stroke="#e2e8f0"/>
+  
+  <!-- Nav Items -->
+  <rect x="10" y="80" width="180" height="35" fill="url(#activeGrad)" rx="5"/>
+  <text x="20" y="100" fill="#22c55e" font-size="12" font-weight="bold">👥 Personnel</text>
+  
+  <text x="20" y="130" fill="#64748b" font-size="12">📊 Tableaux de bord</text>
+  <text x="20" y="160" fill="#64748b" font-size="12">📝 Évaluations</text>
+  <text x="20" y="190" fill="#64748b" font-size="12">📅 Plannings</text>
+  <text x="20" y="220" fill="#64748b" font-size="12">💰 Paie</text>
+  <text x="20" y="250" fill="#64748b" font-size="12">📋 Rapports</text>
+  
+  <!-- Main Content Area -->
+  <rect x="200" y="60" width="600" height="540" fill="#f8fafc"/>
+  
+  <!-- Content Header -->
+  <rect x="210" y="70" width="580" height="60" fill="white" stroke="#e2e8f0" rx="8"/>
+  <text x="225" y="95" fill="#1e293b" font-size="18" font-weight="bold">Gestion du Personnel</text>
+  <text x="225" y="115" fill="#64748b" font-size="12">Gérer les enseignants, administrateurs et personnel de soutien</text>
+  
+  <!-- Action Buttons -->
+  <rect x="650" y="80" width="80" height="30" fill="#3b82f6" rx="4"/>
+  <text x="690" y="98" text-anchor="middle" fill="white" font-size="11" font-weight="bold">+ Ajouter</text>
+  
+  <rect x="560" y="80" width="80" height="30" fill="white" stroke="#d1d5db" rx="4"/>
+  <text x="600" y="98" text-anchor="middle" fill="#64748b" font-size="11">Importer</text>
+  
+  <!-- Search Bar -->
+  <rect x="225" y="150" width="250" height="35" fill="white" stroke="#d1d5db" rx="4"/>
+  <text x="235" y="170" fill="#9ca3af" font-size="12">🔍 Rechercher un membre...</text>
+  
+  <!-- Filter Buttons -->
+  <rect x="490" y="150" width="70" height="35" fill="#eff6ff" stroke="#3b82f6" rx="4"/>
+  <text x="525" y="170" text-anchor="middle" fill="#3b82f6" font-size="11" font-weight="bold">Tous</text>
+  
+  <rect x="570" y="150" width="80" height="35" fill="white" stroke="#d1d5db" rx="4"/>
+  <text x="610" y="170" text-anchor="middle" fill="#64748b" font-size="11">Enseignants</text>
+  
+  <rect x="660" y="150" width="70" height="35" fill="white" stroke="#d1d5db" rx="4"/>
+  <text x="695" y="170" text-anchor="middle" fill="#64748b" font-size="11">Admin</text>
+  
+  <!-- Staff Cards Grid -->
+  <!-- Card 1 - Teacher -->
+  <rect x="220" y="200" width="175" height="140" fill="url(#cardGrad)" stroke="#e2e8f0" rx="8"/>
+  <circle cx="260" cy="235" r="20" fill="#ddd6fe"/>
+  <text x="260" y="240" text-anchor="middle" fill="#7c3aed" font-size="14" font-weight="bold">MP</text>
+  
+  <text x="290" y="230" fill="#1e293b" font-size="13" font-weight="bold">Marie Perez</text>
+  <text x="290" y="245" fill="#64748b" font-size="10">Enseignante - Mathématiques</text>
+  <text x="290" y="260" fill="#64748b" font-size="10">📞 +243 901 234 567</text>
+  
+  <rect x="230" y="275" width="50" height="20" fill="#dcfce7" rx="3"/>
+  <text x="255" y="287" text-anchor="middle" fill="#16a34a" font-size="9" font-weight="bold">Actif</text>
+  
+  <rect x="290" y="275" width="40" height="20" fill="#f0f9ff" rx="3"/>
+  <text x="310" y="287" text-anchor="middle" fill="#0ea5e9" font-size="9">5 ans</text>
+  
+  <text x="230" y="315" fill="#64748b" font-size="10">⭐ 4.8/5 - 23 évaluations</text>
+  <text x="350" y="315" fill="#3b82f6" font-size="10" cursor="pointer">Voir →</text>
+  
+  <!-- Card 2 - Administrator -->
+  <rect x="405" y="200" width="175" height="140" fill="url(#cardGrad)" stroke="#e2e8f0" rx="8"/>
+  <circle cx="445" cy="235" r="20" fill="#fef3c7"/>
+  <text x="445" y="240" text-anchor="middle" fill="#d97706" font-size="14" font-weight="bold">JK</text>
+  
+  <text x="475" y="230" fill="#1e293b" font-size="13" font-weight="bold">Jean Kabila</text>
+  <text x="475" y="245" fill="#64748b" font-size="10">Directeur Adjoint</text>
+  <text x="475" y="260" fill="#64748b" font-size="10">📞 +243 901 345 678</text>
+  
+  <rect x="415" y="275" width="50" height="20" fill="#dcfce7" rx="3"/>
+  <text x="440" y="287" text-anchor="middle" fill="#16a34a" font-size="9" font-weight="bold">Actif</text>
+  
+  <rect x="475" y="275" width="40" height="20" fill="#f0f9ff" rx="3"/>
+  <text x="495" y="287" text-anchor="middle" fill="#0ea5e9" font-size="9">8 ans</text>
+  
+  <text x="415" y="315" fill="#64748b" font-size="10">👥 Supervise 15 enseignants</text>
+  <text x="535" y="315" fill="#3b82f6" font-size="10" cursor="pointer">Voir →</text>
+  
+  <!-- Card 3 - Support Staff -->
+  <rect x="590" y="200" width="175" height="140" fill="url(#cardGrad)" stroke="#e2e8f0" rx="8"/>
+  <circle cx="630" cy="235" r="20" fill="#dbeafe"/>
+  <text x="630" y="240" text-anchor="middle" fill="#2563eb" font-size="14" font-weight="bold">AN</text>
+  
+  <text x="660" y="230" fill="#1e293b" font-size="13" font-weight="bold">Alice Nkomo</text>
+  <text x="660" y="245" fill="#64748b" font-size="10">Secrétaire</text>
+  <text x="660" y="260" fill="#64748b" font-size="10">📞 +243 901 456 789</text>
+  
+  <rect x="600" y="275" width="50" height="20" fill="#dcfce7" rx="3"/>
+  <text x="625" y="287" text-anchor="middle" fill="#16a34a" font-size="9" font-weight="bold">Actif</text>
+  
+  <rect x="660" y="275" width="40" height="20" fill="#f0f9ff" rx="3"/>
+  <text x="680" y="287" text-anchor="middle" fill="#0ea5e9" font-size="9">3 ans</text>
+  
+  <text x="600" y="315" fill="#64748b" font-size="10">📋 Gestion administrative</text>
+  <text x="720" y="315" fill="#3b82f6" font-size="10" cursor="pointer">Voir →</text>
+  
+  <!-- Card 4 - New Teacher -->
+  <rect x="220" y="350" width="175" height="140" fill="url(#cardGrad)" stroke="#e2e8f0" rx="8"/>
+  <circle cx="260" cy="385" r="20" fill="#ecfdf5"/>
+  <text x="260" y="390" text-anchor="middle" fill="#059669" font-size="14" font-weight="bold">SM</text>
+  
+  <text x="290" y="380" fill="#1e293b" font-size="13" font-weight="bold">Sophie Mwanza</text>
+  <text x="290" y="395" fill="#64748b" font-size="10">Enseignante - Français</text>
+  <text x="290" y="410" fill="#64748b" font-size="10">📞 +243 901 567 890</text>
+  
+  <rect x="230" y="425" width="60" height="20" fill="#fef3c7" rx="3"/>
+  <text x="260" y="437" text-anchor="middle" fill="#d97706" font-size="9" font-weight="bold">Nouveau</text>
+  
+  <rect x="300" y="425" width="40" height="20" fill="#f0f9ff" rx="3"/>
+  <text x="320" y="437" text-anchor="middle" fill="#0ea5e9" font-size="9">2 mois</text>
+  
+  <text x="230" y="465" fill="#64748b" font-size="10">📚 En formation</text>
+  <text x="350" y="465" fill="#3b82f6" font-size="10" cursor="pointer">Voir →</text>
+  
+  <!-- Card 5 - IT Support -->
+  <rect x="405" y="350" width="175" height="140" fill="url(#cardGrad)" stroke="#e2e8f0" rx="8"/>
+  <circle cx="445" cy="385" r="20" fill="#f3e8ff"/>
+  <text x="445" y="390" text-anchor="middle" fill="#9333ea" font-size="14" font-weight="bold">TM</text>
+  
+  <text x="475" y="380" fill="#1e293b" font-size="13" font-weight="bold">Thomas Mukendi</text>
+  <text x="475" y="395" fill="#64748b" font-size="10">Technicien IT</text>
+  <text x="475" y="410" fill="#64748b" font-size="10">📞 +243 901 678 901</text>
+  
+  <rect x="415" y="425" width="50" height="20" fill="#dcfce7" rx="3"/>
+  <text x="440" y="437" text-anchor="middle" fill="#16a34a" font-size="9" font-weight="bold">Actif</text>
+  
+  <rect x="475" y="425" width="40" height="20" fill="#f0f9ff" rx="3"/>
+  <text x="495" y="437" text-anchor="middle" fill="#0ea5e9" font-size="9">1 an</text>
+  
+  <text x="415" y="465" fill="#64748b" font-size="10">💻 Support technique</text>
+  <text x="535" y="465" fill="#3b82f6" font-size="10" cursor="pointer">Voir →</text>
+  
+  <!-- Card 6 - Absent Staff -->
+  <rect x="590" y="350" width="175" height="140" fill="url(#cardGrad)" stroke="#e2e8f0" rx="8"/>
+  <circle cx="630" cy="385" r="20" fill="#fee2e2"/>
+  <text x="630" y="390" text-anchor="middle" fill="#dc2626" font-size="14" font-weight="bold">PL</text>
+  
+  <text x="660" y="380" fill="#1e293b" font-size="13" font-weight="bold">Pierre Lumumba</text>
+  <text x="660" y="395" fill="#64748b" font-size="10">Enseignant - Histoire</text>
+  <text x="660" y="410" fill="#64748b" font-size="10">📞 +243 901 789 012</text>
+  
+  <rect x="600" y="425" width="50" height="20" fill="#fee2e2" rx="3"/>
+  <text x="625" y="437" text-anchor="middle" fill="#dc2626" font-size="9" font-weight="bold">Absent</text>
+  
+  <rect x="660" y="425" width="40" height="20" fill="#f0f9ff" rx="3"/>
+  <text x="680" y="437" text-anchor="middle" fill="#0ea5e9" font-size="9">6 ans</text>
+  
+  <text x="600" y="465" fill="#64748b" font-size="10">🏥 Congé maladie</text>
+  <text x="720" y="465" fill="#3b82f6" font-size="10" cursor="pointer">Voir →</text>
+  
+  <!-- Stats Summary -->
+  <rect x="220" y="510" width="545" height="70" fill="white" stroke="#e2e8f0" rx="8"/>
+  
+  <!-- Stat 1 -->
+  <rect x="240" y="530" width="100" height="30" fill="#eff6ff" rx="4"/>
+  <text x="290" y="540" text-anchor="middle" fill="#3b82f6" font-size="10" font-weight="bold">Total Personnel</text>
+  <text x="290" y="555" text-anchor="middle" fill="#1e293b" font-size="16" font-weight="bold">45</text>
+  
+  <!-- Stat 2 -->
+  <rect x="360" y="530" width="100" height="30" fill="#f0fdf4" rx="4"/>
+  <text x="410" y="540" text-anchor="middle" fill="#16a34a" font-size="10" font-weight="bold">Actifs</text>
+  <text x="410" y="555" text-anchor="middle" fill="#1e293b" font-size="16" font-weight="bold">42</text>
+  
+  <!-- Stat 3 -->
+  <rect x="480" y="530" width="100" height="30" fill="#fef3c7" rx="4"/>
+  <text x="530" y="540" text-anchor="middle" fill="#d97706" font-size="10" font-weight="bold">Nouveaux</text>
+  <text x="530" y="555" text-anchor="middle" fill="#1e293b" font-size="16" font-weight="bold">5</text>
+  
+  <!-- Stat 4 -->
+  <rect x="600" y="530" width="100" height="30" fill="#fee2e2" rx="4"/>
+  <text x="650" y="540" text-anchor="middle" fill="#dc2626" font-size="10" font-weight="bold">Absents</text>
+  <text x="650" y="555" text-anchor="middle" fill="#1e293b" font-size="16" font-weight="bold">3</text>
+  
+  <!-- Pagination -->
+  <text x="220" y="590" fill="#64748b" font-size="12">Affichage 1-6 sur 45 membres</text>
+  <rect x="680" y="575" width="30" height="25" fill="white" stroke="#d1d5db" rx="3"/>
+  <text x="695" y="590" text-anchor="middle" fill="#64748b" font-size="11">‹</text>
+  <rect x="720" y="575" width="30" height="25" fill="#3b82f6" rx="3"/>
+  <text x="735" y="590" text-anchor="middle" fill="white" font-size="11">›</text>
+</svg>

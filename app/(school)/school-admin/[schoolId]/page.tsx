@@ -1,4 +1,6 @@
-import NotFound from "@/app/not-found";
+import { notFound } from "next/navigation";
+import SchoolAdminForm from "@/components/dashboard/forms/school/school-admin-form";
+import { Card, CardContent } from "@/components/ui/card";
 import React from "react";
 
 export default async function page({
@@ -10,13 +12,16 @@ export default async function page({
 }) {
   const schoolId = (await params).schoolId;
   const name = (await searchParams).name;
-  if (!schoolId) {
-    return NotFound({ statusCode: 404, title: "School not found" });
+  if (!schoolId || !name) {
+    notFound();
   }
   return (
-    <div>
-      schoolId: {schoolId}
-      <p>school name : {name}</p>
+    <div className="max-w-3xl mx-auto py-16">
+      <Card className="border-t-4 border-blue-600 shadow">
+        <CardContent className="p-6">
+          <SchoolAdminForm schoolId={schoolId} schoolName={name as string} />
+        </CardContent>
+      </Card>
     </div>
   );
 }

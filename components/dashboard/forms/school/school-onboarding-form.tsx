@@ -34,20 +34,32 @@ export default function SchoolOnboardingForm() {
     try {
       setLoading(true);
       data.logo = imageUrl;
-      console.log(data);
-      const res = await createSchool(data);
-      console.log(res);
+      console.log("Données fictives de l'école:", data);
+      
+      // Simulation d'un délai d'API
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Générer un ID fictif pour l'école
+      const mockSchoolId = `school_${Date.now()}`;
+      const mockSchoolResponse = {
+        id: mockSchoolId,
+        name: data.name,
+        logo: data.logo
+      };
+      
+      console.log("Réponse fictive:", mockSchoolResponse);
       setLoading(false);
       // Toast
-      toast.success("Successfully Created!");
+      toast.success("École créée avec succès (mode démo)!");
       //reset
       reset();
       setImageUrl(initialImage);
-      //route
-      router.push(`/school-admin/${res.id}?name=${res.name}`);
+      //route - redirection vers la création de l'administrateur
+      router.push(`/school-admin/${mockSchoolResponse.id}?name=${mockSchoolResponse.name}`);
     } catch (error) {
       setLoading(false);
       console.log(error);
+      toast.error("Erreur lors de la création de l'école");
     }
   }
 
@@ -64,7 +76,7 @@ export default function SchoolOnboardingForm() {
       <div className="grid grid-cols-12 gap-6 py-6">
         <div className="lg:col-span-12 col-span-full space-y-3">
           <div className="grid gap-6">
-            <div className="grid     gap-3">
+            <div className="grid gap-3">
               <TextInput
                 register={register}
                 errors={errors}
@@ -75,7 +87,7 @@ export default function SchoolOnboardingForm() {
             <div className="grid   gap-3">
               <div className="grid ">
                 <ImageInput
-                  title="Customize your School Logo"
+                  title="Customize your School Logo (500px X 150px)"
                   imageUrl={imageUrl}
                   setImageUrl={setImageUrl}
                   endpoint="schoolLogo"

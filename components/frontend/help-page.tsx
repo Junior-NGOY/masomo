@@ -28,69 +28,93 @@ import Link from "next/link";
 const articles = [
   {
     id: 1,
-    title: "Getting Started Guide",
-    description: "Learn the basics of our platform",
-    category: "Basics"
+    title: "Guide de Démarrage Rapide",
+    description: "Apprenez les bases de Masomo Pro en quelques étapes",
+    category: "Débuter"
   },
   {
     id: 2,
-    title: "Account Settings",
-    description: "Manage your account preferences",
-    category: "Account"
+    title: "Configuration de votre École",
+    description: "Comment configurer les classes, sections et années académiques",
+    category: "Configuration"
   },
   {
     id: 3,
-    title: "Billing & Payments",
-    description: "Understanding billing cycles and payment methods",
-    category: "Billing"
+    title: "Gestion des Frais Scolaires",
+    description: "Tout savoir sur la facturation et les paiements échelonnés",
+    category: "Finances"
+  },
+  {
+    id: 4,
+    title: "Portail Parents - Mode d'emploi",
+    description: "Guide complet pour les parents utilisant le portail",
+    category: "Parents"
+  },
+  {
+    id: 5,
+    title: "Gestion des Notes et Bulletins",
+    description: "Comment saisir les notes et générer les bulletins",
+    category: "Académique"
+  },
+  {
+    id: 6,
+    title: "Présences et Retards",
+    description: "Système de suivi des présences et notifications automatiques",
+    category: "Présences"
   }
-  // Add more articles as needed
 ];
 
 // Sample FAQ data
 const faqs = [
   {
-    question: "What is SCHOOLPRO?",
+    question: "Qu'est-ce que Masomo Pro ?",
     answer:
-      "SCHOOLPRO is a comprehensive school management system designed to streamline administrative tasks, enhance communication between teachers, students, and parents, and improve overall educational processes."
+      "Masomo Pro est un système de gestion scolaire complet conçu pour les écoles africaines, particulièrement adaptée au système éducatif de la RDC. Il permet de gérer plusieurs écoles, les finances, les élèves, les enseignants et les parents dans une seule plateforme."
   },
   {
-    question: "What features does SCHOOLPRO offer?",
+    question: "Quelles sont les principales fonctionnalités de Masomo Pro ?",
     answer:
-      "SCHOOLPRO offers a wide range of features including student information management, attendance tracking, grade management, timetable scheduling, online assignments and quizzes, parent-teacher communication tools, and financial management modules."
+      "Masomo Pro offre la gestion multi-écoles, la gestion financière (frais scolaires, paiements échelonnés), les portails pour directeurs, enseignants, élèves et parents, la génération automatique de sites web d'école, le suivi des présences, la gestion académique et bien plus."
   },
   {
-    question:
-      "Is SCHOOLPRO suitable for all types of educational institutions?",
+    question: "Le système prend-il en charge le système éducatif congolais ?",
     answer:
-      "Yes, SCHOOLPRO is designed to be flexible and can be customized to suit various types of educational institutions, including primary schools, high schools, colleges, and universities."
+      "Oui, Masomo Pro est spécialement conçu pour le système éducatif de la RDC avec support pour Maternelle, Primaire (1ère-6ème), Secondaire (1ère-6ème) et toutes les sections : Scientifique, Pédagogie, Technique, Commerciale et Littéraire."
   },
   {
-    question: "How secure is the data stored in SCHOOLPRO?",
+    question: "Comment fonctionne la gestion multi-écoles ?",
     answer:
-      "SCHOOLPRO takes data security very seriously. We use industry-standard encryption protocols, regular backups, and strict access controls to ensure that all sensitive information is protected."
+      "Avec un seul compte Masomo Pro, vous pouvez gérer plusieurs établissements scolaires. Chaque école a son propre espace avec ses données séparées, mais vous gardez une vue d'ensemble et des rapports consolidés."
   },
   {
-    question:
-      "Can parents access information about their child's progress through SCHOOLPRO?",
+    question: "Les parents peuvent-ils suivre les progrès de leurs enfants ?",
     answer:
-      "SCHOOLPRO includes a parent portal where parents can log in to view their child's attendance, grades, assignments, and communicate with teachers."
+      "Absolument ! Le portail parent permet aux parents de voir les notes, l'assiduité, les devoirs de leurs enfants, de payer les frais scolaires en ligne et de communiquer avec les enseignants."
   },
   {
-    question: "Is technical support available for SCHOOLPRO users?",
+    question: "Comment fonctionne la gestion financière ?",
     answer:
-      "Yes, we offer comprehensive technical support for all SCHOOLPRO users. This includes a dedicated help desk, user manuals, video tutorials, and regular system updates."
+      "Masomo Pro gère tous les types de frais (inscription, minerval, fournitures, documents). Il permet les paiements échelonnés, génère des reçus automatiques et offre des rapports financiers détaillés pour un suivi optimal."
   },
   {
-    question:
-      "Can SCHOOLPRO integrate with other educational tools and software?",
+    question: "Le système génère-t-il automatiquement des sites web pour les écoles ?",
     answer:
-      "Yes, SCHOOLPRO is designed with integration capabilities. It can be integrated with various third-party educational tools, learning management systems, and other software commonly used in educational settings."
+      "Oui ! Chaque école inscrite reçoit automatiquement son propre site web personnalisable avec les informations de l'école, les actualités, les événements et la possibilité pour les parents de s'inscrire."
   },
   {
-    question: "Is SCHOOLPRO accessible on mobile devices?",
+    question: "Masomo Pro est-il accessible sur mobile ?",
     answer:
-      "Yes, SCHOOLPRO is fully responsive and can be accessed on various devices including desktops, laptops, tablets, and smartphones, ensuring that users can access the system anytime, anywhere."
+      "Oui, Masomo Pro est entièrement responsive et fonctionne parfaitement sur ordinateurs, tablettes et smartphones. Une application mobile dédiée est en développement."
+  },
+  {
+    question: "Quel support technique est disponible ?",
+    answer:
+      "Nous offrons un support complet : documentation détaillée, tutoriels vidéo, support par email, chat en direct et assistance téléphonique pour tous nos utilisateurs."
+  },
+  {
+    question: "Comment commencer avec Masomo Pro ?",
+    answer:
+      "C'est simple ! Créez votre compte gratuit, ajoutez votre première école, configurez les classes et sections, et commencez à inscrire vos élèves. Notre équipe vous accompagne dans la mise en place."
   }
 ];
 

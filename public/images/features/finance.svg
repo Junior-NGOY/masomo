@@ -1,0 +1,105 @@
+<svg viewBox="0 0 800 600" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="800" height="600" fill="#ecfdf5"/>
+  
+  <!-- Computer Screen -->
+  <rect x="50" y="80" width="700" height="440" rx="20" fill="#1f2937"/>
+  <rect x="70" y="100" width="660" height="380" rx="10" fill="#ffffff"/>
+  
+  <!-- Header -->
+  <rect x="70" y="100" width="660" height="60" fill="#059669"/>
+  <text x="90" y="130" fill="white" font-family="Arial, sans-serif" font-size="18" font-weight="bold">Gestion Financière - Paiements</text>
+  
+  <!-- Stats Cards -->
+  <g>
+    <!-- Card 1 -->
+    <rect x="90" y="180" width="150" height="80" rx="8" fill="#dcfce7" stroke="#16a34a"/>
+    <text x="110" y="200" fill="#15803d" font-family="Arial, sans-serif" font-size="12" font-weight="bold">ENCAISSEMENTS</text>
+    <text x="110" y="220" fill="#15803d" font-family="Arial, sans-serif" font-size="24" font-weight="bold">$45,280</text>
+    <text x="110" y="240" fill="#15803d" font-family="Arial, sans-serif" font-size="11">Ce mois</text>
+    <text x="110" y="252" fill="#15803d" font-family="Arial, sans-serif" font-size="11">↗ +12%</text>
+    
+    <!-- Card 2 -->
+    <rect x="260" y="180" width="150" height="80" rx="8" fill="#fef3c7" stroke="#f59e0b"/>
+    <text x="280" y="200" fill="#d97706" font-family="Arial, sans-serif" font-size="12" font-weight="bold">EN ATTENTE</text>
+    <text x="280" y="220" fill="#d97706" font-family="Arial, sans-serif" font-size="24" font-weight="bold">$8,450</text>
+    <text x="280" y="240" fill="#d97706" font-family="Arial, sans-serif" font-size="11">23 factures</text>
+    <text x="280" y="252" fill="#d97706" font-family="Arial, sans-serif" font-size="11">↑ 5 nouvelles</text>
+    
+    <!-- Card 3 -->
+    <rect x="430" y="180" width="150" height="80" rx="8" fill="#fee2e2" stroke="#ef4444"/>
+    <text x="450" y="200" fill="#dc2626" font-family="Arial, sans-serif" font-size="12" font-weight="bold">IMPAYÉS</text>
+    <text x="450" y="220" fill="#dc2626" font-family="Arial, sans-serif" font-size="24" font-weight="bold">$3,120</text>
+    <text x="450" y="240" fill="#dc2626" font-family="Arial, sans-serif" font-size="11">8 factures</text>
+    <text x="450" y="252" fill="#dc2626" font-family="Arial, sans-serif" font-size="11">↓ -2 résolus</text>
+    
+    <!-- Card 4 -->
+    <rect x="600" y="180" width="150" height="80" rx="8" fill="#e0e7ff" stroke="#6366f1"/>
+    <text x="620" y="200" fill="#4338ca" font-family="Arial, sans-serif" font-size="12" font-weight="bold">TOTAL ÉLÈVES</text>
+    <text x="620" y="220" fill="#4338ca" font-family="Arial, sans-serif" font-size="24" font-weight="bold">1,245</text>
+    <text x="620" y="240" fill="#4338ca" font-family="Arial, sans-serif" font-size="11">Inscrits</text>
+    <text x="620" y="252" fill="#4338ca" font-family="Arial, sans-serif" font-size="11">98% payés</text>
+  </g>
+  
+  <!-- Payment Methods -->
+  <rect x="90" y="280" width="300" height="120" fill="#f8fafc" stroke="#e2e8f0"/>
+  <text x="110" y="300" fill="#1f2937" font-family="Arial, sans-serif" font-size="14" font-weight="bold">Méthodes de Paiement</text>
+  
+  <!-- Payment Icons -->
+  <g>
+    <!-- Mobile Money -->
+    <rect x="110" y="310" width="80" height="25" rx="12" fill="#f59e0b"/>
+    <text x="135" y="325" fill="white" font-family="Arial, sans-serif" font-size="10" font-weight="bold">M-PESA</text>
+    <text x="110" y="345" fill="#374151" font-family="Arial, sans-serif" font-size="11">65% des paiements</text>
+    
+    <!-- Orange Money -->
+    <rect x="200" y="310" width="80" height="25" rx="12" fill="#ff6b35"/>
+    <text x="215" y="325" fill="white" font-family="Arial, sans-serif" font-size="10" font-weight="bold">Orange Money</text>
+    <text x="200" y="345" fill="#374151" font-family="Arial, sans-serif" font-size="11">20% des paiements</text>
+    
+    <!-- Cash -->
+    <rect x="290" y="310" width="80" height="25" rx="12" fill="#6b7280"/>
+    <text x="315" y="325" fill="white" font-family="Arial, sans-serif" font-size="10" font-weight="bold">Espèces</text>
+    <text x="290" y="345" fill="#374151" font-family="Arial, sans-serif" font-size="11">15% des paiements</text>
+  </g>
+  
+  <!-- Recent Transactions -->
+  <rect x="410" y="280" width="340" height="120" fill="#ffffff" stroke="#e2e8f0"/>
+  <text x="430" y="300" fill="#1f2937" font-family="Arial, sans-serif" font-size="14" font-weight="bold">Transactions Récentes</text>
+  
+  <!-- Transaction List -->
+  <g>
+    <!-- Transaction 1 -->
+    <rect x="420" y="310" width="320" height="20" fill="#f0f9ff"/>
+    <circle cx="430" cy="320" r="6" fill="#10b981"/>
+    <text x="445" y="323" fill="#374151" font-family="Arial, sans-serif" font-size="11">Jean Mukendi - Frais Trimestriel</text>
+    <text x="700" y="323" fill="#10b981" font-family="Arial, sans-serif" font-size="11" font-weight="bold">+$120</text>
+    
+    <!-- Transaction 2 -->
+    <rect x="420" y="335" width="320" height="20" fill="#ffffff"/>
+    <circle cx="430" cy="345" r="6" fill="#10b981"/>
+    <text x="445" y="348" fill="#374151" font-family="Arial, sans-serif" font-size="11">Marie Kasongo - Frais Examen</text>
+    <text x="700" y="348" fill="#10b981" font-family="Arial, sans-serif" font-size="11" font-weight="bold">+$45</text>
+    
+    <!-- Transaction 3 -->
+    <rect x="420" y="360" width="320" height="20" fill="#f0f9ff"/>
+    <circle cx="430" cy="370" r="6" fill="#f59e0b"/>
+    <text x="445" y="373" fill="#374151" font-family="Arial, sans-serif" font-size="11">Paul Lumumba - En attente</text>
+    <text x="700" y="373" fill="#f59e0b" font-family="Arial, sans-serif" font-size="11" font-weight="bold">$85</text>
+  </g>
+  
+  <!-- Actions -->
+  <rect x="90" y="420" width="640" height="40" fill="#f8fafc" stroke="#e2e8f0"/>
+  <rect x="110" y="430" width="100" height="20" rx="10" fill="#3b82f6"/>
+  <text x="145" y="442" fill="white" font-family="Arial, sans-serif" font-size="11">Nouvelle Facture</text>
+  
+  <rect x="220" y="430" width="100" height="20" rx="10" fill="#10b981"/>
+  <text x="255" y="442" fill="white" font-family="Arial, sans-serif" font-size="11">Rapport Mensuel</text>
+  
+  <rect x="330" y="430" width="100" height="20" rx="10" fill="#f59e0b"/>
+  <text x="365" y="442" fill="white" font-family="Arial, sans-serif" font-size="11">Relance Auto</text>
+  
+  <!-- Footer -->
+  <rect x="50" y="520" width="700" height="50" fill="#374151"/>
+  <text x="400" y="548" fill="white" font-family="Arial, sans-serif" font-size="14" text-anchor="middle">Paiements sécurisés - Masomo Pro Finance</text>
+</svg>

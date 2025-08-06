@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
-import { User } from "@/types/types";
+import { User, UserRole } from "@/types/types";
 import { logout } from "@/actions/auth";
 
 //session data type
@@ -24,7 +24,19 @@ interface UserStore {
 export const useUserSession = create<UserSessionStore>()(
   persist(
     (set) => ({
-      user: null,
+      // Données par défaut pour le mode démo
+      user: {
+        id: "user_demo_123",
+        name: "Administrateur Demo",
+        email: "demo@masomo.com",
+        role: UserRole.ADMIN,
+        schoolId: "school_demo_123",
+        schoolName: "École Demo",
+        image: "/avatars/shadcn.jpg",
+        phone: "+243 999 999 999",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      } as User,
       //Method to set user session via server action
       setUser: async (userData) => {
         try {
@@ -37,14 +49,23 @@ export const useUserSession = create<UserSessionStore>()(
       //Method to clear session via sever action
       clearSession: async () => {
         try {
-          // call logout server action
-          const result = await logout();
-          if (result.success) {
-            // reset user in local storage
-            set({ user: null });
-          } else {
-            throw new Error("logout failed");
-          }
+          // Mode démo - pas d'appel API pour logout
+          console.log("Déconnexion en mode démo");
+          // reset user avec les données démo par défaut
+          set({ 
+            user: {
+              id: "user_demo_123",
+              name: "Administrateur Demo",
+              email: "demo@masomo.com",
+              role: UserRole.ADMIN,
+              schoolId: "school_demo_123",
+              schoolName: "École Demo",
+              image: "/avatars/shadcn.jpg",
+              phone: "+243 999 999 999",
+              createdAt: new Date().toISOString(),
+              updatedAt: new Date().toISOString()
+            } as User 
+          });
         } catch (error) {
           console.log("Logout error:", error);
           //optionally handle error (e.g,  show notification)

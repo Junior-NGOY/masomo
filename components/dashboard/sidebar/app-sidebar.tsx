@@ -67,7 +67,13 @@ import {
   Trash2,
   User,
   UserCog,
-  Users
+  Users,
+  CalendarDays,
+  FileText,
+  Bus,
+  BarChart2,
+  Shield,
+  ClipboardList
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Logo from "@/components/logo";
@@ -125,6 +131,14 @@ const sidebarLinks = {
         {
           title: "Attendance",
           url: "/dashboard/students/attendance"
+        },
+        {
+          title: "Student Grades",
+          url: "/dashboard/students/grades"
+        },
+        {
+          title: "Student Schedule",
+          url: "/dashboard/students/schedule"
         }
       ]
     },
@@ -150,8 +164,20 @@ const sidebarLinks = {
           url: "/dashboard/academics/timetable"
         },
         {
+          title: "Student Grades",
+          url: "/demo/academic-system?tab=grades"
+        },
+        {
+          title: "Student Schedule",
+          url: "/demo/academic-system?tab=schedule"
+        },
+        {
+          title: "Academic Portal",
+          url: "/demo/academic-system"
+        },
+        {
           title: "Examinations",
-          url: "/dashboard/academics/examinations"
+          url: "/dashboard/examinations"
         },
         {
           title: "Assignments",
@@ -164,25 +190,102 @@ const sidebarLinks = {
       ]
     },
     {
+      title: "Attendance System",
+      url: "/dashboard/attendance",
+      icon: CalendarDays,
+      items: [
+        {
+          title: "Student Attendance",
+          url: "/dashboard/attendance/students"
+        },
+        {
+          title: "Staff Attendance", 
+          url: "/dashboard/attendance/staff"
+        },
+        {
+          title: "Biometric System",
+          url: "/dashboard/attendance/biometric"
+        },
+        {
+          title: "Attendance Reports",
+          url: "/dashboard/attendance/reports"
+        },
+        {
+          title: "Late Arrivals",
+          url: "/dashboard/attendance/late"
+        },
+        {
+          title: "Absence Management",
+          url: "/dashboard/attendance/absences"
+        }
+      ]
+    },
+    {
+      title: "Financial Management",
+      url: "/dashboard/finance",
+      icon: DollarSign,
+      items: [
+        {
+          title: "Fee Management",
+          url: "/dashboard/finance"
+        },
+        {
+          title: "Payment Records",
+          url: "/dashboard/finance/payments"
+        },
+        {
+          title: "Financial Reports",
+          url: "/dashboard/finance/reports"
+        },
+        {
+          title: "Outstanding Fees",
+          url: "/dashboard/finance/outstanding"
+        }
+      ]
+    },
+    {
+      title: "Transport Management",
+      url: "/dashboard/transport",
+      icon: Bus,
+      items: [
+        {
+          title: "Routes & Vehicles",
+          url: "/dashboard/transport"
+        },
+        {
+          title: "Live Tracking",
+          url: "/dashboard/transport/tracking"
+        },
+        {
+          title: "Driver Management",
+          url: "/dashboard/transport/drivers"
+        },
+        {
+          title: "Maintenance",
+          url: "/dashboard/transport/maintenance"
+        }
+      ]
+    },
+    {
       title: "Staff Management",
-      url: "#",
+      url: "/dashboard/staff",
       icon: UserCog,
       items: [
         {
-          title: "General",
-          url: "#"
+          title: "Staff Directory",
+          url: "/dashboard/staff"
         },
         {
-          title: "Team",
-          url: "#"
+          title: "Performance Review",
+          url: "/dashboard/staff/performance"
         },
         {
-          title: "Billing",
-          url: "#"
+          title: "Payroll",
+          url: "/dashboard/staff/payroll"
         },
         {
-          title: "Limits",
-          url: "#"
+          title: "Leave Management",
+          url: "/dashboard/staff/leave"
         }
       ]
     },
@@ -206,72 +309,117 @@ const sidebarLinks = {
       ]
     },
     {
-      title: "Communication",
-      url: "/",
+      title: "Communication Hub",
+      url: "/dashboard/communication",
       icon: MessagesSquare,
       items: [
         {
-          title: "General",
-          url: "/communication/"
+          title: "Announcements",
+          url: "/dashboard/announcements"
         },
         {
-          title: "Team",
-          url: "/communication/"
+          title: "Notice Board",
+          url: "/dashboard/announcements/board"
         },
         {
-          title: "Billing",
-          url: "/communication/"
+          title: "Messages",
+          url: "/dashboard/communication/messages"
         },
         {
-          title: "Limits",
-          url: "#"
+          title: "Notifications",
+          url: "/dashboard/communication/notifications"
         }
       ]
     },
     {
       title: "Finance",
-      url: "#",
+      url: "/dashboard/finance",
       icon: DollarSign,
       items: [
         {
-          title: "General",
-          url: "/finance/"
+          title: "Overview",
+          url: "/dashboard/finance"
         },
         {
-          title: "Team",
-          url: "/finance/"
+          title: "Student Fees",
+          url: "/dashboard/finance/fees"
         },
         {
-          title: "Billing",
-          url: "/finance/"
+          title: "Invoicing",
+          url: "/dashboard/finance/invoices"
         },
         {
-          title: "Limits",
-          url: "/finance/"
+          title: "Reports",
+          url: "/dashboard/finance/reports"
         }
       ]
     },
-
     {
-      title: "Ressources",
-      url: "#",
-      icon: Settings2,
+      title: "Analytics & Reports",
+      url: "/dashboard/analytics",
+      icon: BarChart2,
       items: [
         {
-          title: "General",
-          url: "#"
+          title: "Performance Analytics",
+          url: "/dashboard/analytics"
         },
         {
-          title: "Team",
-          url: "#"
+          title: "Academic Reports",
+          url: "/dashboard/analytics/academic"
         },
         {
-          title: "Billing",
-          url: "#"
+          title: "Financial Reports",
+          url: "/dashboard/analytics/financial"
         },
         {
-          title: "Limits",
-          url: "#"
+          title: "Custom Reports",
+          url: "/dashboard/analytics/custom"
+        }
+      ]
+    },
+    {
+      title: "Resource Management",
+      url: "/dashboard/resources",
+      icon: BookOpen,
+      items: [
+        {
+          title: "Library",
+          url: "/dashboard/resources"
+        },
+        {
+          title: "Inventory",
+          url: "/dashboard/resources/inventory"
+        },
+        {
+          title: "Facility Booking",
+          url: "/dashboard/resources/facilities"
+        },
+        {
+          title: "Equipment",
+          url: "/dashboard/resources/equipment"
+        }
+      ]
+    },
+    {
+      title: "Security & Access",
+      url: "/dashboard/security",
+      icon: Shield,
+      items: [
+        {
+          title: "User Roles",
+          url: "/dashboard/security/roles"
+        },
+        {
+          title: "Access Control",
+          url: "/dashboard/security/access"
+        },
+        {
+          title: "Audit Logs",
+          url: "/dashboard/security/logs"
+        },
+        {
+          title: "Data Backup",
+          url: "/dashboard/security/backup"
         }
       ]
     },

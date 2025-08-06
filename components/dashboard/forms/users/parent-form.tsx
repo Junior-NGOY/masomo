@@ -82,16 +82,15 @@ export default function ParentForm({
     }
   ];
   const [selectedRelationship, setSelectedRelationship] = useState<any>(null);
-
   //Genders
   const genders = [
     {
       label: "Female",
-      value: "Femal"
+      value: "FEMALE"
     },
     {
       label: "Male",
-      value: "Male"
+      value: "MALE"
     }
   ];
   const [selectedGender, setSelectedGender] = useState<any>(genders[0]);

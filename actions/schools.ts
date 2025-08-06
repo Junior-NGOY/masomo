@@ -3,6 +3,7 @@ import axios from "axios";
 import { SchoolProps } from "@/components/dashboard/forms/school/school-onboarding-form";
 import { revalidatePath } from "next/cache";
 import { School } from "@/types/types";
+import { Slash } from "lucide-react";
 
 const BASE_API_URL = process.env.API_URL || "";
 export const api = axios.create({
@@ -16,7 +17,7 @@ export async function createSchool(data: SchoolProps) {
     //send the data to the api
     const response = await api.post("/schools", data);
     revalidatePath("/dashboard/admin/schools");
-    return response.data as School;
+    return response.data.data as School;
   } catch (error: any) {
     if (axios.isAxiosError(Error)) {
       //type-safe error
@@ -26,5 +27,32 @@ export async function createSchool(data: SchoolProps) {
     }
     throw error;
     console.log(error);
+  }
+}
+
+export async function getSchoolById(id: string | null | undefined) {
+  if (id) {
+    try {
+      //send the data to the api
+      const response = await api.get(`/schools/${id}`);
+      const school = response.data.data;
+      return school as School;
+    } catch (error: any) {
+      if (axios.isAxiosError(Error)) {
+        //type-safe error
+        const message = error.response?.data?.message || "Failed to get school";
+        throw new Error(message);
+      }
+      throw error;
+      console.log(error);
+    }
+  } else {
+    const school = {
+      id: null,
+      name: null,
+      logo: null,
+      Slug: null
+    };
+    return school;
   }
 }

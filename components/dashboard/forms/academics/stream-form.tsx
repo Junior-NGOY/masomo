@@ -20,6 +20,7 @@ import {
 import { StreamCreateProps } from "@/types/types";
 import { Stream } from "stream";
 import { createStream } from "@/actions/classes";
+import useSchoolStore from "@/store/school";
 export type ClassProps = {
   name: string;
 };
@@ -45,9 +46,10 @@ export default function StreamForm({
   });
 
   const [loading, setLoading] = useState(false);
-
+  const { school } = useSchoolStore();
   async function saveStream(data: StreamCreateProps) {
     data.classId = classId;
+    data.schoolId = school?.id ?? "";
     try {
       setLoading(true);
       if (editingId) {

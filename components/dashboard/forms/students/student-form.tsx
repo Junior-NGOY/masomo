@@ -16,6 +16,7 @@ import toast from "react-hot-toast";
 import RadioInput from "@/components/FormInputs/RadioInput";
 import { generateRegistrationNumber } from "@/lib/generateRegNo";
 import { generateRollNumber } from "@/lib/generateRoll";
+import useSchoolStore from "@/store/school";
 
 export type SelectOptionProps = {
   label: string;
@@ -53,6 +54,10 @@ export type StudentProps = {
   regNo: string;
   admissionDate: string;
   address: string;
+  schoolId: string;
+  schoolName: string;
+  // Ajout pour cohérence avec le backend
+  userId?: string;
 };
 export default function SingleStudentForm({
   parents,
@@ -83,16 +88,15 @@ export default function SingleStudentForm({
   const streamsOptions = streams.map((item) => {
     return { label: item.title, value: item.id };
   });
-  const [selectedStream, setSelectedStream] = useState<any>(streams[0]);
-  //Genders
+  const [selectedStream, setSelectedStream] = useState<any>(streams[0]);  //Genders
   const genders = [
     {
       label: "Female",
-      value: "Femal"
+      value: "FEMALE"
     },
     {
       label: "Male",
-      value: "Male"
+      value: "MALE"
     }
   ];
   const [selectedGender, setSelectedGender] = useState<any>(null);
@@ -153,10 +157,12 @@ export default function SingleStudentForm({
   const [loading, setLoading] = useState(false);
   const initialImage = initialData?.imageUrl || "/images/student.png";
   const [imageUrl, setImageUrl] = useState(initialImage);
-
+  const { school } = useSchoolStore();
   async function saveStudent(data: StudentProps) {
     try {
       setLoading(true);
+      data.schoolId = school?.id ?? "";
+      data.schoolName = school?.name ?? "";
       data.imageUrl = imageUrl;
       data.parentId = selectedParent.value;
       data.parentName = selectedParent.label;

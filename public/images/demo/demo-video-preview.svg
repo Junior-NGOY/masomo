@@ -1,0 +1,70 @@
+<svg width="400" height="225" viewBox="0 0 400 225" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .fade-in { 
+        animation: fadeIn 2s ease-in-out infinite alternate;
+      }
+      @keyframes fadeIn {
+        0% { opacity: 0.3; }
+        100% { opacity: 1; }
+      }
+      .slide-up {
+        animation: slideUp 3s ease-in-out infinite;
+      }
+      @keyframes slideUp {
+        0% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+        100% { transform: translateY(0); }
+      }
+    </style>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="400" height="225" fill="#f8fafc"/>
+  
+  <!-- Header -->
+  <rect width="400" height="50" fill="#3b82f6"/>
+  <text x="20" y="32" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="white">Masomo Pro - Démonstration Live</text>
+  
+  <!-- Navigation -->
+  <rect x="0" y="50" width="80" height="175" fill="#f1f5f9"/>
+  <rect x="10" y="65" width="60" height="6" fill="#cbd5e1" rx="3" class="fade-in"/>
+  <rect x="10" y="80" width="50" height="6" fill="#cbd5e1" rx="3"/>
+  <rect x="10" y="95" width="55" height="6" fill="#3b82f6" rx="3" class="fade-in"/>
+  <rect x="10" y="110" width="45" height="6" fill="#cbd5e1" rx="3"/>
+  
+  <!-- Main content with animation -->
+  <rect x="100" y="70" width="280" height="140" fill="white" stroke="#e2e8f0" stroke-width="1" class="slide-up"/>
+  
+  <!-- Animated student cards -->
+  <g class="fade-in">
+    <rect x="120" y="90" width="240" height="25" fill="#f8fafc" stroke="#e5e7eb" stroke-width="0.5"/>
+    <circle cx="135" cy="102" r="8" fill="#dbeafe"/>
+    <text x="131" y="106" font-family="Arial, sans-serif" font-size="8" font-weight="bold" fill="#1e40af">JK</text>
+    <text x="155" y="106" font-family="Arial, sans-serif" font-size="11" fill="#111827">Jean Kabila - 6ème A</text>
+    <rect x="320" y="97" width="30" height="10" fill="#dcfce7" rx="5"/>
+    <text x="325" y="104" font-family="Arial, sans-serif" font-size="8" fill="#166534">Actif</text>
+  </g>
+  
+  <g class="slide-up">
+    <rect x="120" y="120" width="240" height="25" fill="#f9fafb" stroke="#e5e7eb" stroke-width="0.5"/>
+    <circle cx="135" cy="132" r="8" fill="#fecaca"/>
+    <text x="131" y="136" font-family="Arial, sans-serif" font-size="8" font-weight="bold" fill="#dc2626">MN</text>
+    <text x="155" y="136" font-family="Arial, sans-serif" font-size="11" fill="#111827">Marie Ngoy - 3ème S</text>
+    <rect x="320" y="127" width="30" height="10" fill="#dcfce7" rx="5"/>
+    <text x="325" y="134" font-family="Arial, sans-serif" font-size="8" fill="#166534">Actif</text>
+  </g>
+  
+  <!-- Progress indicator -->
+  <rect x="120" y="180" width="240" height="4" fill="#e5e7eb" rx="2"/>
+  <rect x="120" y="180" width="120" height="4" fill="#3b82f6" rx="2" class="fade-in"/>
+  
+  <!-- Play indicator -->
+  <circle cx="50" cy="200" r="12" fill="#3b82f6" class="fade-in"/>
+  <polygon points="46,195 46,205 54,200" fill="white"/>
+  
+  <!-- Loading dots -->
+  <circle cx="360" cy="200" r="2" fill="#3b82f6" class="fade-in"/>
+  <circle cx="370" cy="200" r="2" fill="#3b82f6" class="slide-up"/>
+  <circle cx="380" cy="200" r="2" fill="#3b82f6" class="fade-in"/>
+</svg>

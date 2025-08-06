@@ -10,10 +10,11 @@ export default async function DashboardLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const user = await getServerUser();
+  // Désactivé pour le mode démo - pas de vérification d'authentification
+  /* const user = await getServerUser();
   if (!user) {
     redirect("/login");
-  }
+  } */
   return (
     <div>
       <SidebarProvider>

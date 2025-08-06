@@ -4,9 +4,10 @@ import { redirect } from "next/navigation";
 import React from "react";
 
 export default async function page() {
-  const user = await getServerUser();
+  // Désactivé pour le mode démo - pas de vérification d'authentification
+  /* const user = await getServerUser();
   if (user) {
     redirect("/dashboard");
-  }
+  } */
   return <Login />;
 }
