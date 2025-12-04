@@ -20,6 +20,7 @@ type TextInputProps = {
   placeholder?: string;
   forgotPasswordLink?: string;
   icon?: any;
+  disableValidation?: boolean;
 };
 export default function PasswordInput({
   register,
@@ -31,6 +32,7 @@ export default function PasswordInput({
   icon,
   placeholder,
   forgotPasswordLink,
+  disableValidation = false,
 }: TextInputProps) {
   const Icon = icon;
   const [passType, setPassType] = useState(type);
@@ -82,17 +84,17 @@ export default function PasswordInput({
             type={passType}
             {...register(name, {
               required: true,
-              minLength: {
-                value: 8,
-                message: "Password must be at least 8 characters",
-              },
-              pattern: {
-                value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/,
-                message:
-                  "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
-              },
-              // setValueAs: (value: string) =>
-              //   value === "" ? generatedPassword : value,
+              ...(!disableValidation && {
+                minLength: {
+                  value: 8,
+                  message: "Password must be at least 8 characters",
+                },
+                pattern: {
+                  value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])/,
+                  message:
+                    "Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character",
+                },
+              }),
             })}
             className={cn(
               "block w-full rounded-md border-0 py-2 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6 text-sm",

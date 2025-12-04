@@ -17,7 +17,6 @@ import {
   Settings,
   Navigation
 } from "lucide-react";
-import { MockDataService } from "@/services/mockServices";
 import StatsCard from "@/components/dashboard/StatsCard";
 import {
   Table,
@@ -34,21 +33,27 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
+import { useTransportRoutes, useTransportStats } from "@/hooks/useTransport";
 
 export default function TransportPage() {
-  // TODO: Remplacer par les vrais appels API une fois le backend terminé
-  const transportRoutes = MockDataService.transport.getTransportRoutes();
-  const transportStats = MockDataService.transport.getTransportStats();
+  const { routes, loading: routesLoading } = useTransportRoutes();
+  const { stats, loading: statsLoading } = useTransportStats();
   
   const [searchQuery, setSearchQuery] = React.useState("");
   const [statusFilter, setStatusFilter] = React.useState("all");
 
+  if (routesLoading || statsLoading) {
+    return <div className="p-6">Chargement...</div>;
+  }
+
   // Filtrer les routes
-  const filteredRoutes = transportRoutes.filter(route => {
-    const matchesSearch = route.routeName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         route.driverName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         route.vehicleNumber.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === "all" || route.status === statusFilter;
+  const filteredRoutes = routes.filter(route => {
+    const matchesSearch = route.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         (route.driver?.name || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         (route.vehicle?.registrationNo || '').toLowerCase().includes(searchQuery.toLowerCase());
+    // Note: The API route object might not have a status field directly, assuming active for now or checking vehicle status
+    const status = route.vehicle?.status || 'ACTIVE';
+    const matchesStatus = statusFilter === "all" || status === statusFilter;
     
     return matchesSearch && matchesStatus;
   });
@@ -79,11 +84,24 @@ export default function TransportPage() {
     }
   };
 
-  const getOccupancyColor = (current: number, capacity: number) => {
-    const percentage = (current / capacity) * 100;
-    if (percentage >= 90) return "text-red-600";
-    if (percentage >= 75) return "text-orange-600";
-    return "text-green-600";
+  // Helper to parse stops if they are JSON string
+  const getStops = (stops: string | any[]): string[] => {
+    if (Array.isArray(stops)) return stops;
+    try {
+      return JSON.parse(stops);
+    } catch {
+      return [stops];
+    }
+  };
+
+  // Helper to parse schedule
+  const getSchedule = (schedule: string | any): any => {
+    if (typeof schedule === 'object') return schedule;
+    try {
+      return JSON.parse(schedule);
+    } catch {
+      return { morning: '07:00', evening: '15:00' };
+    }
   };
 
   return (
@@ -112,30 +130,29 @@ export default function TransportPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatsCard
           title="Véhicules Total"
-          value={transportStats.totalVehicles}
+          value={stats?.totalVehicles.toString() || "0"}
           description="Flotte disponible"
           icon={Bus}
         />
         <StatsCard
           title="Routes Actives"
-          value={transportStats.activeRoutes}
-          description="En service aujourd'hui"
+          value={stats?.totalRoutes.toString() || "0"}
+          description="En service"
           icon={Route}
           className="border-green-200"
         />
         <StatsCard
-          title="Élèves Transportés"
-          value={MockDataService.dashboard.formatNumber(transportStats.studentsTransported)}
-          description="Quotidiennement"
+          title="Chauffeurs"
+          value={stats?.totalDrivers.toString() || "0"}
+          description="Total chauffeurs"
           icon={Users}
           className="border-blue-200"
         />
         <StatsCard
-          title="Taux d'Occupation"
-          value={`${transportStats.averageOccupancy}%`}
-          description="Moyenne de la flotte"
+          title="Véhicules Actifs"
+          value={stats?.activeVehicles.toString() || "0"}
+          description="Sur la route"
           icon={AlertTriangle}
-          trend={{ value: 5.1, isPositive: true }}
           className="border-purple-200"
         />
       </div>
@@ -163,55 +180,61 @@ export default function TransportPage() {
 
       {/* Routes actives avec état en temps réel */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {transportRoutes
-          .filter(route => route.status === "ACTIVE")
-          .map((route) => (
-          <Card key={route.id} className="border-l-4 border-l-green-500">
-            <CardHeader className="pb-3">
-              <div className="flex items-center justify-between">
-                <CardTitle className="text-base">{route.routeName}</CardTitle>
-                <Badge variant="outline" className="text-green-700 border-green-200">
-                  En service
-                </Badge>
-              </div>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="flex items-center gap-2 text-sm">
-                <Bus className="h-4 w-4 text-gray-500" />
-                <span>{route.vehicleNumber}</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <Users className="h-4 w-4 text-gray-500" />
-                <span className={getOccupancyColor(route.currentStudents, route.capacity)}>
-                  {route.currentStudents}/{route.capacity} élèves
-                </span>
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <Clock className="h-4 w-4 text-gray-500" />
-                <span>Durée: {route.estimatedTime}</span>
-              </div>
-              <div className="flex items-center gap-2 text-sm">
-                <MapPin className="h-4 w-4 text-gray-500" />
-                <span>Chauffeur: {route.driverName}</span>
-              </div>
-              <div className="pt-2">
-                <div className="text-xs text-gray-600 mb-1">Arrêts principaux:</div>
-                <div className="flex flex-wrap gap-1">
-                  {route.stops.slice(0, 3).map((stop, index) => (
-                    <Badge key={index} variant="secondary" className="text-xs">
-                      {stop}
+        {routes
+          .slice(0, 3) // Show only first 3 as "Active Routes" for now
+          .map((route) => {
+            const stops = getStops(route.stops);
+            const schedule = getSchedule(route.schedule);
+            const status = route.vehicle?.status || 'ACTIVE';
+            
+            return (
+              <Card key={route.id} className="border-l-4 border-l-green-500">
+                <CardHeader className="pb-3">
+                  <div className="flex items-center justify-between">
+                    <CardTitle className="text-base">{route.name}</CardTitle>
+                    <Badge variant="outline" className="text-green-700 border-green-200">
+                      {getStatusText(status)}
                     </Badge>
-                  ))}
-                  {route.stops.length > 3 && (
-                    <Badge variant="secondary" className="text-xs">
-                      +{route.stops.length - 3}
-                    </Badge>
-                  )}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  <div className="flex items-center gap-2 text-sm">
+                    <Bus className="h-4 w-4 text-gray-500" />
+                    <span>{route.vehicle?.registrationNo || 'N/A'}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Users className="h-4 w-4 text-gray-500" />
+                    <span>
+                      Capacité: {route.vehicle?.capacity || 0} places
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <Clock className="h-4 w-4 text-gray-500" />
+                    <span>Départ: {schedule.morning || '07:00'}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-sm">
+                    <MapPin className="h-4 w-4 text-gray-500" />
+                    <span>Chauffeur: {route.driver?.name || 'N/A'}</span>
+                  </div>
+                  <div className="pt-2">
+                    <div className="text-xs text-gray-600 mb-1">Arrêts principaux:</div>
+                    <div className="flex flex-wrap gap-1">
+                      {stops.slice(0, 3).map((stop, index) => (
+                        <Badge key={index} variant="secondary" className="text-xs">
+                          {stop}
+                        </Badge>
+                      ))}
+                      {stops.length > 3 && (
+                        <Badge variant="secondary" className="text-xs">
+                          +{stops.length - 3}
+                        </Badge>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
       </div>
 
       {/* Liste complète des routes */}
@@ -257,46 +280,47 @@ export default function TransportPage() {
                   <TableHead>Route</TableHead>
                   <TableHead>Véhicule</TableHead>
                   <TableHead>Chauffeur</TableHead>
-                  <TableHead>Occupation</TableHead>
-                  <TableHead>Durée</TableHead>
+                  <TableHead>Capacité</TableHead>
+                  <TableHead>Horaire</TableHead>
                   <TableHead>Statut</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredRoutes.map((route) => (
-                  <TableRow key={route.id}>
-                    <TableCell className="font-medium">
-                      <div>
-                        <div>{route.routeName}</div>
-                        <div className="text-xs text-gray-500">
-                          {route.stops.length} arrêts
+                {filteredRoutes.map((route) => {
+                  const stops = getStops(route.stops);
+                  const schedule = getSchedule(route.schedule);
+                  const status = route.vehicle?.status || 'ACTIVE';
+
+                  return (
+                    <TableRow key={route.id}>
+                      <TableCell className="font-medium">
+                        <div>
+                          <div>{route.name}</div>
+                          <div className="text-xs text-gray-500">
+                            {stops.length} arrêts
+                          </div>
                         </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>{route.vehicleNumber}</TableCell>
-                    <TableCell>{route.driverName}</TableCell>
-                    <TableCell>
-                      <div className={getOccupancyColor(route.currentStudents, route.capacity)}>
-                        {route.currentStudents}/{route.capacity}
-                      </div>
-                      <div className="text-xs text-gray-500">
-                        {Math.round((route.currentStudents / route.capacity) * 100)}%
-                      </div>
-                    </TableCell>
-                    <TableCell>{route.estimatedTime}</TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className={getStatusColor(route.status)}>
-                        {getStatusText(route.status)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="ghost" size="sm">
-                        Gérer
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                      </TableCell>
+                      <TableCell>{route.vehicle?.registrationNo || 'N/A'}</TableCell>
+                      <TableCell>{route.driver?.name || 'N/A'}</TableCell>
+                      <TableCell>
+                        {route.vehicle?.capacity || 0} places
+                      </TableCell>
+                      <TableCell>{schedule.morning || '07:00'} - {schedule.evening || '15:00'}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className={getStatusColor(status)}>
+                          {getStatusText(status)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button variant="ghost" size="sm">
+                          Gérer
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
               </TableBody>
             </Table>
           </div>

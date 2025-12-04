@@ -19,7 +19,7 @@ export const columns: ColumnDef<Teacher>[] = [
       return (
         <div className="flex items-center gap-1">
           <Image
-            src={teacher.imageUrl}
+            src={teacher.imageUrl || "/placeholder-avatar.png"}
             alt={teacher.firstName}
             width={512}
             height={512}

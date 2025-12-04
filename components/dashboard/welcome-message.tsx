@@ -1,4 +1,3 @@
-"use client";
 import type React from "react";
 import { User, Sparkles } from "lucide-react";
 

@@ -20,7 +20,7 @@ export default function Logo({
   const { school } = useSchoolStore();
   
   // Priorité : logoSrc prop > school logo > logo par défaut
-  const finalLogoSrc = logoSrc || school?.logo || "/images/logo.png";
+  const finalLogoSrc = logoSrc || school?.logo || "/images/logo.svg";
   const finalLogoAlt = logoAlt || school?.name || "MasomoPro";
   
   if (variant === "light") {

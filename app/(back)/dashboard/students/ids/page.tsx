@@ -2,12 +2,15 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { StudentMockDataService, StudentID } from "@/services/studentMockDataService";
+import { useStudentIDCards, StudentIDCard as StudentIDCardType } from "@/hooks/useStudentIDCards";
+import { useStudentStats } from "@/hooks/useStudents";
+import { Skeleton } from "@/components/ui/skeleton";
 import StudentIDCard from "@/components/StudentIDCard";
 import PrintStudentCards from "@/components/PrintStudentCards";
 import QRCodeViewer from "@/components/QRCodeViewer";
@@ -35,13 +38,39 @@ export default function StudentIDsPage() {
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [classFilter, setClassFilter] = useState("ALL");
   const [showPrintModal, setShowPrintModal] = useState(false);
-  const [selectedCards, setSelectedCards] = useState<StudentID[]>([]);
+  const [selectedCards, setSelectedCards] = useState<StudentIDCardType[]>([]);
   const [showQRViewer, setShowQRViewer] = useState(false);
-  const [selectedStudent, setSelectedStudent] = useState<StudentID | null>(null);
+  const [selectedStudent, setSelectedStudent] = useState<StudentIDCardType | null>(null);
 
-  const studentIDs = StudentMockDataService.getStudentIDs();
-  const profiles = StudentMockDataService.getStudentProfiles();
-  const stats = StudentMockDataService.getStudentStats();
+  const { idCards: studentIDs, loading: idsLoading, error: idsError } = useStudentIDCards();
+  const { stats, loading: statsLoading, error: statsError } = useStudentStats();
+
+  const isLoading = idsLoading || statsLoading;
+
+  if (isLoading) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex justify-between items-center">
+          <Skeleton className="h-10 w-64" />
+          <Skeleton className="h-10 w-32" />
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-32 w-full" />
+          ))}
+        </div>
+        <Skeleton className="h-64 w-full" />
+      </div>
+    );
+  }
+
+  if (idsError || statsError || !stats) {
+    return (
+      <div className="p-6 flex items-center justify-center text-red-500">
+        Erreur lors du chargement des données.
+      </div>
+    );
+  }
 
   // Filtrage des données
   const filteredIDs = studentIDs.filter(id => {
@@ -122,17 +151,17 @@ export default function StudentIDsPage() {
     setShowPrintModal(true);
   };
 
-  const handlePrintSelected = (cards: StudentID[]) => {
+  const handlePrintSelected = (cards: StudentIDCardType[]) => {
     setSelectedCards(cards);
     setShowPrintModal(true);
   };
 
-  const handlePrintSingle = (card: StudentID) => {
+  const handlePrintSingle = (card: StudentIDCardType) => {
     setSelectedCards([card]);
     setShowPrintModal(true);
   };
 
-  const handleShowQRCode = (student: StudentID) => {
+  const handleShowQRCode = (student: StudentIDCardType) => {
     setSelectedStudent(student);
     setShowQRViewer(true);
   };
@@ -275,13 +304,10 @@ export default function StudentIDsPage() {
                     {filteredIDs.map((id) => (
                       <tr key={id.id} className="border-b hover:bg-gray-50">
                         <td className="py-3">
-                          <Image
-                            src={id.photoUrl}
-                            alt={id.studentName}
-                            width={40}
-                            height={40}
-                            className="w-10 h-10 rounded-full object-cover"
-                          />
+                          <Avatar className="w-10 h-10">
+                            <AvatarImage src={id.photoUrl} alt={id.studentName} className="object-cover" />
+                            <AvatarFallback>{id.studentName.substring(0, 2).toUpperCase()}</AvatarFallback>
+                          </Avatar>
                         </td>
                         <td className="py-3 font-medium">{id.studentName}</td>
                         <td className="py-3 text-gray-600">{id.className}</td>
@@ -406,13 +432,10 @@ export default function StudentIDsPage() {
                       .map((id) => (
                         <div key={id.id} className="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
                           <div className="flex items-center gap-3">
-                            <Image
-                              src={id.photoUrl}
-                              alt={id.studentName}
-                              width={40}
-                              height={40}
-                              className="w-10 h-10 rounded-full object-cover"
-                            />
+                            <Avatar className="w-10 h-10">
+                              <AvatarImage src={id.photoUrl} alt={id.studentName} className="object-cover" />
+                              <AvatarFallback>{id.studentName.substring(0, 2).toUpperCase()}</AvatarFallback>
+                            </Avatar>
                             <div>
                               <p className="font-medium text-orange-800">{id.studentName}</p>
                               <p className="text-sm text-orange-600">{id.className} - {id.idNumber}</p>
@@ -454,13 +477,10 @@ export default function StudentIDsPage() {
                       .map((id) => (
                         <div key={id.id} className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
                           <div className="flex items-center gap-3">
-                            <Image
-                              src={id.photoUrl}
-                              alt={id.studentName}
-                              width={40}
-                              height={40}
-                              className="w-10 h-10 rounded-full object-cover"
-                            />
+                            <Avatar className="w-10 h-10">
+                              <AvatarImage src={id.photoUrl} alt={id.studentName} className="object-cover" />
+                              <AvatarFallback>{id.studentName.substring(0, 2).toUpperCase()}</AvatarFallback>
+                            </Avatar>
                             <div>
                               <p className="font-medium text-red-800">{id.studentName}</p>
                               <p className="text-sm text-red-600">{id.className} - {id.idNumber}</p>

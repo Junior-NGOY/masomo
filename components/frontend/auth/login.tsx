@@ -1,4 +1,5 @@
 "use client";
+import toast from "react-hot-toast";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
 import { useState } from "react";
@@ -47,45 +48,33 @@ export default function Login() {
   async function onSubmit(data: LoginInputProps) {
     try {
       setIsLoading(true);
-      console.log("Connexion en mode démo avec:", data);
-      
-      // Pas de validation - accepter n'importe quelles données
-      // Simulation d'un délai d'API court
-      await new Promise(resolve => setTimeout(resolve, 800));
-      
-      // Données fictives d'utilisateur
-      const mockUserData = {
-        id: `user_${Date.now()}`,
-        email: data.email || "demo@masomo.com",
-        name: "Administrateur Demo",
-        role: UserRole.ADMIN,
-        schoolId: "school_demo_123",
-        schoolName: "École Demo",
-        phone: "+243 999 999 999",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      };
-      
-      // Données fictives d'école
-      const mockSchoolData = {
-        id: "school_demo_123",
-        name: "École Demo",
-        logo: "/images/logo.png"
-      };
-      
-      console.log("✅ Connexion réussie (mode démo)");
-      
-      // Sauvegarder dans Zustand (données fictives)
-      setUser(mockUserData as User);
-      setSchool(mockSchoolData as School);
-      
-      setIsLoading(false);
-      
-      // Redirection directe vers le dashboard (mode démo)
-      router.push("/dashboard");
+      const response = await loginUser(data);
+      if (response) {
+        // Mettre à jour le store Zustand avec les vraies données
+        await setUser(response.user);
+        
+        // Si l'utilisateur a une école, la charger aussi
+        if (response.user.schoolId) {
+          try {
+            const schoolData = await getSchoolById(response.user.schoolId);
+            if (schoolData) {
+              setSchool(schoolData);
+            }
+          } catch (err) {
+            console.error("Erreur lors du chargement de l'école:", err);
+          }
+        }
+        
+        toast.success("Connexion réussie!");
+        router.push("/dashboard");
+      } else {
+        setIsLoading(false);
+        toast.error("Échec de la connexion. Vérifiez vos identifiants.");
+      }
     } catch (error: any) {
       setIsLoading(false);
-      console.log("Erreur de connexion:", error);
+      console.error("Erreur de connexion:", error);
+      toast.error(error.message || "Une erreur est survenue lors de la connexion");
     }
   }
   return (
@@ -94,7 +83,7 @@ export default function Login() {
         {/* Logo repositionné */}
         <div className="absolute top-8 left-8 z-10">
           <Logo 
-            logoSrc="/images/logo.png" // Changez ce chemin vers votre logo
+            logoSrc="/images/logo.svg"
             logoAlt="Masomo Pro"
             size="sm"
           />
@@ -103,42 +92,43 @@ export default function Login() {
         <div className="mx-auto grid w-[350px] gap-6 mt-16 md:mt-8">
           <div className="grid gap-2 text-center">
             <h1 className="text-3xl font-bold">Connexion</h1>
-            <p className="text-gray-600">Mode Démo - Utilisez n'importe quelles données</p>
+            <p className="text-gray-600">Entrez vos identifiants pour accéder à votre compte</p>
           </div>
           <form className="grid gap-4" onSubmit={handleSubmit(onSubmit)}>
             <TextInput
-              label="Email Address (Demo - optionnel)"
+              label="Email Address"
               register={register}
               name="email"
               type="email"
               errors={errors}
-              placeholder="demo@masomo.com (ou laissez vide)"
+              placeholder="Ex: admin@masomo.pro"
               icon={Mail}
             />
 
             <PasswordInput
-              label="Password (Demo - optionnel)"
+              label="Password"
               register={register}
               name="password"
               type="password"
               errors={errors}
-              placeholder="motdepasse (ou laissez vide)"
+              placeholder="Votre mot de passe"
               forgotPasswordLink="/forgot-password"
               icon={Lock}
+              disableValidation={true}
             />
 
             <SubmitButton
               buttonIcon={LogIn}
-              title="Connexion Demo"
+              title="Se connecter"
               loading={isLoading}
               loadingTitle="Connexion en cours..."
             />
           </form>
           
-          <div className="text-center text-sm text-gray-500">
+          {/* <div className="text-center text-sm text-gray-500">
             <p>🎯 Mode Démo Actif</p>
             <p>Aucune validation requise - cliquez sur "Connexion Demo"</p>
-          </div>
+          </div> */}
         </div>
       </div>
       <div className="hidden bg-muted lg:block relative">

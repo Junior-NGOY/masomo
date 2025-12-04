@@ -24,19 +24,8 @@ interface UserStore {
 export const useUserSession = create<UserSessionStore>()(
   persist(
     (set) => ({
-      // Données par défaut pour le mode démo
-      user: {
-        id: "user_demo_123",
-        name: "Administrateur Demo",
-        email: "demo@masomo.com",
-        role: UserRole.ADMIN,
-        schoolId: "school_demo_123",
-        schoolName: "École Demo",
-        image: "/avatars/shadcn.jpg",
-        phone: "+243 999 999 999",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
-      } as User,
+      // Données par défaut vides
+      user: null,
       //Method to set user session via server action
       setUser: async (userData) => {
         try {

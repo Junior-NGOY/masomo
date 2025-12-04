@@ -1,5 +1,3 @@
-"use client";
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -33,7 +31,9 @@ export default function StatsCard({
         <Icon className="h-4 w-4 text-muted-foreground" />
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold text-gray-900">{value}</div>
+        <div className="text-2xl font-bold text-gray-900">
+          {typeof value === 'number' && isNaN(value) ? '0' : value}
+        </div>
         {description && (
           <p className="text-xs text-muted-foreground mt-1">
             {description}
@@ -47,7 +47,7 @@ export default function StatsCard({
                 trend.isPositive ? "text-green-600" : "text-red-600"
               )}
             >
-              {trend.isPositive ? "+" : ""}{trend.value}%
+              {trend.isPositive ? "+" : ""}{isNaN(trend.value) ? 0 : trend.value}%
             </span>
             <span className="text-xs text-muted-foreground ml-1">
               vs mois dernier

@@ -19,13 +19,10 @@ export const columns: ColumnDef<Student>[] = [
       const student = row.original;
       return (
         <div className="flex items-center gap-1">
-          <Image
-            src={student.imageUrl}
-            alt={student.firstName}
-            width={512}
-            height={512}
-            className="w-10 h-10 rounded-full"
-          />
+          <Avatar>
+            <AvatarImage src={student.imageUrl || ""} alt={student.firstName} />
+            <AvatarFallback>{student.firstName[0]}{student.lastName[0]}</AvatarFallback>
+          </Avatar>
           <div className="">
             <h2 className="font-medium capitalize">
               {student.firstName.toLowerCase()} {student.lastName.toLowerCase()}

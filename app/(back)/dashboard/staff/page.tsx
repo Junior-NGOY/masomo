@@ -18,7 +18,6 @@ import {
   Filter,
   Download
 } from "lucide-react";
-import { MockDataService } from "@/services/mockServices";
 import StatsCard from "@/components/dashboard/StatsCard";
 import {
   Table,
@@ -35,69 +34,47 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select";
+import { useTeachers } from "@/hooks/useTeachers";
 
 export default function StaffPage() {
-  // TODO: Remplacer par les vrais appels API une fois le backend terminé
-  const staffRecords = MockDataService.staff.getStaffRecords();
-  const staffStats = MockDataService.staff.getStaffStats();
+  const { teachers, loading } = useTeachers();
   
   const [searchQuery, setSearchQuery] = React.useState("");
   const [roleFilter, setRoleFilter] = React.useState("all");
   const [departmentFilter, setDepartmentFilter] = React.useState("all");
-  const [statusFilter, setStatusFilter] = React.useState("all");
+
+  if (loading) {
+    return <div className="p-6">Chargement...</div>;
+  }
+
+  // Calculate stats
+  const staffStats = {
+    totalStaff: teachers.length,
+    activeStaff: teachers.length, // All fetched teachers are active
+    onLeave: 0, // Would need separate API
+    teachingStaff: teachers.length,
+    administrativeStaff: 0 // Would need separate API
+  };
 
   // Filtrer les enregistrements du personnel
-  const filteredStaff = staffRecords.filter(staff => {
-    const matchesSearch = staff.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         staff.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         staff.department.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesRole = roleFilter === "all" || staff.role === roleFilter;
-    const matchesDepartment = departmentFilter === "all" || staff.department === departmentFilter;
-    const matchesStatus = statusFilter === "all" || staff.status === statusFilter;
+  const filteredStaff = teachers.filter(teacher => {
+    const fullName = `${teacher.firstName} ${teacher.lastName}`;
+    const matchesSearch = fullName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         teacher.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         (teacher.departmentName && teacher.departmentName.toLowerCase().includes(searchQuery.toLowerCase()));
+    const matchesDepartment = departmentFilter === "all" || teacher.departmentId === departmentFilter;
     
-    return matchesSearch && matchesRole && matchesDepartment && matchesStatus;
+    return matchesSearch && matchesDepartment;
   });
 
-  // Obtenir les rôles et départements uniques pour les filtres
-  const uniqueRoles = Array.from(new Set(staffRecords.map(staff => staff.role)));
-  const uniqueDepartments = Array.from(new Set(staffRecords.map(staff => staff.department)));
+  // Obtenir les départements uniques pour les filtres
+  const uniqueDepartments = Array.from(new Set(teachers.map(t => ({
+    id: t.departmentId,
+    name: t.departmentName
+  })).filter(d => d.name)));
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "ACTIVE":
-        return "border-green-200 text-green-700";
-      case "INACTIVE":
-        return "border-gray-200 text-gray-700";
-      case "ON_LEAVE":
-        return "border-orange-200 text-orange-700";
-      default:
-        return "border-gray-200 text-gray-700";
-    }
-  };
-
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case "ACTIVE":
-        return "Actif";
-      case "INACTIVE":
-        return "Inactif";
-      case "ON_LEAVE":
-        return "En congé";
-      default:
-        return status;
-    }
-  };
-
-  const getRoleIcon = (role: string) => {
-    switch (role.toLowerCase()) {
-      case "enseignant":
-        return <GraduationCap className="h-4 w-4" />;
-      case "directeur adjoint":
-      case "surveillant général":
-        return <Building className="h-4 w-4" />;
-      default:
-        return <UserCog className="h-4 w-4" />;
-    }
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('fr-FR');
   };
 
   return (
@@ -126,34 +103,34 @@ export default function StaffPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
         <StatsCard
           title="Personnel Total"
-          value={staffStats.totalStaff}
+          value={staffStats.totalStaff.toString()}
           description="Tous départements"
           icon={Users}
         />
         <StatsCard
           title="Personnel Actif"
-          value={staffStats.activeStaff}
+          value={staffStats.activeStaff.toString()}
           description="En service"
           icon={UserCog}
           className="border-green-200"
         />
         <StatsCard
           title="En Congé"
-          value={staffStats.onLeave}
+          value={staffStats.onLeave.toString()}
           description="Temporairement absent"
           icon={Calendar}
           className="border-orange-200"
         />
         <StatsCard
           title="Personnel Enseignant"
-          value={staffStats.teachingStaff}
+          value={staffStats.teachingStaff.toString()}
           description="Corps professoral"
           icon={GraduationCap}
           className="border-blue-200"
         />
         <StatsCard
           title="Personnel Administratif"
-          value={staffStats.administrativeStaff}
+          value={staffStats.administrativeStaff.toString()}
           description="Administration"
           icon={Building}
           className="border-purple-200"
@@ -163,15 +140,14 @@ export default function StaffPage() {
       {/* Cartes du personnel par département */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {uniqueDepartments.map((department) => {
-          const departmentStaff = staffRecords.filter(staff => staff.department === department);
-          const activeCount = departmentStaff.filter(staff => staff.status === "ACTIVE").length;
+          const departmentStaff = teachers.filter(t => t.departmentId === department.id);
           
           return (
-            <Card key={department} className="border-l-4 border-l-blue-500">
+            <Card key={department.id} className="border-l-4 border-l-blue-500">
               <CardHeader className="pb-3">
                 <CardTitle className="text-base flex items-center gap-2">
                   <Building className="h-4 w-4" />
-                  {department}
+                  {department.name}
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
@@ -181,19 +157,13 @@ export default function StaffPage() {
                 </div>
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-gray-600">Personnel actif</span>
-                  <span className="font-semibold text-green-600">{activeCount}</span>
+                  <span className="font-semibold text-green-600">{departmentStaff.length}</span>
                 </div>
                 <div className="space-y-2">
-                  {departmentStaff.slice(0, 3).map((staff) => (
-                    <div key={staff.id} className="flex items-center gap-2 text-sm">
-                      {getRoleIcon(staff.role)}
-                      <span className="truncate">{staff.name}</span>
-                      <Badge 
-                        variant="outline" 
-                        className={`text-xs ${getStatusColor(staff.status)}`}
-                      >
-                        {getStatusText(staff.status)}
-                      </Badge>
+                  {departmentStaff.slice(0, 3).map((teacher) => (
+                    <div key={teacher.id} className="flex items-center gap-2 text-sm">
+                      <GraduationCap className="h-4 w-4" />
+                      <span className="truncate">{teacher.firstName} {teacher.lastName}</span>
                     </div>
                   ))}
                   {departmentStaff.length > 3 && (
@@ -230,19 +200,6 @@ export default function StaffPage() {
                 />
               </div>
             </div>
-            <Select value={roleFilter} onValueChange={setRoleFilter}>
-              <SelectTrigger className="w-full md:w-[180px]">
-                <SelectValue placeholder="Rôle" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tous les rôles</SelectItem>
-                {uniqueRoles.map((role) => (
-                  <SelectItem key={role} value={role}>
-                    {role}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
             <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
               <SelectTrigger className="w-full md:w-[180px]">
                 <SelectValue placeholder="Département" />
@@ -250,21 +207,10 @@ export default function StaffPage() {
               <SelectContent>
                 <SelectItem value="all">Tous les départements</SelectItem>
                 {uniqueDepartments.map((department) => (
-                  <SelectItem key={department} value={department}>
-                    {department}
+                  <SelectItem key={department.id} value={department.id}>
+                    {department.name}
                   </SelectItem>
                 ))}
-              </SelectContent>
-            </Select>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-full md:w-[150px]">
-                <SelectValue placeholder="Statut" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tous les statuts</SelectItem>
-                <SelectItem value="ACTIVE">Actif</SelectItem>
-                <SelectItem value="INACTIVE">Inactif</SelectItem>
-                <SelectItem value="ON_LEAVE">En congé</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -280,74 +226,68 @@ export default function StaffPage() {
                   <TableHead>Contact</TableHead>
                   <TableHead>Date d'Embauche</TableHead>
                   <TableHead>Matières/Classes</TableHead>
-                  <TableHead>Statut</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredStaff.map((staff) => (
-                  <TableRow key={staff.id}>
+                {filteredStaff.map((teacher) => (
+                  <TableRow key={teacher.id}>
                     <TableCell className="font-medium">
                       <div className="flex items-center gap-2">
-                        {getRoleIcon(staff.role)}
-                        {staff.name}
+                        <GraduationCap className="h-4 w-4" />
+                        {teacher.firstName} {teacher.lastName}
                       </div>
                     </TableCell>
-                    <TableCell>{staff.role}</TableCell>
-                    <TableCell>{staff.department}</TableCell>
+                    <TableCell>{teacher.designation}</TableCell>
+                    <TableCell>{teacher.departmentName}</TableCell>
                     <TableCell>
                       <div className="space-y-1">
                         <div className="flex items-center gap-1 text-sm">
                           <Mail className="h-3 w-3 text-gray-400" />
-                          <span className="truncate max-w-[150px]" title={staff.email}>
-                            {staff.email}
+                          <span className="truncate max-w-[150px]" title={teacher.email}>
+                            {teacher.email}
                           </span>
                         </div>
                         <div className="flex items-center gap-1 text-sm">
                           <Phone className="h-3 w-3 text-gray-400" />
-                          <span>{staff.phone}</span>
+                          <span>{teacher.phone}</span>
                         </div>
                       </div>
                     </TableCell>
                     <TableCell>
-                      {MockDataService.formatDate(staff.joiningDate)}
+                      {formatDate(teacher.dateOfJoining)}
                     </TableCell>
                     <TableCell>
                       <div className="space-y-1">
-                        {staff.subjects && (
+                        {teacher.subjects && teacher.subjects.length > 0 && (
                           <div className="flex flex-wrap gap-1">
-                            {staff.subjects.slice(0, 2).map((subject, index) => (
+                            {teacher.subjects.slice(0, 2).map((subject, index) => (
                               <Badge key={index} variant="secondary" className="text-xs">
                                 {subject}
                               </Badge>
                             ))}
-                            {staff.subjects.length > 2 && (
+                            {teacher.subjects.length > 2 && (
                               <Badge variant="secondary" className="text-xs">
-                                +{staff.subjects.length - 2}
+                                +{teacher.subjects.length - 2}
                               </Badge>
                             )}
                           </div>
                         )}
-                        {staff.classes && (
+                        {teacher.classes && teacher.classes.length > 0 && (
                           <div className="flex flex-wrap gap-1">
-                            {staff.classes.slice(0, 2).map((className, index) => (
+                            {teacher.classes.slice(0, 2).map((className, index) => (
                               <Badge key={index} variant="outline" className="text-xs">
                                 {className}
                               </Badge>
                             ))}
-                            {staff.classes.length > 2 && (
+                            {teacher.classes.length > 2 && (
                               <Badge variant="outline" className="text-xs">
-                                +{staff.classes.length - 2}
+                                +{teacher.classes.length - 2}
                               </Badge>
                             )}
                           </div>
                         )}
                       </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="outline" className={getStatusColor(staff.status)}>
-                        {getStatusText(staff.status)}
-                      </Badge>
                     </TableCell>
                     <TableCell className="text-right">
                       <Button variant="ghost" size="sm">

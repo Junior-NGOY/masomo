@@ -8,7 +8,7 @@ import { Slash } from "lucide-react";
 const BASE_API_URL = process.env.API_URL || "";
 export const api = axios.create({
   baseURL: BASE_API_URL,
-  timeout: 5000,
+  timeout: 30000, // 30 seconds - increased from 5s to accommodate slow backend responses
   headers: { "Content-Type": "application/json" }
 });
 export async function createSchool(data: SchoolProps) {
@@ -47,12 +47,6 @@ export async function getSchoolById(id: string | null | undefined) {
       console.log(error);
     }
   } else {
-    const school = {
-      id: null,
-      name: null,
-      logo: null,
-      Slug: null
-    };
-    return school;
+    return null;
   }
 }

@@ -40,7 +40,7 @@ import { Department } from "@/types/types";
 export default function DepartmentListing({
   departments
 }: {
-  departments: Department[];
+  departments: any[];
 }) {
   // Mock data - replace with actual data fetching
   /* const [departments] = useState<Department[]>([
@@ -202,18 +202,15 @@ export default function DepartmentListing({
                     </CardHeader>
                     <CardContent>
                       <ScrollArea className="h-[200px]">
-                        {[
-                          { id: "t1", name: "John Doe" },
-                          { id: "t2", name: "Jane Smith" }
-                        ].map((teacher, index) => (
+                        {selectedDepartment.teachers?.map((teacher, index) => (
                           <div key={teacher.id}>
                             <div className="flex items-center justify-between py-2">
-                              <span>{teacher?.name}</span>
+                              <span>{teacher.firstName} {teacher.lastName}</span>
                               <Button variant="ghost" size="sm">
                                 View Profile
                               </Button>
                             </div>
-                            {index < selectedDepartment.teachers.length - 1 && (
+                            {index < (selectedDepartment.teachers?.length || 0) - 1 && (
                               <Separator />
                             )}
                           </div>
@@ -229,10 +226,7 @@ export default function DepartmentListing({
                     </CardHeader>
                     <CardContent>
                       <ScrollArea className="h-[200px]">
-                        {[
-                          { id: "s1", name: "Programming" },
-                          { id: "s2", name: "Database Systems" }
-                        ].map((subject, index) => (
+                        {selectedDepartment.subjects?.map((subject, index) => (
                           <div key={subject.id}>
                             <div className="flex items-center justify-between py-2">
                               <span>{subject.name}</span>
@@ -240,7 +234,7 @@ export default function DepartmentListing({
                                 View Details
                               </Button>
                             </div>
-                            {index < selectedDepartment.subjects.length - 1 && (
+                            {index < (selectedDepartment.subjects?.length || 0) - 1 && (
                               <Separator />
                             )}
                           </div>

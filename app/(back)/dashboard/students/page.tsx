@@ -11,179 +11,33 @@ import Link from "next/link";
 import DataTable from "@/components/DataTableComponents/DataTable";
 import TableHeader from "@/components/dashboard/Tables/TableHeader";
 import { columns } from "./columns";
-import { Student } from "@/types/types";
-import { StudentMockDataService } from "@/services/studentMockDataService";
-import { 
-  Users, 
-  DollarSign, 
-  UserCheck, 
+import {
+  Users,
+  DollarSign,
+  UserCheck,
   CreditCard,
   TrendingUp,
   AlertTriangle,
-  //CheckCircle,
   Search,
   Filter,
   Plus,
   Eye,
   BarChart3,
   Clock,
-  //BookOpen
 } from "lucide-react";
+import { useStudents, useStudentStats } from "@/hooks/useStudents";
+import { formatCurrency } from "@/utils/format";
+import { Skeleton } from "@/components/ui/skeleton";
 
 export default function StudentManagementPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [activeView, setActiveView] = useState("overview");
 
-  // Données fictives temporaires pour les étudiants
-  const mockStudents: Student[] = [
-    {
-      id: "std_001",
-      name: "Mukendi Jean",
-      firstName: "Jean",
-      lastName: "Mukendi",
-      email: "jean.mukendi@etudiant.com",
-      phone: "+243 85 123 4567",
-      parentId: "parent_001",
-      parentName: "Mukendi Paul",
-      classId: "class_001",
-      streamId: "stream_001",
-      classTitle: "6ème Primaire A",
-      streamTitle: "Section A",
-      password: "student123",
-      imageUrl: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face",
-      state: "active",
-      BCN: "BC2015001",
-      nationality: "Congolaise",
-      religion: "Chrétienne",
-      gender: "MALE",
-      dob: "2015-03-15",
-      rollNo: "001",
-      regNo: "REG2025001",
-      admissionDate: "2025-01-10",
-      address: "Avenue Kasai, Lubumbashi",
-      createdAt: "2025-01-10",
-      updatedAt: "2025-01-15"
-    },
-    {
-      id: "std_002", 
-      name: "Kasongo Marie",
-      firstName: "Marie",
-      lastName: "Kasongo",
-      email: "marie.kasongo@etudiant.com",
-      phone: "+243 85 234 5678",
-      parentId: "parent_002",
-      parentName: "Kasongo Joseph",
-      classId: "class_001",
-      streamId: "stream_001",
-      classTitle: "6ème Primaire A",
-      streamTitle: "Section A",
-      password: "student123",
-      imageUrl: "https://images.unsplash.com/photo-1494790108755-2616b612b47c?w=150&h=150&fit=crop&crop=face",
-      state: "active",
-      BCN: "BC2015002",
-      nationality: "Congolaise",
-      religion: "Chrétienne",
-      gender: "FEMALE",
-      dob: "2015-07-22",
-      rollNo: "002",
-      regNo: "REG2025002",
-      admissionDate: "2025-01-10",
-      address: "Boulevard du 30 Juin, Kinshasa",
-      createdAt: "2025-01-10",
-      updatedAt: "2025-01-15"
-    },
-    {
-      id: "std_003",
-      name: "Mbuyi Pierre",
-      firstName: "Pierre",
-      lastName: "Mbuyi",
-      email: "pierre.mbuyi@etudiant.com",
-      phone: "+243 85 345 6789",
-      parentId: "parent_003",
-      parentName: "Mbuyi André",
-      classId: "class_002",
-      streamId: "stream_002",
-      classTitle: "5ème Primaire B",
-      streamTitle: "Section B",
-      password: "student123",
-      imageUrl: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face",
-      state: "active",
-      BCN: "BC2016003",
-      nationality: "Congolaise",
-      religion: "Musulmane",
-      gender: "MALE",
-      dob: "2016-11-08",
-      rollNo: "003",
-      regNo: "REG2025003",
-      admissionDate: "2025-01-10",
-      address: "Quartier Matonge, Lubumbashi",
-      createdAt: "2025-01-10",
-      updatedAt: "2025-01-15"
-    },
-    {
-      id: "std_004",
-      name: "Tshiala Grace",
-      firstName: "Grace",
-      lastName: "Tshiala",
-      email: "grace.tshiala@etudiant.com",
-      phone: "+243 85 456 7890",
-      parentId: "parent_004",
-      parentName: "Tshiala Emmanuel",
-      classId: "class_001",
-      streamId: "stream_001",
-      classTitle: "6ème Primaire A",
-      streamTitle: "Section A",
-      password: "student123",
-      imageUrl: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=150&h=150&fit=crop&crop=face",
-      state: "active",
-      BCN: "BC2015004",
-      nationality: "Congolaise",
-      religion: "Chrétienne",
-      gender: "FEMALE",
-      dob: "2015-05-30",
-      rollNo: "004",
-      regNo: "REG2025004",
-      admissionDate: "2025-01-10",
-      address: "Avenue Lumumba, Kolwezi",
-      createdAt: "2025-01-10",
-      updatedAt: "2025-01-15"
-    },
-    {
-      id: "std_005",
-      name: "Kalala David",
-      firstName: "David",
-      lastName: "Kalala",
-      email: "david.kalala@etudiant.com",
-      phone: "+243 85 567 8901",
-      parentId: "parent_005",
-      parentName: "Kalala Robert",
-      classId: "class_003",
-      streamId: "stream_003",
-      classTitle: "4ème Primaire C",
-      streamTitle: "Section C",
-      password: "student123",
-      imageUrl: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150&h=150&fit=crop&crop=face",
-      state: "active",
-      BCN: "BC2017005",
-      nationality: "Congolaise",
-      religion: "Chrétienne",
-      gender: "MALE",
-      dob: "2017-02-14",
-      rollNo: "005",
-      regNo: "REG2025005",
-      admissionDate: "2025-01-10",
-      address: "Boulevard Kamanyola, Lubumbashi",
-      createdAt: "2025-01-10",
-      updatedAt: "2025-01-15"
-    }
-  ];
-
-  // Données du service
-  const stats = StudentMockDataService.getStudentStats();
-  const profiles = StudentMockDataService.getStudentProfiles();
+  const { students, loading: studentsLoading, error: studentsError } = useStudents();
+  const { stats, loading: statsLoading, error: statsError } = useStudentStats();
 
   // Filtrage des étudiants
-  const filteredStudents = mockStudents.filter(student => 
+  const filteredStudents = students.filter(student =>
     student.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     (student.classTitle && student.classTitle.toLowerCase().includes(searchTerm.toLowerCase()))
   );
@@ -228,6 +82,31 @@ export default function StudentManagementPage() {
     </Card>
   );
 
+  if (studentsLoading || statsLoading) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex justify-between items-center">
+          <Skeleton className="h-10 w-64" />
+          <Skeleton className="h-10 w-32" />
+        </div>
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Skeleton key={i} className="h-32 w-full" />
+          ))}
+        </div>
+        <Skeleton className="h-64 w-full" />
+      </div>
+    );
+  }
+
+  if (studentsError || statsError || !stats) {
+    return (
+      <div className="p-6 flex items-center justify-center text-red-500">
+        Erreur lors du chargement des données.
+      </div>
+    );
+  }
+
   return (
     <div className="p-6 space-y-6">
       {/* En-tête */}
@@ -269,8 +148,8 @@ export default function StudentManagementPage() {
             />
             <StatsCard
               title="Frais Collectés"
-              value={StudentMockDataService.formatCurrency(stats.paidFees)}
-              description={`${Math.round((stats.paidFees / stats.totalFees) * 100)}% du total`}
+              value={formatCurrency(stats.paidFees)}
+              description={`${stats.totalFees > 0 ? Math.round((stats.paidFees / stats.totalFees) * 100) : 0}% du total`}
               icon={DollarSign}
               color="green"
               href="/dashboard/students/fees"
@@ -349,7 +228,7 @@ export default function StudentManagementPage() {
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start gap-3 p-3 bg-orange-50 rounded-lg">
                   <CreditCard className="h-4 w-4 text-orange-600 mt-0.5" />
                   <div>
@@ -361,7 +240,7 @@ export default function StudentManagementPage() {
                     </p>
                   </div>
                 </div>
-                
+
                 <div className="flex items-start gap-3 p-3 bg-yellow-50 rounded-lg">
                   <Clock className="h-4 w-4 text-yellow-600 mt-0.5" />
                   <div>
@@ -369,7 +248,8 @@ export default function StudentManagementPage() {
                       Présences à améliorer
                     </p>
                     <p className="text-xs text-yellow-600">
-                      {profiles.filter(p => p.attendanceRate < 80).length} élève(s) avec faible assiduité
+                      {/* Mock logic for now as we don't have individual attendance stats in the hook yet */}
+                      0 élève(s) avec faible assiduité
                     </p>
                   </div>
                 </div>
@@ -387,16 +267,16 @@ export default function StudentManagementPage() {
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-600">Collecte des frais</span>
                   <span className="font-medium text-green-600">
-                    {Math.round((stats.paidFees / stats.totalFees) * 100)}%
+                    {stats.totalFees > 0 ? Math.round((stats.paidFees / stats.totalFees) * 100) : 0}%
                   </span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div
                     className="bg-green-500 h-2 rounded-full transition-all duration-300"
-                    style={{ width: `${(stats.paidFees / stats.totalFees) * 100}%` }}
+                    style={{ width: `${stats.totalFees > 0 ? (stats.paidFees / stats.totalFees) * 100 : 0}%` }}
                   />
                 </div>
-                
+
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-gray-600">Taux de présence</span>
                   <span className="font-medium text-blue-600">{stats.attendanceRate}%</span>
@@ -407,7 +287,7 @@ export default function StudentManagementPage() {
                     style={{ width: `${stats.attendanceRate}%` }}
                   />
                 </div>
-                
+
                 <div className="pt-2 border-t">
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Cartes actives:</span>
@@ -418,7 +298,8 @@ export default function StudentManagementPage() {
             </Card>
           </div>
 
-          {/* Élèves les plus performants */}
+          {/* Élèves les plus performants - Placeholder as we don't have this data in stats yet */}
+          {/* 
           <Card>
             <CardHeader>
               <CardTitle>Élèves Exemplaires</CardTitle>
@@ -454,6 +335,7 @@ export default function StudentManagementPage() {
               </div>
             </CardContent>
           </Card>
+          */}
         </TabsContent>
 
         <TabsContent value="directory" className="space-y-4">

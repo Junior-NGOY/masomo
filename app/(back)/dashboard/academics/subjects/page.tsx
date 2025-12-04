@@ -1,155 +1,62 @@
-// import { getBriefDepartments } from "@/actions/departments";
-// import { getAllSubjects } from "@/actions/subjects";
+"use client";
+
 import SubjectListing from "@/components/dashboard/subject-listing";
-import { SubjectCategory, SubjectType } from "@/types/types";
+import { useSubjects } from "@/hooks/useSubjects";
+import { useBriefDepartments } from "@/hooks/useDepartments";
+import { Skeleton } from "@/components/ui/skeleton";
 import React from "react";
 
-export default function page() {
-  // TODO: Remplacer par les appels API réels une fois le backend complété
-  // const departments = (await getBriefDepartments()) || [];
-  const departments = [
-    { id: "1", name: "Primaire" },
-    { id: "2", name: "Secondaire" },
-    { id: "3", name: "Administration" },
-    { id: "4", name: "Sports" },
-    { id: "5", name: "Arts" },
-  ];
-  
-  // const subjects = (await getAllSubjects()) || [];
-  const subjects = [
-    {
-      id: "1",
-      name: "Français",
-      slug: "francais",
-      code: "FR101",
-      shortName: "FR",
-      description: "Langue française et littérature",
-      category: SubjectCategory.CORE,
-      type: SubjectType.THEORY,
-      passingMarks: 40,
-      totalMarks: 100,
-      departmentId: "1",
-      departmentName: "Primaire",
-      isActive: true,
-      isOptional: false,
-      hasTheory: true,
-      hasPractical: false,
-      labRequired: false,
-      createdAt: "2024-01-10T00:00:00Z",
-      updatedAt: "2024-01-10T00:00:00Z",
-    },
-    {
-      id: "2",
-      name: "Mathématiques",
-      slug: "mathematiques",
-      code: "MATH101",
-      shortName: "MATH",
-      description: "Calcul, algèbre et géométrie",
-      category: SubjectCategory.CORE,
-      type: SubjectType.THEORY,
-      passingMarks: 40,
-      totalMarks: 100,
-      departmentId: "1",
-      departmentName: "Primaire",
-      isActive: true,
-      isOptional: false,
-      hasTheory: true,
-      hasPractical: false,
-      labRequired: false,
-      createdAt: "2024-01-10T00:00:00Z",
-      updatedAt: "2024-01-10T00:00:00Z",
-    },
-    {
-      id: "3",
-      name: "Sciences",
-      slug: "sciences",
-      code: "SCI101",
-      shortName: "SCI",
-      description: "Sciences naturelles et physiques",
-      category: SubjectCategory.CORE,
-      type: SubjectType.BOTH,
-      passingMarks: 40,
-      totalMarks: 100,
-      departmentId: "2",
-      departmentName: "Secondaire",
-      isActive: true,
-      isOptional: false,
-      hasTheory: true,
-      hasPractical: true,
-      labRequired: true,
-      createdAt: "2024-01-10T00:00:00Z",
-      updatedAt: "2024-01-10T00:00:00Z",
-    },
-    {
-      id: "4",
-      name: "Histoire-Géographie",
-      slug: "histoire-geographie",
-      code: "HG101",
-      shortName: "HG",
-      description: "Histoire et géographie du Congo et du monde",
-      category: SubjectCategory.CORE,
-      type: SubjectType.THEORY,
-      passingMarks: 40,
-      totalMarks: 100,
-      departmentId: "2",
-      departmentName: "Secondaire",
-      isActive: true,
-      isOptional: false,
-      hasTheory: true,
-      hasPractical: false,
-      labRequired: false,
-      createdAt: "2024-01-10T00:00:00Z",
-      updatedAt: "2024-01-10T00:00:00Z",
-    },
-    {
-      id: "5",
-      name: "Anglais",
-      slug: "anglais",
-      code: "ENG101",
-      shortName: "ENG",
-      description: "Langue anglaise",
-      category: SubjectCategory.LANGUAGE,
-      type: SubjectType.THEORY,
-      passingMarks: 40,
-      totalMarks: 100,
-      departmentId: "1",
-      departmentName: "Primaire",
-      isActive: true,
-      isOptional: false,
-      hasTheory: true,
-      hasPractical: false,
-      labRequired: false,
-      createdAt: "2024-01-10T00:00:00Z",
-      updatedAt: "2024-01-10T00:00:00Z",
-    },
-    {
-      id: "6",
-      name: "Education Physique",
-      slug: "education-physique",
-      code: "EP101",
-      shortName: "EP",
-      description: "Sport et activités physiques",
-      category: SubjectCategory.EXTRA_CURRICULAR,
-      type: SubjectType.PRACTICAL,
-      passingMarks: 50,
-      totalMarks: 100,
-      departmentId: "4",
-      departmentName: "Sports",
-      isActive: true,
-      isOptional: true,
-      hasTheory: false,
-      hasPractical: true,
-      labRequired: false,
-      createdAt: "2024-01-10T00:00:00Z",
-      updatedAt: "2024-01-10T00:00:00Z",
-    },
-  ];
+export default function SubjectsPage() {
+  const { subjects, loading: subjectsLoading, error: subjectsError } = useSubjects();
+  const { departments, loading: departmentsLoading, error: departmentsError } = useBriefDepartments();
+
+  const loading = subjectsLoading || departmentsLoading;
+  const error = subjectsError || departmentsError;
+
+  if (loading) {
+    return (
+      <div className="flex h-screen bg-background">
+        <div className="w-80 border-r bg-muted/30 p-4 space-y-4">
+          <Skeleton className="h-10 w-full" />
+          <div className="space-y-2">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <Skeleton key={i} className="h-16 w-full" />
+            ))}
+          </div>
+        </div>
+        <div className="flex-1 p-6 space-y-6">
+          <div className="flex justify-between">
+            <Skeleton className="h-10 w-48" />
+            <Skeleton className="h-10 w-32" />
+          </div>
+          <div className="grid gap-6 md:grid-cols-3">
+            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-32 w-full" />
+          </div>
+          <Skeleton className="h-64 w-full" />
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-6 flex items-center justify-center text-red-500">
+        Erreur lors du chargement des données.
+      </div>
+    );
+  }
+
+  const departmentOptions = departments.map((dept) => ({
+    value: dept.id,
+    label: dept.name,
+  }));
+
   return (
     <SubjectListing
       subjects={subjects}
-      departments={departments.map((item) => {
-        return { value: item.id, label: item.name };
-      })}
+      departments={departmentOptions}
     />
   );
 }

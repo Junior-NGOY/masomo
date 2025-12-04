@@ -78,9 +78,24 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Logo from "@/components/logo";
 import { useUserSession } from "@/store/auth";
+import useSchoolStore from "@/store/school";
 import UserMenu from "./user-menu";
+import { useLevelStore, SchoolLevel } from "@/store/level-store";
 
-const sidebarLinks = {
+type SidebarItem = {
+  title: string;
+  url: string;
+  icon?: any;
+  isActive?: boolean;
+  items?: { title: string; url: string; levels?: SchoolLevel[] }[];
+  levels?: SchoolLevel[];
+};
+
+const sidebarLinks: {
+  teams: { name: string; logo: any; plan: string }[];
+  navMain: SidebarItem[];
+  projects: { name: string; url: string; icon: any }[];
+} = {
   teams: [
     {
       name: "Acme Inc",
@@ -101,7 +116,7 @@ const sidebarLinks = {
   navMain: [
     {
       title: "Dashboard",
-      url: "#",
+      url: "/dashboard",
       icon: SquareTerminal,
       isActive: true,
       items: [

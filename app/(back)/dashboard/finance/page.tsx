@@ -17,7 +17,6 @@ import {
   Calendar,
   Users
 } from "lucide-react";
-import { MockDataService } from "@/services/mockServices";
 import StatsCard from "@/components/dashboard/StatsCard";
 import {
   Table,
@@ -36,33 +35,35 @@ import {
 } from "@/components/ui/select";
 import NewFeeModal from "@/components/NewFeeModal";
 import PaymentModal from "@/components/PaymentModal";
+import { useFinancialSummary, useOutstandingFees, useRevenueByMonth } from "@/hooks/useFinance";
+import { useStudentFees } from "@/hooks/useStudentFees";
 
 export default function FinancePage() {
-  // TODO: Remplacer par les vrais appels API une fois le backend terminé
-  const financialRecords = MockDataService.finance.getFinancialRecords();
-  const financeStats = MockDataService.finance.getFinanceStats();
+  const { summary, loading: summaryLoading } = useFinancialSummary();
+  const { fees: outstandingFees, loading: feesLoading } = useOutstandingFees();
+  const { revenue, loading: revenueLoading } = useRevenueByMonth();
+  const { fees: allFees, loading: allFeesLoading } = useStudentFees();
   
   const [searchQuery, setSearchQuery] = React.useState("");
   const [statusFilter, setStatusFilter] = React.useState("all");
   const [feeTypeFilter, setFeeTypeFilter] = React.useState("all");
 
+  if (summaryLoading || feesLoading || revenueLoading || allFeesLoading) {
+    return <div className="p-6">Chargement...</div>;
+  }
+
   // Filtrer les enregistrements financiers
-  const filteredRecords = financialRecords.filter(record => {
-    const matchesSearch = record.studentName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         record.className.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         record.feeType.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesStatus = statusFilter === "all" || record.status === statusFilter;
-    const matchesFeeType = feeTypeFilter === "all" || record.feeType.includes(feeTypeFilter);
+  const filteredRecords = allFees.filter(fee => {
+    const matchesSearch = fee.studentName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         fee.feeType.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = statusFilter === "all" || fee.status === statusFilter;
+    const matchesFeeType = feeTypeFilter === "all" || fee.feeType.includes(feeTypeFilter);
     
     return matchesSearch && matchesStatus && matchesFeeType;
   });
 
   // Obtenir les types de frais uniques pour le filtre
-  const uniqueFeeTypes = Array.from(new Set(financialRecords.map(record => {
-    // Extraire le type principal (ex: "Frais de scolarité" de "Frais de scolarité Trimestre 2")
-    const mainType = record.feeType.split(' ')[0] + ' ' + record.feeType.split(' ')[1] + ' ' + record.feeType.split(' ')[2];
-    return mainType;
-  })));
+  const uniqueFeeTypes = Array.from(new Set(allFees.map(fee => fee.feeType)));
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -96,14 +97,42 @@ export default function FinancePage() {
 
   const getPaymentMethodIcon = (method?: string) => {
     switch (method) {
+      case "MOBILE_MONEY":
       case "Mobile Money":
         return <CreditCard className="h-3 w-3" />;
+      case "CASH":
       case "Espèces":
         return <Receipt className="h-3 w-3" />;
       default:
         return null;
     }
   };
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('fr-FR', {
+      style: 'currency',
+      currency: 'CDF',
+      minimumFractionDigits: 0
+    }).format(amount);
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('fr-FR');
+  };
+
+  // Calculer les statistiques
+  const totalRevenue = summary?.totalCollected || 0;
+  const pendingPayments = summary?.totalOutstanding || 0;
+  const collectionRate = summary?.collectionRate || "0";
+  const monthlyTarget = totalRevenue * 1.2; // Mock target
+
+  // Paiements récents (frais payés)
+  const recentPayments = allFees
+    .filter(fee => fee.status === "PAID")
+    .slice(0, 3);
+
+  // Paiements en retard
+  const overduePayments = allFees.filter(fee => fee.status === "OVERDUE");
 
   return (
     <div className="flex-1 space-y-6 p-4">
@@ -130,22 +159,22 @@ export default function FinancePage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatsCard
           title="Revenus Totaux"
-          value={MockDataService.formatCurrency(financeStats.totalRevenue)}
-          description="Ce mois"
+          value={formatCurrency(totalRevenue)}
+          description="Total collecté"
           icon={DollarSign}
           trend={{ value: 12.5, isPositive: true }}
           className="border-green-200"
         />
         <StatsCard
           title="Paiements en Attente"
-          value={MockDataService.formatCurrency(financeStats.pendingPayments)}
+          value={formatCurrency(pendingPayments)}
           description="À collecter"
           icon={AlertTriangle}
           className="border-orange-200"
         />
         <StatsCard
           title="Taux de Collection"
-          value={`${financeStats.collectionRate}%`}
+          value={`${collectionRate}%`}
           description="Performance de collection"
           icon={TrendingUp}
           trend={{ value: 5.2, isPositive: true }}
@@ -153,7 +182,7 @@ export default function FinancePage() {
         />
         <StatsCard
           title="Objectif Mensuel"
-          value={MockDataService.formatCurrency(financeStats.monthlyTarget)}
+          value={formatCurrency(monthlyTarget)}
           description="Cible fixée"
           icon={Calendar}
           className="border-purple-200"
@@ -169,32 +198,33 @@ export default function FinancePage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            {financialRecords
-              .filter(record => record.status === "PAID")
-              .slice(0, 3)
-              .map((record) => (
-              <div key={record.id} className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
-                <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 bg-green-500 rounded-full flex items-center justify-center">
-                    {getPaymentMethodIcon(record.paymentMethod)}
+          {recentPayments.length > 0 ? (
+            <div className="space-y-3">
+              {recentPayments.map((fee) => (
+                <div key={fee.id} className="flex items-center justify-between p-3 bg-green-50 rounded-lg border border-green-200">
+                  <div className="flex items-center gap-3">
+                    <div className="h-8 w-8 bg-green-500 rounded-full flex items-center justify-center">
+                      {getPaymentMethodIcon(fee.paymentMethod || undefined)}
+                    </div>
+                    <div>
+                      <p className="font-medium text-sm">{fee.studentName || 'N/A'}</p>
+                      <p className="text-xs text-gray-600">{fee.feeType}</p>
+                    </div>
                   </div>
-                  <div>
-                    <p className="font-medium text-sm">{record.studentName}</p>
-                    <p className="text-xs text-gray-600">{record.feeType}</p>
+                  <div className="text-right">
+                    <p className="font-semibold text-green-700">
+                      {formatCurrency(fee.amount)}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {fee.paidDate && formatDate(fee.paidDate)}
+                    </p>
                   </div>
                 </div>
-                <div className="text-right">
-                  <p className="font-semibold text-green-700">
-                    {MockDataService.formatCurrency(record.amount)}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    {record.paidDate && MockDataService.formatDate(record.paidDate)}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-center text-gray-500 py-4">Aucun paiement récent</p>
+          )}
         </CardContent>
       </Card>
 
@@ -207,29 +237,31 @@ export default function FinancePage() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-3">
-            {financialRecords
-              .filter(record => record.status === "OVERDUE")
-              .map((record) => (
-              <div key={record.id} className="flex items-center justify-between p-3 bg-red-50 rounded-lg border border-red-200">
-                <div>
-                  <p className="font-medium text-sm">{record.studentName}</p>
-                  <p className="text-xs text-gray-600">{record.className} - {record.feeType}</p>
-                  <p className="text-xs text-red-600">
-                    Échéance: {MockDataService.formatDate(record.dueDate)}
-                  </p>
+          {overduePayments.length > 0 ? (
+            <div className="space-y-3">
+              {overduePayments.map((fee) => (
+                <div key={fee.id} className="flex items-center justify-between p-3 bg-red-50 rounded-lg border border-red-200">
+                  <div>
+                    <p className="font-medium text-sm">{fee.studentName || 'N/A'}</p>
+                    <p className="text-xs text-gray-600">{fee.className || 'N/A'} - {fee.feeType}</p>
+                    <p className="text-xs text-red-600">
+                      Échéance: {fee.dueDate ? formatDate(fee.dueDate) : 'N/A'}
+                    </p>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-semibold text-red-700">
+                      {formatCurrency(fee.amount)}
+                    </p>
+                    <Button size="sm" variant="outline" className="mt-1">
+                      Envoyer Rappel
+                    </Button>
+                  </div>
                 </div>
-                <div className="text-right">
-                  <p className="font-semibold text-red-700">
-                    {MockDataService.formatCurrency(record.amount)}
-                  </p>
-                  <Button size="sm" variant="outline" className="mt-1">
-                    Envoyer Rappel
-                  </Button>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <p className="text-center text-gray-500 py-4">Aucun paiement en retard</p>
+          )}
         </CardContent>
       </Card>
 
@@ -273,9 +305,9 @@ export default function FinancePage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Tous les types</SelectItem>
-                <SelectItem value="scolarité">Frais de scolarité</SelectItem>
-                <SelectItem value="transport">Frais de transport</SelectItem>
-                <SelectItem value="activités">Frais d'activités</SelectItem>
+                {uniqueFeeTypes.slice(0, 5).map(type => (
+                  <SelectItem key={type} value={type}>{type}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>
@@ -297,35 +329,35 @@ export default function FinancePage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredRecords.map((record) => (
-                  <TableRow key={record.id}>
+                {filteredRecords.map((fee) => (
+                  <TableRow key={fee.id}>
                     <TableCell className="font-medium">
-                      {record.studentName}
+                      {fee.studentName || 'N/A'}
                     </TableCell>
-                    <TableCell>{record.className}</TableCell>
+                    <TableCell>{fee.className || 'N/A'}</TableCell>
                     <TableCell className="max-w-xs">
-                      <div className="truncate" title={record.feeType}>
-                        {record.feeType}
+                      <div className="truncate" title={fee.feeType}>
+                        {fee.feeType}
                       </div>
                     </TableCell>
                     <TableCell className="font-semibold">
-                      {MockDataService.formatCurrency(record.amount)}
+                      {formatCurrency(fee.amount)}
                     </TableCell>
                     <TableCell>
-                      {MockDataService.formatDate(record.dueDate)}
+                      {fee.dueDate ? formatDate(fee.dueDate) : '-'}
                     </TableCell>
                     <TableCell>
-                      {record.paidDate ? MockDataService.formatDate(record.paidDate) : "-"}
+                      {fee.paidDate ? formatDate(fee.paidDate) : "-"}
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">
-                        {getPaymentMethodIcon(record.paymentMethod)}
-                        <span className="text-sm">{record.paymentMethod || "-"}</span>
+                        {getPaymentMethodIcon(fee.paymentMethod || undefined)}
+                        <span className="text-sm">{fee.paymentMethod || "-"}</span>
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline" className={getStatusColor(record.status)}>
-                        {getStatusText(record.status)}
+                      <Badge variant="outline" className={getStatusColor(fee.status)}>
+                        {getStatusText(fee.status)}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">

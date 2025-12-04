@@ -18,7 +18,7 @@ import {
   Calendar,
   AlertTriangle
 } from "lucide-react";
-import { MockDataService } from "@/services/mockServices";
+import { useResources, useResourceStats } from "@/hooks/useResources";
 import StatsCard from "@/components/dashboard/StatsCard";
 import {
   Table,
@@ -37,38 +37,41 @@ import {
 } from "@/components/ui/select";
 
 export default function ResourcesPage() {
-  // TODO: Remplacer par les vrais appels API une fois le backend terminé
-  const resources = MockDataService.resources.getResources();
-  const resourceStats = MockDataService.resources.getResourceStats();
+  const { resources, loading: resourcesLoading } = useResources();
+  const { stats, loading: statsLoading } = useResourceStats();
   
   const [searchQuery, setSearchQuery] = React.useState("");
   const [typeFilter, setTypeFilter] = React.useState("all");
-  const [statusFilter, setStatusFilter] = React.useState("all");
+  const [conditionFilter, setConditionFilter] = React.useState("all");
   const [categoryFilter, setCategoryFilter] = React.useState("all");
+
+  if (resourcesLoading || statsLoading) {
+    return <div className="p-6">Chargement...</div>;
+  }
 
   // Filtrer les ressources
   const filteredResources = resources.filter(resource => {
     const matchesSearch = resource.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         resource.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         resource.location.toLowerCase().includes(searchQuery.toLowerCase());
+                         (resource.category?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+                         (resource.location?.toLowerCase() || '').includes(searchQuery.toLowerCase());
     const matchesType = typeFilter === "all" || resource.type === typeFilter;
-    const matchesStatus = statusFilter === "all" || resource.status === statusFilter;
-    const matchesCategory = categoryFilter === "all" || resource.category.includes(categoryFilter);
+    const matchesCondition = conditionFilter === "all" || resource.condition === conditionFilter;
+    const matchesCategory = categoryFilter === "all" || resource.category?.includes(categoryFilter);
     
-    return matchesSearch && matchesType && matchesStatus && matchesCategory;
+    return matchesSearch && matchesType && matchesCondition && matchesCategory;
   });
 
   // Obtenir les types et catégories uniques pour les filtres
   const uniqueTypes = Array.from(new Set(resources.map(resource => resource.type)));
-  const uniqueCategories = Array.from(new Set(resources.map(resource => resource.category)));
+  const uniqueCategories = Array.from(new Set(resources.map(resource => resource.category).filter(Boolean))) as string[];
 
-  const getStatusColor = (status: string) => {
-    switch (status) {
-      case "AVAILABLE":
+  const getStatusColor = (condition: string | null) => {
+    switch (condition) {
+      case "GOOD":
         return "border-green-200 text-green-700";
-      case "BORROWED":
+      case "FAIR":
         return "border-blue-200 text-blue-700";
-      case "MAINTENANCE":
+      case "POOR":
         return "border-orange-200 text-orange-700";
       case "DAMAGED":
         return "border-red-200 text-red-700";
@@ -77,18 +80,18 @@ export default function ResourcesPage() {
     }
   };
 
-  const getStatusText = (status: string) => {
-    switch (status) {
-      case "AVAILABLE":
-        return "Disponible";
-      case "BORROWED":
-        return "Emprunté";
-      case "MAINTENANCE":
-        return "Maintenance";
+  const getStatusText = (condition: string | null) => {
+    switch (condition) {
+      case "GOOD":
+        return "Bon état";
+      case "FAIR":
+        return "État moyen";
+      case "POOR":
+        return "Mauvais état";
       case "DAMAGED":
         return "Endommagé";
       default:
-        return status;
+        return condition || "Inconnu";
     }
   };
 
@@ -155,27 +158,27 @@ export default function ResourcesPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatsCard
           title="Ressources Totales"
-          value={MockDataService.dashboard.formatNumber(resourceStats.totalResources)}
+          value={stats?.totalResources || 0}
           description="Tous types confondus"
           icon={Package}
         />
         <StatsCard
           title="Ressources Disponibles"
-          value={MockDataService.dashboard.formatNumber(resourceStats.availableResources)}
+          value={stats?.totalAvailable || 0}
           description="Prêtes à l'utilisation"
           icon={BookOpen}
           className="border-green-200"
         />
         <StatsCard
           title="Ressources Empruntées"
-          value={resourceStats.borrowedResources}
+          value={resources.length - (stats?.totalAvailable || 0)}
           description="Actuellement utilisées"
           icon={Calendar}
           className="border-blue-200"
         />
         <StatsCard
           title="Taux d'Utilisation"
-          value={`${resourceStats.utilizationRate}%`}
+          value={stats?.totalAvailable && stats?.totalQuantity ? `${Math.round((stats.totalAvailable / stats.totalQuantity) * 100)}%` : '0%'}
           description="Efficacité d'usage"
           icon={AlertTriangle}
           trend={{ value: 8.2, isPositive: true }}
@@ -225,7 +228,7 @@ export default function ResourcesPage() {
       </div>
 
       {/* Alertes de maintenance */}
-      {resources.filter(r => r.status === "MAINTENANCE" || r.status === "DAMAGED").length > 0 && (
+      {resources.filter(r => r.condition === "POOR" || r.condition === "DAMAGED").length > 0 && (
         <Card className="border-orange-200 bg-orange-50">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-orange-800">
@@ -236,7 +239,7 @@ export default function ResourcesPage() {
           <CardContent>
             <div className="space-y-3">
               {resources
-                .filter(resource => resource.status === "MAINTENANCE" || resource.status === "DAMAGED")
+                .filter(resource => resource.condition === "POOR" || resource.condition === "DAMAGED")
                 .map((resource) => (
                 <div key={resource.id} className="p-3 bg-white rounded-lg border border-orange-200">
                   <div className="flex items-center justify-between">
@@ -245,13 +248,13 @@ export default function ResourcesPage() {
                       <div>
                         <h4 className="font-semibold text-orange-900">{resource.name}</h4>
                         <p className="text-sm text-orange-700">
-                          {resource.category} - {resource.location}
+                          {resource.category || 'N/A'} - {resource.location || 'N/A'}
                         </p>
                       </div>
                     </div>
                     <div className="text-right">
-                      <Badge variant="outline" className={getStatusColor(resource.status)}>
-                        {getStatusText(resource.status)}
+                      <Badge variant="outline" className={getStatusColor(resource.condition)}>
+                        {getStatusText(resource.condition)}
                       </Badge>
                       <p className="text-xs text-orange-600 mt-1">
                         {resource.quantity - resource.available} en panne
@@ -313,15 +316,15 @@ export default function ResourcesPage() {
                 ))}
               </SelectContent>
             </Select>
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <Select value={conditionFilter} onValueChange={setConditionFilter}>
               <SelectTrigger className="w-full md:w-[150px]">
-                <SelectValue placeholder="Statut" />
+                <SelectValue placeholder="Condition" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Tous les statuts</SelectItem>
-                <SelectItem value="AVAILABLE">Disponible</SelectItem>
-                <SelectItem value="BORROWED">Emprunté</SelectItem>
-                <SelectItem value="MAINTENANCE">Maintenance</SelectItem>
+                <SelectItem value="all">Toutes conditions</SelectItem>
+                <SelectItem value="GOOD">Bon état</SelectItem>
+                <SelectItem value="FAIR">État moyen</SelectItem>
+                <SelectItem value="POOR">Mauvais état</SelectItem>
                 <SelectItem value="DAMAGED">Endommagé</SelectItem>
               </SelectContent>
             </Select>
@@ -356,11 +359,11 @@ export default function ResourcesPage() {
                         {getTypeText(resource.type)}
                       </Badge>
                     </TableCell>
-                    <TableCell>{resource.category}</TableCell>
+                    <TableCell>{resource.category || 'N/A'}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-1">
                         <MapPin className="h-3 w-3 text-gray-400" />
-                        {resource.location}
+                        {resource.location || 'N/A'}
                       </div>
                     </TableCell>
                     <TableCell className="font-semibold">
@@ -375,8 +378,8 @@ export default function ResourcesPage() {
                       </span>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline" className={getStatusColor(resource.status)}>
-                        {getStatusText(resource.status)}
+                      <Badge variant="outline" className={getStatusColor(resource.condition)}>
+                        {getStatusText(resource.condition)}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">

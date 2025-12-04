@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -343,13 +344,10 @@ export default function StudentFeeDetailsPage() {
             <ArrowLeft className="h-4 w-4" />
           </Button>
           <div className="flex items-start gap-4">
-            <Image
-              src={student.imageUrl}
-              alt={student.name}
-              width={64}
-              height={64}
-              className="w-16 h-16 rounded-full object-cover border-2 border-gray-200"
-            />
+            <Avatar className="w-16 h-16 border-2 border-gray-200">
+              <AvatarImage src={student.imageUrl} alt={student.name} className="object-cover" />
+              <AvatarFallback>{student.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+            </Avatar>
             <div>
               <h1 className="text-3xl font-bold text-gray-900">{student.name}</h1>
               <div className="flex items-center gap-4 text-gray-600 mt-1">

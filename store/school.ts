@@ -18,13 +18,8 @@ interface SchoolState {
 const useSchoolStore = create<SchoolState>()(
   persist(
     (set) => ({
-      // Données par défaut pour le mode démo
-      school: {
-        id: "school_demo_123",
-        name: "École Demo",
-        logo: "/images/logo.png",
-        slug: "ecole-demo"
-      },
+      // Données par défaut vides
+      school: null,
       setSchool: (school) => set({ school })
     }),
     {

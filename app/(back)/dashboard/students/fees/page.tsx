@@ -3,23 +3,27 @@
 import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { StudentMockDataService, StudentFee, StudentProfile } from "@/services/studentMockDataService";
+import { useStudentFees, StudentFee } from "@/hooks/useStudentFees";
+import { useStudentStats, useStudents } from "@/hooks/useStudents";
+import { formatCurrency } from "@/utils/format";
+import { Skeleton } from "@/components/ui/skeleton";
 import ReceiptModal from "@/components/ReceiptModal";
 import NewFeeModal from "@/components/NewFeeModal";
 import EditStudentFeeModal from "@/components/EditStudentFeeModal";
 import { ExportService } from "@/lib/exportUtils";
-import { 
-  DollarSign, 
-  CreditCard, 
-  AlertTriangle, 
-  CheckCircle, 
-  Clock, 
+import {
+  DollarSign,
+  CreditCard,
+  AlertTriangle,
+  CheckCircle,
+  Clock,
   TrendingUp,
   Users,
   Receipt,
@@ -59,9 +63,33 @@ export default function StudentFeesPage() {
   const [feesCurrentPage, setFeesCurrentPage] = useState(1);
   const [feesItemsPerPage, setFeesItemsPerPage] = useState(20);
 
-  const fees = StudentMockDataService.getStudentFees();
-  const profiles = StudentMockDataService.getStudentProfiles();
-  const stats = StudentMockDataService.getStudentStats();
+  const { fees, loading: feesLoading } = useStudentFees();
+  const { students, loading: studentsLoading } = useStudents();
+  const { stats, loading: statsLoading } = useStudentStats();
+
+  // Compute profiles from students and fees
+  const profiles = students.map(student => {
+    const studentFees = fees.filter(f => f.studentId === student.id);
+    const totalFees = studentFees.reduce((sum, f) => sum + f.amount, 0);
+    const paidFees = studentFees.reduce((sum, f) => sum + (f.paidAmount ?? 0), 0);
+    const pendingFees = studentFees.reduce((sum, f) => sum + (f.remainingAmount ?? 0), 0);
+
+    return {
+      ...student,
+      className: student.classTitle || 'N/A',
+      totalFees,
+      paidFees,
+      pendingFees
+    };
+  });
+
+  const isLoading = feesLoading || studentsLoading || statsLoading;
+
+  if (isLoading) {
+    return <div className="p-6"><Skeleton className="h-96 w-full" /></div>;
+  }
+
+  if (!stats) return null; // Handle error state appropriately in real app
 
   // Fonctions de gestion des frais
   const handlePrintReceipt = (fee: StudentFee) => {
@@ -95,10 +123,10 @@ export default function StudentFeesPage() {
   // Filtrage des données
   const filteredFees = fees.filter(fee => {
     const matchesSearch = fee.studentName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         fee.feeType.toLowerCase().includes(searchTerm.toLowerCase());
+      fee.feeType.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === "ALL" || fee.status === statusFilter;
     const matchesClass = classFilter === "ALL" || fee.className === classFilter;
-    
+
     return matchesSearch && matchesStatus && matchesClass;
   });
 
@@ -121,10 +149,10 @@ export default function StudentFeesPage() {
   // Filtrage des élèves pour la vue "Par élève"
   const filteredStudents = profiles.filter(student => {
     const matchesSearch = student.name.toLowerCase().includes(studentsSearchTerm.toLowerCase()) ||
-                         student.className.toLowerCase().includes(studentsSearchTerm.toLowerCase());
-    
+      student.className.toLowerCase().includes(studentsSearchTerm.toLowerCase());
+
     const matchesClass = studentsClassFilter === "ALL" || student.className === studentsClassFilter;
-    
+
     let matchesStatus = true;
     if (studentsStatusFilter === "PAID") {
       matchesStatus = student.pendingFees === 0;
@@ -133,7 +161,7 @@ export default function StudentFeesPage() {
     } else if (studentsStatusFilter === "PARTIAL") {
       matchesStatus = student.paidFees > 0 && student.pendingFees > 0;
     }
-    
+
     return matchesSearch && matchesClass && matchesStatus;
   });
 
@@ -270,7 +298,7 @@ export default function StudentFeesPage() {
               Calendrier académique
             </Button>
           </Link>
-          <Button 
+          <Button
             size="sm"
             onClick={handleNewFee}
           >
@@ -284,21 +312,21 @@ export default function StudentFeesPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatsCard
           title="Total des frais"
-          value={StudentMockDataService.formatCurrency(stats.totalFees)}
+          value={formatCurrency(stats.totalFees)}
           description="Tous les frais"
           icon={DollarSign}
           color="blue"
         />
         <StatsCard
           title="Frais payés"
-          value={StudentMockDataService.formatCurrency(stats.paidFees)}
+          value={formatCurrency(stats.paidFees)}
           description={`${Math.round((stats.paidFees / stats.totalFees) * 100)}% collecté`}
           icon={CheckCircle}
           color="green"
         />
         <StatsCard
           title="Frais en attente"
-          value={StudentMockDataService.formatCurrency(stats.pendingFees)}
+          value={formatCurrency(stats.pendingFees)}
           description="À collecter"
           icon={Clock}
           color="yellow"
@@ -400,9 +428,9 @@ export default function StudentFeesPage() {
                         </SelectContent>
                       </Select>
                     </div>
-                    
-                    <Button 
-                      variant="outline" 
+
+                    <Button
+                      variant="outline"
                       size="sm"
                       onClick={handleExportData}
                       className="ml-4"
@@ -446,10 +474,10 @@ export default function StudentFeesPage() {
                         <td className="py-3 text-gray-600">{fee.className}</td>
                         <td className="py-3">{fee.feeType}</td>
                         <td className="py-3 text-right font-medium">
-                          {StudentMockDataService.formatCurrency(fee.amount)}
+                          {formatCurrency(fee.amount)}
                           {fee.remainingAmount && fee.remainingAmount > 0 && (
                             <div className="text-xs text-red-600">
-                              Reste: {StudentMockDataService.formatCurrency(fee.remainingAmount)}
+                              Reste: {formatCurrency(fee.remainingAmount)}
                             </div>
                           )}
                         </td>
@@ -469,17 +497,17 @@ export default function StudentFeesPage() {
                                 <Eye className="h-4 w-4" />
                               </Button>
                             </Link>
-                            <Button 
-                              variant="ghost" 
-                              size="sm" 
+                            <Button
+                              variant="ghost"
+                              size="sm"
                               title="Modifier"
                               onClick={() => handleEditFee(fee)}
                             >
                               <Edit className="h-4 w-4" />
                             </Button>
                             {fee.receiptNo && (
-                              <Button 
-                                variant="ghost" 
+                              <Button
+                                variant="ghost"
                                 size="sm"
                                 title="Télécharger reçu"
                                 onClick={() => {
@@ -508,7 +536,7 @@ export default function StudentFeesPage() {
                   <div className="text-sm text-gray-600">
                     Page {feesCurrentPage} sur {totalFeesPages}
                   </div>
-                  
+
                   <div className="flex items-center space-x-2">
                     <Button
                       variant="outline"
@@ -519,10 +547,10 @@ export default function StudentFeesPage() {
                       <ChevronLeft className="h-4 w-4" />
                       Précédent
                     </Button>
-                    
+
                     <div className="flex space-x-1">
                       {Array.from({ length: Math.min(5, totalFeesPages) }, (_, i) => {
-                        let pageNum;
+                        let pageNum: number;
                         if (totalFeesPages <= 5) {
                           pageNum = i + 1;
                         } else if (feesCurrentPage <= 3) {
@@ -532,7 +560,7 @@ export default function StudentFeesPage() {
                         } else {
                           pageNum = feesCurrentPage - 2 + i;
                         }
-                        
+
                         return (
                           <Button
                             key={pageNum}
@@ -545,7 +573,7 @@ export default function StudentFeesPage() {
                           </Button>
                         );
                       })}
-                      
+
                       {totalFeesPages > 5 && feesCurrentPage < totalFeesPages - 2 && (
                         <>
                           <Button variant="ghost" size="sm" disabled>
@@ -562,7 +590,7 @@ export default function StudentFeesPage() {
                         </>
                       )}
                     </div>
-                    
+
                     <Button
                       variant="outline"
                       size="sm"
@@ -681,8 +709,8 @@ export default function StudentFeesPage() {
                       </Select>
                     </div>
 
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       size="sm"
                       onClick={handleExportStudents}
                     >
@@ -706,13 +734,10 @@ export default function StudentFeesPage() {
                 <Card key={student.id} className="hover:shadow-md transition-shadow">
                   <CardHeader className="pb-3">
                     <div className="flex items-center gap-3">
-                      <Image
-                        src={student.imageUrl}
-                        alt={student.name}
-                        width={48}
-                        height={48}
-                        className="w-12 h-12 rounded-full object-cover"
-                      />
+                      <Avatar className="w-12 h-12">
+                        <AvatarImage src={student.imageUrl} alt={student.name} className="object-cover" />
+                        <AvatarFallback>{student.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                      </Avatar>
                       <div className="flex-1 min-w-0">
                         <CardTitle className="text-lg truncate">{student.name}</CardTitle>
                         <p className="text-sm text-gray-600">{student.className}</p>
@@ -724,19 +749,19 @@ export default function StudentFeesPage() {
                       <div className="flex justify-between text-sm">
                         <span>Total des frais:</span>
                         <span className="font-medium">
-                          {StudentMockDataService.formatCurrency(student.totalFees)}
+                          {formatCurrency(student.totalFees)}
                         </span>
                       </div>
                       <div className="flex justify-between text-sm">
                         <span className="text-green-600">Payé:</span>
                         <span className="font-medium text-green-600">
-                          {StudentMockDataService.formatCurrency(student.paidFees)}
+                          {formatCurrency(student.paidFees)}
                         </span>
                       </div>
                       <div className="flex justify-between text-sm">
                         <span className="text-red-600">En attente:</span>
                         <span className="font-medium text-red-600">
-                          {StudentMockDataService.formatCurrency(student.pendingFees)}
+                          {formatCurrency(student.pendingFees)}
                         </span>
                       </div>
                     </div>
@@ -786,13 +811,10 @@ export default function StudentFeesPage() {
                         <tr key={student.id} className="border-b hover:bg-gray-50">
                           <td className="py-3 px-4">
                             <div className="flex items-center gap-3">
-                              <Image
-                                src={student.imageUrl}
-                                alt={student.name}
-                                width={32}
-                                height={32}
-                                className="w-8 h-8 rounded-full object-cover"
-                              />
+                              <Avatar className="w-8 h-8">
+                                <AvatarImage src={student.imageUrl} alt={student.name} className="object-cover" />
+                                <AvatarFallback>{student.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                              </Avatar>
                               <div>
                                 <div className="font-medium">{student.name}</div>
                                 <div className="text-xs text-gray-500">{student.email}</div>
@@ -801,13 +823,13 @@ export default function StudentFeesPage() {
                           </td>
                           <td className="py-3 px-4 text-gray-600">{student.className}</td>
                           <td className="py-3 px-4 text-right font-medium">
-                            {StudentMockDataService.formatCurrency(student.totalFees)}
+                            {formatCurrency(student.totalFees)}
                           </td>
                           <td className="py-3 px-4 text-right text-green-600 font-medium">
-                            {StudentMockDataService.formatCurrency(student.paidFees)}
+                            {formatCurrency(student.paidFees)}
                           </td>
                           <td className="py-3 px-4 text-right text-red-600 font-medium">
-                            {StudentMockDataService.formatCurrency(student.pendingFees)}
+                            {formatCurrency(student.pendingFees)}
                           </td>
                           <td className="py-3 px-4">
                             <div className="flex items-center gap-2">
@@ -846,7 +868,7 @@ export default function StudentFeesPage() {
                   <div className="text-sm text-gray-600">
                     Page {currentPage} sur {totalPages}
                   </div>
-                  
+
                   <div className="flex items-center space-x-2">
                     <Button
                       variant="outline"
@@ -857,10 +879,10 @@ export default function StudentFeesPage() {
                       <ChevronLeft className="h-4 w-4" />
                       Précédent
                     </Button>
-                    
+
                     <div className="flex space-x-1">
                       {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
-                        let pageNum;
+                        let pageNum: number;
                         if (totalPages <= 5) {
                           pageNum = i + 1;
                         } else if (currentPage <= 3) {
@@ -870,7 +892,7 @@ export default function StudentFeesPage() {
                         } else {
                           pageNum = currentPage - 2 + i;
                         }
-                        
+
                         return (
                           <Button
                             key={pageNum}
@@ -883,7 +905,7 @@ export default function StudentFeesPage() {
                           </Button>
                         );
                       })}
-                      
+
                       {totalPages > 5 && currentPage < totalPages - 2 && (
                         <>
                           <Button variant="ghost" size="sm" disabled>
@@ -900,7 +922,7 @@ export default function StudentFeesPage() {
                         </>
                       )}
                     </div>
-                    
+
                     <Button
                       variant="outline"
                       size="sm"
@@ -920,8 +942,8 @@ export default function StudentFeesPage() {
         <TabsContent value="analytics" className="space-y-4">
           {/* Bouton d'exportation pour les analyses */}
           <div className="flex justify-end">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               size="sm"
               onClick={handleExportAnalytics}
             >
@@ -948,7 +970,7 @@ export default function StudentFeesPage() {
                       style={{ width: `${(stats.paidFees / stats.totalFees) * 100}%` }}
                     />
                   </div>
-                  
+
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-yellow-600">Frais en attente</span>
                     <span className="font-medium">{Math.round((stats.pendingFees / stats.totalFees) * 100)}%</span>
@@ -971,19 +993,19 @@ export default function StudentFeesPage() {
                 <div className="flex justify-between">
                   <span className="text-gray-600">Revenus collectés:</span>
                   <span className="font-bold text-green-600">
-                    {StudentMockDataService.formatCurrency(stats.paidFees)}
+                    {formatCurrency(stats.paidFees)}
                   </span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Revenus attendus:</span>
                   <span className="font-medium">
-                    {StudentMockDataService.formatCurrency(stats.pendingFees)}
+                    {formatCurrency(stats.pendingFees)}
                   </span>
                 </div>
                 <div className="flex justify-between border-t pt-2">
                   <span className="font-medium">Total prévu:</span>
                   <span className="font-bold">
-                    {StudentMockDataService.formatCurrency(stats.totalFees)}
+                    {formatCurrency(stats.totalFees)}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">

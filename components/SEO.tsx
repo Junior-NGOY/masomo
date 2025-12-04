@@ -122,7 +122,7 @@ export function generateSchemaMarkup(type: 'WebSite' | 'Organization' | 'Softwar
         ...baseSchema,
         name: 'Masomo Pro',
         url: 'https://masomo-pro.com',
-        logo: 'https://masomo-pro.com/images/logo.png',
+        logo: 'https://masomo-pro.com/images/logo.svg',
         description: 'Plateforme de gestion scolaire moderne et intuitive',
         contactPoint: {
           '@type': 'ContactPoint',

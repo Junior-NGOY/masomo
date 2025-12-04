@@ -1,5 +1,3 @@
-"use client";
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BarChart3, TrendingUp } from "lucide-react";
 import { MonthlyData, DashboardMockDataService } from "@/services/dashboardMockData";
@@ -9,11 +7,11 @@ interface MonthlyStatsChartProps {
 }
 
 export default function MonthlyStatsChart({ data }: MonthlyStatsChartProps) {
-  const monthlyData = data || DashboardMockDataService.getMonthlyData();
+  const monthlyData = (data || DashboardMockDataService.getMonthlyData()) || [];
   
   // Calculer les valeurs max pour la normalisation
-  const maxStudents = Math.max(...monthlyData.map(d => d.students));
-  const maxRevenue = Math.max(...monthlyData.map(d => d.revenue));
+  const maxStudents = monthlyData.length > 0 ? Math.max(...monthlyData.map(d => d?.students || 0)) : 1;
+  const maxRevenue = monthlyData.length > 0 ? Math.max(...monthlyData.map(d => d?.revenue || 0)) : 1;
 
   return (
     <Card>
@@ -28,6 +26,7 @@ export default function MonthlyStatsChart({ data }: MonthlyStatsChartProps) {
           {/* Graphique simple avec des barres CSS */}
           <div className="grid grid-cols-6 gap-2 h-32">
             {monthlyData.map((month, index) => {
+              if (!month) return null;
               const studentHeight = (month.students / maxStudents) * 100;
               const revenueHeight = (month.revenue / maxRevenue) * 100;
               
@@ -64,20 +63,22 @@ export default function MonthlyStatsChart({ data }: MonthlyStatsChartProps) {
           </div>
           
           {/* Statistiques rapides */}
-          <div className="grid grid-cols-2 gap-4 pt-4 border-t">
-            <div className="text-center">
-              <div className="text-lg font-bold text-blue-600">
-                +{monthlyData[monthlyData.length - 1].students - monthlyData[0].students}
+          {monthlyData.length > 0 && (
+            <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+              <div className="text-center">
+                <div className="text-lg font-bold text-blue-600">
+                  +{monthlyData[monthlyData.length - 1].students - monthlyData[0].students}
+                </div>
+                <div className="text-xs text-gray-600">Nouveaux étudiants</div>
               </div>
-              <div className="text-xs text-gray-600">Nouveaux étudiants</div>
-            </div>
-            <div className="text-center">
-              <div className="text-lg font-bold text-green-600">
-                +{Math.round(((monthlyData[monthlyData.length - 1].revenue - monthlyData[0].revenue) / monthlyData[0].revenue) * 100)}%
+              <div className="text-center">
+                <div className="text-lg font-bold text-green-600">
+                  +{monthlyData[0].revenue > 0 ? Math.round(((monthlyData[monthlyData.length - 1].revenue - monthlyData[0].revenue) / monthlyData[0].revenue) * 100) : 0}%
+                </div>
+                <div className="text-xs text-gray-600">Croissance revenus</div>
               </div>
-              <div className="text-xs text-gray-600">Croissance revenus</div>
             </div>
-          </div>
+          )}
         </div>
       </CardContent>
     </Card>

@@ -16,7 +16,9 @@ import {
   Download,
   BarChart3
 } from "lucide-react";
-import { MockDataService } from "@/services/mockServices";
+import { useExaminations } from "@/hooks/useExaminations";
+import { useDashboardStats } from "@/hooks/useDashboardStats";
+
 import StatsCard from "@/components/dashboard/StatsCard";
 import {
   Table,
@@ -35,9 +37,15 @@ import {
 } from "@/components/ui/select";
 
 export default function ExaminationsPage() {
-  // TODO: Remplacer par les vrais appels API une fois le backend terminé
-  const examinations = MockDataService.examinations.getExaminations();
-  const examStats = MockDataService.examinations.getExamStats();
+  const { examinations, loading: examsLoading } = useExaminations();
+  const { stats: dashboardStats, loading: statsLoading } = useDashboardStats();
+  
+  const examStats = {
+    scheduledExams: examinations.filter(e => e.status === 'SCHEDULED').length,
+    ongoingExams: examinations.filter(e => e.status === 'ONGOING').length,
+    completedExams: examinations.filter(e => e.status === 'COMPLETED').length,
+    averageScore: dashboardStats?.academicPerformance?.averageGrade || 0
+  };
   
   const [searchQuery, setSearchQuery] = React.useState("");
   const [statusFilter, setStatusFilter] = React.useState("all");
@@ -46,8 +54,8 @@ export default function ExaminationsPage() {
   // Filtrer les examens
   const filteredExams = examinations.filter(exam => {
     const matchesSearch = exam.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         exam.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         exam.className.toLowerCase().includes(searchQuery.toLowerCase());
+                         (exam.subject?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false) ||
+                         (exam.className?.toLowerCase().includes(searchQuery.toLowerCase()) ?? false);
     const matchesStatus = statusFilter === "all" || exam.status === statusFilter;
     const matchesSubject = subjectFilter === "all" || exam.subject === subjectFilter;
     
@@ -55,7 +63,7 @@ export default function ExaminationsPage() {
   });
 
   // Obtenir les matières uniques pour le filtre
-  const uniqueSubjects = Array.from(new Set(examinations.map(exam => exam.subject)));
+  const uniqueSubjects = Array.from(new Set(examinations.map(exam => exam.subject).filter(Boolean)));
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -86,6 +94,10 @@ export default function ExaminationsPage() {
         return status;
     }
   };
+
+  if (examsLoading || statsLoading) {
+    return <div className="p-6">Chargement...</div>;
+  }
 
   return (
     <div className="flex-1 space-y-6 p-4">
@@ -161,7 +173,7 @@ export default function ExaminationsPage() {
                     <h4 className="font-semibold text-sm">{exam.name}</h4>
                     <div className="flex items-center gap-2 text-xs text-gray-600">
                       <Calendar className="h-3 w-3" />
-                      {MockDataService.formatDate(exam.date)} à {exam.time}
+                      {new Date(exam.startDate).toLocaleDateString('fr-FR')} à {exam.time}
                     </div>
                     <div className="flex items-center gap-2 text-xs text-gray-600">
                       <MapPin className="h-3 w-3" />
@@ -223,7 +235,7 @@ export default function ExaminationsPage() {
               <SelectContent>
                 <SelectItem value="all">Toutes les matières</SelectItem>
                 {uniqueSubjects.map((subject) => (
-                  <SelectItem key={subject} value={subject}>
+                  <SelectItem key={subject} value={subject as string}>
                     {subject}
                   </SelectItem>
                 ))}
@@ -259,7 +271,7 @@ export default function ExaminationsPage() {
                     <TableCell>{exam.className}</TableCell>
                     <TableCell>
                       <div className="text-sm">
-                        <div>{MockDataService.formatDate(exam.date)}</div>
+                        <div>{new Date(exam.startDate).toLocaleDateString('fr-FR')}</div>
                         <div className="text-gray-500">{exam.time}</div>
                       </div>
                     </TableCell>

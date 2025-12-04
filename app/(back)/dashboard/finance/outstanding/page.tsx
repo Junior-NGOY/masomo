@@ -42,111 +42,25 @@ import {
   TabsTrigger
 } from "@/components/ui/tabs";
 
-interface OutstandingPayment {
-  id: string;
-  studentName: string;
-  studentId: string;
-  className: string;
-  amount: number;
-  dueDate: string;
-  daysOverdue: number;
-  feeType: string;
-  parentName: string;
-  parentPhone: string;
-  parentEmail: string;
-  status: 'overdue' | 'pending' | 'partial';
-  lastReminder: string;
-  paidAmount: number;
-}
+import { useOutstandingFees } from "@/hooks/useOutstandingFees";
 
-export default function OutstandingPaymentsPage() {
+export default function OutstandingFeesPage() {
   const [searchQuery, setSearchQuery] = React.useState("");
-  const [classFilter, setClassFilter] = React.useState("all");
   const [statusFilter, setStatusFilter] = React.useState("all");
+  const [classFilter, setClassFilter] = React.useState("all");
   const [activeTab, setActiveTab] = React.useState("overview");
 
-  // Données simulées des impayés
-  const outstandingPayments: OutstandingPayment[] = [
-    {
-      id: "out-001",
-      studentName: "Aminata Diallo",
-      studentId: "STU-001",
-      className: "6ème A",
-      amount: 85000,
-      dueDate: "2024-02-15",
-      daysOverdue: 45,
-      feeType: "Frais de scolarité",
-      parentName: "Mamadou Diallo",
-      parentPhone: "+221 77 123 4567",
-      parentEmail: "m.diallo@email.com",
-      status: "overdue",
-      lastReminder: "2024-03-20",
-      paidAmount: 0
-    },
-    {
-      id: "out-002",
-      studentName: "Ibrahim Kane",
-      studentId: "STU-002",
-      className: "5ème B",
-      amount: 120000,
-      dueDate: "2024-03-01",
-      daysOverdue: 30,
-      feeType: "Frais de transport",
-      parentName: "Fatou Kane",
-      parentPhone: "+221 76 987 6543",
-      parentEmail: "f.kane@email.com",
-      status: "overdue",
-      lastReminder: "2024-03-25",
-      paidAmount: 0
-    },
-    {
-      id: "out-003",
-      studentName: "Aissa Sow",
-      studentId: "STU-003",
-      className: "4ème C",
-      amount: 95000,
-      dueDate: "2024-03-10",
-      daysOverdue: 21,
-      feeType: "Frais de cantine",
-      parentName: "Ousmane Sow",
-      parentPhone: "+221 78 456 7890",
-      parentEmail: "o.sow@email.com",
-      status: "partial",
-      lastReminder: "2024-03-28",
-      paidAmount: 35000
-    },
-    {
-      id: "out-004",
-      studentName: "Moussa Fall",
-      studentId: "STU-004",
-      className: "3ème A",
-      amount: 75000,
-      dueDate: "2024-03-20",
-      daysOverdue: 11,
-      feeType: "Frais d'examen",
-      parentName: "Mariama Fall",
-      parentPhone: "+221 77 234 5678",
-      parentEmail: "m.fall@email.com",
-      status: "pending",
-      lastReminder: "2024-03-30",
-      paidAmount: 0
-    }
-  ];
+  const { payments: outstandingPayments, stats, loading } = useOutstandingFees();
 
-  // Statistiques
-  const stats = {
-    totalOutstanding: outstandingPayments.reduce((sum, payment) => sum + (payment.amount - payment.paidAmount), 0),
-    overdueCount: outstandingPayments.filter(p => p.status === 'overdue').length,
-    pendingCount: outstandingPayments.filter(p => p.status === 'pending').length,
-    partialCount: outstandingPayments.filter(p => p.status === 'partial').length,
-    averageDaysOverdue: Math.round(outstandingPayments.reduce((sum, p) => sum + p.daysOverdue, 0) / outstandingPayments.length)
-  };
+  if (loading) {
+    return <div className="p-6">Chargement...</div>;
+  }
 
-  // Filtrage
+  if (!stats) return null;
+
   const filteredPayments = outstandingPayments.filter(payment => {
     const matchesSearch = payment.studentName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         payment.parentName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         payment.className.toLowerCase().includes(searchQuery.toLowerCase());
+                         payment.parentName.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesClass = classFilter === "all" || payment.className === classFilter;
     const matchesStatus = statusFilter === "all" || payment.status === statusFilter;
     
@@ -162,6 +76,7 @@ export default function OutstandingPaymentsPage() {
     }
   };
 
+
   const getStatusText = (status: string) => {
     switch (status) {
       case 'overdue': return 'En retard';
@@ -174,7 +89,7 @@ export default function OutstandingPaymentsPage() {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('fr-FR', {
       style: 'currency',
-      currency: 'XOF',
+      currency: 'CDF',
       minimumFractionDigits: 0
     }).format(amount);
   };

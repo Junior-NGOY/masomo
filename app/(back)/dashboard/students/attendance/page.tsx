@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import Image from "next/image";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -10,12 +11,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { StudentMockDataService, StudentAttendance } from "@/services/studentMockDataService";
-import { 
-  UserCheck, 
-  UserX, 
-  Clock, 
-  CheckCircle, 
+import { useStudentAttendance } from "@/hooks/useStudentAttendance";
+import { useStudentStats, useStudents } from "@/hooks/useStudents";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+  UserCheck,
+  UserX,
+  Clock,
+  CheckCircle,
   Calendar as CalendarIcon,
   Users,
   TrendingUp,
@@ -37,9 +40,23 @@ export default function StudentAttendancePage() {
   const [dateFilter, setDateFilter] = useState<Date>(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
 
-  const attendance = StudentMockDataService.getStudentAttendance();
-  const profiles = StudentMockDataService.getStudentProfiles();
-  const stats = StudentMockDataService.getStudentStats();
+  const { attendance, loading: attendanceLoading } = useStudentAttendance();
+  const { students, loading: studentsLoading } = useStudents();
+  const { stats, loading: statsLoading } = useStudentStats();
+
+  // Use students as profiles for now, as they contain basic info
+  const profiles = students.map(s => ({
+    ...s,
+    className: s.classTitle || 'N/A'
+  }));
+
+  const isLoading = attendanceLoading || studentsLoading || statsLoading;
+
+  if (isLoading) {
+    return <div className="p-6"><Skeleton className="h-96 w-full" /></div>;
+  }
+
+  if (!stats) return null;
 
   // Filtrage des données
   const filteredAttendance = attendance.filter(att => {
@@ -47,7 +64,7 @@ export default function StudentAttendancePage() {
     const matchesStatus = statusFilter === "ALL" || att.status === statusFilter;
     const matchesClass = classFilter === "ALL" || att.className === classFilter;
     const matchesDate = !selectedDate || att.date === format(selectedDate, 'yyyy-MM-dd');
-    
+
     return matchesSearch && matchesStatus && matchesClass && matchesDate;
   });
 
@@ -55,10 +72,10 @@ export default function StudentAttendancePage() {
   const uniqueClasses = [...new Set(attendance.map(att => att.className))];
 
   // Statistiques de présence pour la date sélectionnée
-  const todayAttendance = attendance.filter(att => 
+  const todayAttendance = attendance.filter(att =>
     att.date === format(selectedDate || new Date(), 'yyyy-MM-dd')
   );
-  
+
   const todayStats = {
     present: todayAttendance.filter(att => att.status === 'PRESENT').length,
     absent: todayAttendance.filter(att => att.status === 'ABSENT').length,
@@ -254,7 +271,7 @@ export default function StudentAttendancePage() {
           <Card>
             <CardHeader>
               <CardTitle>
-                Présences du {selectedDate ? format(selectedDate, "PP", { locale: fr }) : "jour"} 
+                Présences du {selectedDate ? format(selectedDate, "PP", { locale: fr }) : "jour"}
                 ({filteredAttendance.length})
               </CardTitle>
             </CardHeader>
@@ -318,13 +335,10 @@ export default function StudentAttendancePage() {
                 <Card key={student.id}>
                   <CardHeader className="pb-3">
                     <div className="flex items-center gap-3">
-                      <Image
-                        src={student.imageUrl}
-                        alt={student.name}
-                        width={48}
-                        height={48}
-                        className="w-12 h-12 rounded-full object-cover"
-                      />
+                      <Avatar className="w-12 h-12">
+                        <AvatarImage src={student.imageUrl} alt={student.name} className="object-cover" />
+                        <AvatarFallback>{student.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                      </Avatar>
                       <div>
                         <CardTitle className="text-lg">{student.name}</CardTitle>
                         <p className="text-sm text-gray-600">{student.className}</p>
@@ -341,14 +355,13 @@ export default function StudentAttendancePage() {
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2">
                         <div
-                          className={`h-2 rounded-full transition-all duration-300 ${
-                            attendanceRate >= 90 ? 'bg-green-500' : 
+                          className={`h-2 rounded-full transition-all duration-300 ${attendanceRate >= 90 ? 'bg-green-500' :
                             attendanceRate >= 80 ? 'bg-orange-500' : 'bg-red-500'
-                          }`}
+                            }`}
                           style={{ width: `${attendanceRate}%` }}
                         />
                       </div>
-                      
+
                       {recentAbsences.length > 0 && (
                         <div className="pt-2">
                           <p className="text-xs text-gray-600 mb-1">Absences récentes:</p>
@@ -362,7 +375,7 @@ export default function StudentAttendancePage() {
                         </div>
                       )}
                     </div>
-                    
+
                     <Button variant="outline" size="sm" className="w-full">
                       <Eye className="h-4 w-4 mr-2" />
                       Voir historique
@@ -464,13 +477,10 @@ export default function StudentAttendancePage() {
                   .map((student) => (
                     <div key={student.id} className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
                       <div className="flex items-center gap-3">
-                        <Image
-                          src={student.imageUrl}
-                          alt={student.name}
-                          width={32}
-                          height={32}
-                          className="w-8 h-8 rounded-full object-cover"
-                        />
+                        <Avatar className="w-8 h-8">
+                          <AvatarImage src={student.imageUrl} alt={student.name} className="object-cover" />
+                          <AvatarFallback>{student.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                        </Avatar>
                         <div>
                           <p className="font-medium text-red-800">{student.name}</p>
                           <p className="text-sm text-red-600">{student.className}</p>

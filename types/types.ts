@@ -63,8 +63,8 @@ export type Department = {
   hodStartDate?: string;
   budget?: number;
   budgetYear?: string;
-  teachers: StreamWithCount[];
-  subjects: StreamWithCount[];
+  teachers?: Teacher[];
+  subjects?: Subject[];
   createdAt: string;
   updatedAt: string;
 };

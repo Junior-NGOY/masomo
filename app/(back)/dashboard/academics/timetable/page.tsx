@@ -22,6 +22,10 @@ import {
   Settings
 } from "lucide-react";
 import { MockDataService } from "@/services/mockServices";
+import { TimetableMockService } from "@/services/timetableMockService";
+import { useTimetable } from "@/hooks/useTimetable";
+import { useClasses } from "@/hooks/useClasses";
+import { useSubjects } from "@/hooks/useSubjects";
 import StatsCard from "@/components/dashboard/StatsCard";
 import {
   Table,
@@ -44,7 +48,6 @@ import {
   TabsList,
   TabsTrigger
 } from "@/components/ui/tabs";
-import { TimetableMockService } from "@/services/timetableMockService";
 import TimetableCreationModal from "@/components/TimetableCreationModal";
 import TimetableViewModal from "@/components/TimetableViewModal";
 import TimetableGrid from "@/components/TimetableGrid";
@@ -75,10 +78,15 @@ export default function TimetablePage() {
   const [showViewModal, setShowViewModal] = React.useState(false);
 
   // Récupération des données
-  const timetables = TimetableMockService.getAllTimetables();
-  const timetableStats = TimetableMockService.getTimetableStats();
-  const classes: ClassType[] = MockDataService.classes.getAll();
-  const subjects: SubjectType[] = MockDataService.subjects.getAll();
+  const { timetables, stats: timetableStats, loading: timetableLoading, deleteTimetable, duplicateTimetable } = useTimetable();
+  const { classes, loading: classesLoading } = useClasses();
+  const { subjects, loading: subjectsLoading } = useSubjects();
+
+  if (timetableLoading || classesLoading || subjectsLoading) {
+    return <div className="p-6">Chargement...</div>;
+  }
+
+  if (!timetableStats) return null;
 
   // Filtrage des emplois du temps
   const filteredTimetables = timetables.filter(timetable => {
@@ -101,16 +109,14 @@ export default function TimetablePage() {
     setShowCreationModal(true);
   };
 
-  const handleDeleteTimetable = (timetableId: string) => {
+  const handleDeleteTimetable = async (timetableId: string) => {
     if (confirm("Êtes-vous sûr de vouloir supprimer cet emploi du temps ?")) {
-      TimetableMockService.deleteTimetable(timetableId);
-      // Actualiser la page ou l'état selon les besoins
+      await deleteTimetable(timetableId);
     }
   };
 
-  const handleDuplicateTimetable = (timetableId: string) => {
-    TimetableMockService.duplicateTimetable(timetableId);
-    // Actualiser la page
+  const handleDuplicateTimetable = async (timetableId: string) => {
+    await duplicateTimetable(timetableId);
   };
 
   const getStatusColor = (status: string) => {
@@ -220,9 +226,9 @@ export default function TimetablePage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Toutes les classes</SelectItem>
-                    {classes.map((classe: ClassType) => (
-                      <SelectItem key={classe.id} value={classe.id}>
-                        {classe.name}
+                    {classes.map((classe: any, index: number) => (
+                      <SelectItem key={`${classe.id}-${index}`} value={classe.id}>
+                        {classe.title}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -267,9 +273,9 @@ export default function TimetablePage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Toutes les classes</SelectItem>
-                    {classes.map((classe: ClassType) => (
-                      <SelectItem key={classe.id} value={classe.id}>
-                        {classe.name}
+                    {classes.map((classe: any, index: number) => (
+                      <SelectItem key={`${classe.id}-${index}`} value={classe.id}>
+                        {classe.title || classe.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -280,8 +286,8 @@ export default function TimetablePage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Toutes les matières</SelectItem>
-                    {subjects.map((subject: SubjectType) => (
-                      <SelectItem key={subject.id} value={subject.id}>
+                    {subjects.map((subject: any, index: number) => (
+                      <SelectItem key={`${subject.id}-${index}`} value={subject.id}>
                         {subject.name}
                       </SelectItem>
                     ))}
@@ -304,8 +310,8 @@ export default function TimetablePage() {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredTimetables.map((timetable) => (
-                      <TableRow key={timetable.id}>
+                    {filteredTimetables.map((timetable, index) => (
+                      <TableRow key={`${timetable.id}-${index}`}>
                         <TableCell className="font-medium">
                           {timetable.className}
                         </TableCell>
