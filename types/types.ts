@@ -308,3 +308,69 @@ export type UserCreateProps = {
   schoolId?: string;
   schoolName?: string;
 };
+
+export enum FeeType {
+  TUITION = "TUITION",
+  REGISTRATION = "REGISTRATION",
+  EXAM = "EXAM",
+  TRANSPORT = "TRANSPORT",
+  LIBRARY = "LIBRARY",
+  LABORATORY = "LABORATORY",
+  ACTIVITY = "ACTIVITY",
+  UNIFORM = "UNIFORM",
+  BOOKS = "BOOKS",
+  TRIP = "TRIP",
+  MAINTENANCE = "MAINTENANCE",
+  DEVELOPMENT = "DEVELOPMENT",
+  MEDICAL = "MEDICAL",
+  GRADUATION = "GRADUATION",
+  OTHER = "OTHER"
+}
+
+export interface FeeCreateProps {
+  name: string;
+  amount: number;
+  type: FeeType;
+  academicYearId: string;
+  schoolId: string;
+  classLevel: string;
+  classIds?: string[];
+  dueDate?: Date;
+  description?: string;
+  isRecurring?: boolean;
+  recurringType?: string;
+  dueDayOfMonth?: number;
+  excludedMonths?: string[];
+  isOptional?: boolean;
+}
+
+export interface Fee {
+  id: string;
+  name: string;
+  amount: number;
+  type: FeeType;
+  classLevel: string;
+  classIds: string[];
+  academicYearId: string;
+  schoolId: string;
+  dueDate?: string;
+  description?: string;
+  isRecurring: boolean;
+  recurringType?: string;
+  dueDayOfMonth?: number;
+  excludedMonths?: string;
+  isOptional: boolean;
+  createdAt: string;
+  updatedAt: string;
+  academicYear?: {
+    name: string;
+    isActive: boolean;
+  };
+  school?: {
+    name: string;
+  };
+  _count?: {
+    payments: number;
+    studentFeeStructures: number;
+  };
+}

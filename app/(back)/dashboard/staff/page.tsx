@@ -68,10 +68,13 @@ export default function StaffPage() {
   });
 
   // Obtenir les départements uniques pour les filtres
-  const uniqueDepartments = Array.from(new Set(teachers.map(t => ({
-    id: t.departmentId,
-    name: t.departmentName
-  })).filter(d => d.name)));
+  const uniqueDepartments = Array.from(
+    new Map(
+      teachers
+        .filter(t => t.departmentId && t.departmentName)
+        .map(t => [t.departmentId, { id: t.departmentId, name: t.departmentName }])
+    ).values()
+  );
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('fr-FR');

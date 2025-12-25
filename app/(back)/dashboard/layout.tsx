@@ -1,6 +1,7 @@
-import { getServerUser } from "@/actions/auth";
+import { getAllSchools } from "@/actions/schools";
 import AppSidebar from "@/components/dashboard/sidebar/app-sidebar";
 import SidebarHeader from "@/components/dashboard/sidebar/sidebar-header";
+import SchoolInitializer from "@/components/school-initializer";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { redirect } from "next/navigation";
 import React from "react";
@@ -10,13 +11,15 @@ export default async function DashboardLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // Désactivé pour le mode démo - pas de vérification d'authentification
   /* const user = await getServerUser();
   if (!user) {
     redirect("/login");
   } */
+  const schools = await getAllSchools();
+  const school = schools[0];
   return (
     <div>
+      <SchoolInitializer school={school} />
       <SidebarProvider>
         <AppSidebar />
         <SidebarInset>

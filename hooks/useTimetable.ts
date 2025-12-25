@@ -42,9 +42,13 @@ export function useTimetable() {
     useEffect(() => {
         const fetchTimetables = async () => {
             try {
-                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/timetables`);
+                const url = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/timetables`;
+                console.log('Fetching timetables from:', url);
+                const response = await fetch(url);
                 if (!response.ok) {
-                    throw new Error('Failed to fetch timetables');
+                    const errorText = await response.text();
+                    console.error('Fetch failed:', response.status, response.statusText, errorText);
+                    throw new Error(`Failed to fetch timetables: ${response.status} ${response.statusText}`);
                 }
                 const result = await response.json();
                 const data: Timetable[] = result.data;
@@ -53,6 +57,18 @@ export function useTimetable() {
 
                 // Calculate stats
                 const activeTimetables = data.filter(t => t.status === 'ACTIVE');
+                
+                // Deduplicate slots in active timetables to prevent rendering errors
+                activeTimetables.forEach(timetable => {
+                    const uniqueSlots = new Map();
+                    timetable.schedule.forEach(slot => {
+                        if (!uniqueSlots.has(slot.id)) {
+                            uniqueSlots.set(slot.id, slot);
+                        }
+                    });
+                    timetable.schedule = Array.from(uniqueSlots.values());
+                });
+
                 const uniqueClasses = new Set(activeTimetables.map(t => t.classId));
                 const totalHours = activeTimetables.reduce((sum, t) => sum + t.totalHours, 0);
 

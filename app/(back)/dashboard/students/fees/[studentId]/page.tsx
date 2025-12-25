@@ -8,12 +8,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { StudentMockDataService, StudentFee } from "@/services/studentMockDataService";
+import { useStudentFees, StudentFee } from "@/hooks/useStudentFees";
+import { useStudents } from "@/hooks/useStudents";
+import { updateStudentFee, deleteStudentFee, createStudentFee } from "@/actions/studentFees";
 import PaymentDetailsModal from "@/components/PaymentDetailsModal";
 import ReceiptModal from "@/components/ReceiptModal";
 import PaymentModal from "@/components/PaymentModal";
 import PostponeModal from "@/components/PostponeModal";
 import EditStudentFeeModal from "@/components/EditStudentFeeModal";
+import { Skeleton } from "@/components/ui/skeleton";
+import { formatCurrency } from "@/utils/format";
 import { 
   ArrowLeft,
   DollarSign,
@@ -51,12 +55,18 @@ export default function StudentFeeDetailsPage() {
   const [editFeeModalOpen, setEditFeeModalOpen] = useState(false);
   const [selectedFeeForEdit, setSelectedFeeForEdit] = useState<StudentFee | null>(null);
 
-  // Récupérer les données de l'élève
-  const profiles = StudentMockDataService.getStudentProfiles();
-  const allFees = StudentMockDataService.getStudentFees();
+  // Récupérer les données depuis les hooks
+  const { fees, loading: feesLoading } = useStudentFees();
+  const { students, loading: studentsLoading } = useStudents();
   
-  const student = profiles.find(p => p.id === studentId);
-  const studentFees = allFees.filter(fee => fee.studentId === studentId);
+  const student = students.find(s => s.id === studentId);
+  const studentFees = fees.filter(fee => fee.studentId === studentId);
+
+  const isLoading = feesLoading || studentsLoading;
+
+  if (isLoading) {
+    return <div className="p-6"><Skeleton className="h-96 w-full" /></div>;
+  }
 
   if (!student) {
     return (
@@ -74,12 +84,8 @@ export default function StudentFeeDetailsPage() {
 
   // Calculs des statistiques
   const totalFees = studentFees.reduce((sum, fee) => sum + fee.amount, 0);
-  const paidFees = studentFees
-    .filter(fee => fee.status === 'PAID')
-    .reduce((sum, fee) => sum + fee.amount, 0);
-  const pendingFees = studentFees
-    .filter(fee => fee.status === 'PENDING' || fee.status === 'OVERDUE')
-    .reduce((sum, fee) => sum + (fee.remainingAmount || fee.amount), 0);
+  const paidFees = studentFees.reduce((sum, fee) => sum + (fee.paidAmount || 0), 0);
+  const pendingFees = studentFees.reduce((sum, fee) => sum + (fee.remainingAmount || 0), 0);
   const overdueFees = studentFees.filter(fee => fee.status === 'OVERDUE');
 
   // Fonction pour ouvrir la modal de détails
@@ -111,11 +117,44 @@ export default function StudentFeeDetailsPage() {
     setPaymentModalOpen(true);
   };
 
+  // Fonction appelée après un paiement réussi
+  const handlePaymentSuccess = () => {
+    setPaymentModalOpen(false);
+    setSelectedFeeForPayment(null);
+    // Rafraîchir les données en rechargeant la page
+    setTimeout(() => {
+      window.location.reload();
+    }, 500);
+  };
+
   // Fonction pour reporter un paiement
   const handlePostponePayment = (fee: StudentFee) => {
     setSelectedFeeForPostpone(fee);
     setPostponeModalOpen(true);
   };
+
+  const handleConfirmPostpone = async (feeId: string, newDate: string | Date, reason: string) => {
+    try {
+      const fee = studentFees.find(f => f.id === feeId);
+      if (!fee) return;
+
+      const dateObj = new Date(newDate);
+
+      await updateStudentFee(feeId, {
+        dueDate: dateObj.toISOString(),
+        notes: fee.notes ? `${fee.notes}\n[Reporté]: ${reason}` : `[Reporté]: ${reason}`
+      });
+      
+      setPostponeModalOpen(false);
+      setSelectedFeeForPostpone(null);
+      window.location.reload();
+    } catch (error) {
+      console.error("Erreur lors du report:", error);
+      alert("Erreur lors du report de la date d'échéance");
+    }
+  };
+
+
 
   // Fonction pour modifier un frais
   const handleEditFee = (fee: StudentFee) => {
@@ -124,24 +163,62 @@ export default function StudentFeeDetailsPage() {
   };
 
   // Fonction pour mettre à jour un frais
-  const handleUpdateFee = (updatedFee: StudentFee) => {
-    // Mettre à jour localement (dans une vraie app, cela serait fait via API)
-    setEditFeeModalOpen(false);
-    setSelectedFeeForEdit(null);
-    // Ici on pourrait recharger les données ou mettre à jour l'état local
-    console.log('Frais mis à jour:', updatedFee);
-    // Dans une vraie app: refetch des données
-    window.location.reload();
+  const handleUpdateFee = async (updatedFee: StudentFee) => {
+    try {
+      // Appel API pour mettre à jour le frais (report d'échéance inclus)
+      await updateStudentFee(updatedFee.id, {
+        totalAmount: updatedFee.amount, // Ajout du montant total
+        paidAmount: updatedFee.paidAmount ?? 0,
+        dueDate: updatedFee.dueDate,
+        status: updatedFee.status,
+        notes: updatedFee.notes
+      });
+      setEditFeeModalOpen(false);
+      setSelectedFeeForEdit(null);
+      window.location.reload();
+    } catch (error) {
+      console.error("Erreur lors de la mise à jour:", error);
+      alert('Erreur lors de la mise à jour du frais');
+    }
+  };
+
+  // Fonction pour dupliquer un frais
+  const handleDuplicateFee = async (fee: StudentFee) => {
+    if (!fee.feeId || !fee.academicYearId) {
+      alert("Impossible de dupliquer ce frais : informations manquantes (ID du frais ou année académique)");
+      return;
+    }
+
+    if (confirm(`Voulez-vous vraiment dupliquer le frais "${fee.feeType}" ?`)) {
+      try {
+        await createStudentFee({
+          studentId: fee.studentId,
+          feeId: fee.feeId,
+          academicYearId: fee.academicYearId,
+          totalAmount: fee.amount
+        });
+        setEditFeeModalOpen(false);
+        setSelectedFeeForEdit(null);
+        window.location.reload();
+      } catch (error) {
+        console.error(error);
+        alert('Erreur lors de la duplication du frais');
+      }
+    }
   };
 
   // Fonction pour supprimer un frais
-  const handleDeleteFee = (feeId: string) => {
-    // Supprimer localement (dans une vraie app, cela serait fait via API)
-    setEditFeeModalOpen(false);
-    setSelectedFeeForEdit(null);
-    console.log('Frais supprimé:', feeId);
-    // Dans une vraie app: refetch des données
-    window.location.reload();
+  const handleDeleteFee = async (feeId: string) => {
+    if (confirm('Êtes-vous sûr de vouloir supprimer ce frais ?')) {
+      try {
+        await deleteStudentFee(feeId);
+        setEditFeeModalOpen(false);
+        setSelectedFeeForEdit(null);
+        window.location.reload();
+      } catch (error) {
+        alert('Erreur lors de la suppression du frais');
+      }
+    }
   };
 
   // Fonctions pour les boutons d'en-tête
@@ -183,6 +260,15 @@ export default function StudentFeeDetailsPage() {
     const printWindow = window.open('', '_blank');
     if (!printWindow) return;
 
+    // Fonction helper pour formater les montants dans le rapport
+    const formatAmount = (amount: number) => {
+      return new Intl.NumberFormat('fr-CD', {
+        style: 'currency',
+        currency: 'CDF',
+        minimumFractionDigits: 0
+      }).format(amount);
+    };
+
     const printContent = `
       <!DOCTYPE html>
       <html>
@@ -215,7 +301,7 @@ export default function StudentFeeDetailsPage() {
           <div class="student-info">
             <h3>Informations de l'élève</h3>
             <p><strong>Nom:</strong> ${student?.name}</p>
-            <p><strong>Classe:</strong> ${student?.className}</p>
+            <p><strong>Classe:</strong> ${student?.classTitle || 'Non définie'}</p>
             <p><strong>Email:</strong> ${student?.email}</p>
             <p><strong>Téléphone:</strong> ${student?.phone}</p>
           </div>
@@ -236,7 +322,7 @@ export default function StudentFeeDetailsPage() {
               ${studentFees.map(fee => `
                 <tr>
                   <td>${fee.feeType}</td>
-                  <td>${StudentMockDataService.formatCurrency(fee.amount)}</td>
+                  <td>${formatAmount(fee.amount)}</td>
                   <td>${new Date(fee.dueDate).toLocaleDateString('fr-FR')}</td>
                   <td class="status-${fee.status.toLowerCase()}">${
                     fee.status === 'PAID' ? 'Payé' :
@@ -253,10 +339,10 @@ export default function StudentFeeDetailsPage() {
 
           <div class="summary">
             <h3>Résumé financier</h3>
-            <p><strong>Total des frais:</strong> ${StudentMockDataService.formatCurrency(totalFees)}</p>
-            <p><strong>Montant payé:</strong> ${StudentMockDataService.formatCurrency(paidFees)}</p>
-            <p><strong>Solde restant:</strong> ${StudentMockDataService.formatCurrency(pendingFees)}</p>
-            <p><strong>Taux de paiement:</strong> ${Math.round((paidFees / totalFees) * 100)}%</p>
+            <p><strong>Total des frais:</strong> ${formatAmount(totalFees)}</p>
+            <p><strong>Montant payé:</strong> ${formatAmount(paidFees)}</p>
+            <p><strong>Solde restant:</strong> ${formatAmount(pendingFees)}</p>
+            <p><strong>Taux de paiement:</strong> ${totalFees > 0 ? Math.round((paidFees / totalFees) * 100) : 0}%</p>
           </div>
         </body>
       </html>
@@ -353,7 +439,7 @@ export default function StudentFeeDetailsPage() {
               <div className="flex items-center gap-4 text-gray-600 mt-1">
                 <span className="flex items-center gap-1">
                   <User className="h-4 w-4" />
-                  {student.className}
+                  {student.classTitle}
                 </span>
                 <span className="flex items-center gap-1">
                   <Mail className="h-4 w-4" />
@@ -398,21 +484,21 @@ export default function StudentFeeDetailsPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatsCard
           title="Total des frais"
-          value={StudentMockDataService.formatCurrency(totalFees)}
+          value={formatCurrency(totalFees)}
           description="Montant total"
           icon={DollarSign}
           color="blue"
         />
         <StatsCard
           title="Montant payé"
-          value={StudentMockDataService.formatCurrency(paidFees)}
-          description={`${Math.round((paidFees / totalFees) * 100)}% du total`}
+          value={formatCurrency(paidFees)}
+          description={`${totalFees > 0 ? Math.round((paidFees / totalFees) * 100) : 0}% du total`}
           icon={CheckCircle}
           color="green"
         />
         <StatsCard
           title="Solde restant"
-          value={StudentMockDataService.formatCurrency(pendingFees)}
+          value={formatCurrency(pendingFees)}
           description="À payer"
           icon={Clock}
           color="orange"
@@ -455,7 +541,7 @@ export default function StudentFeeDetailsPage() {
                           <div className="grid gap-2 md:grid-cols-2 lg:grid-cols-4 text-sm">
                             <div>
                               <span className="text-gray-500">Montant:</span>
-                              <p className="font-medium">{StudentMockDataService.formatCurrency(fee.amount)}</p>
+                              <p className="font-medium">{formatCurrency(fee.amount)}</p>
                             </div>
                             <div>
                               <span className="text-gray-500">Date d'échéance:</span>
@@ -480,7 +566,7 @@ export default function StudentFeeDetailsPage() {
                           {fee.remainingAmount && fee.remainingAmount > 0 && (
                             <div className="mt-2 p-2 bg-orange-50 rounded text-sm">
                               <span className="text-orange-800">
-                                Solde restant: {StudentMockDataService.formatCurrency(fee.remainingAmount)}
+                                Solde restant: {formatCurrency(fee.remainingAmount)}
                               </span>
                             </div>
                           )}
@@ -571,7 +657,7 @@ export default function StudentFeeDetailsPage() {
                             <div>
                               <span className="text-gray-500">Montant dû:</span>
                               <p className="font-medium text-lg">
-                                {StudentMockDataService.formatCurrency(fee.remainingAmount || fee.amount)}
+                                {formatCurrency(fee.remainingAmount || fee.amount)}
                               </p>
                             </div>
                             <div>
@@ -586,7 +672,7 @@ export default function StudentFeeDetailsPage() {
                               <div>
                                 <span className="text-gray-500">Déjà payé:</span>
                                 <p className="font-medium text-green-600">
-                                  {StudentMockDataService.formatCurrency(fee.amount - (fee.remainingAmount || 0))}
+                                  {formatCurrency(fee.amount - (fee.remainingAmount || 0))}
                                 </p>
                               </div>
                             )}
@@ -665,7 +751,7 @@ export default function StudentFeeDetailsPage() {
                         
                         <div className="text-right">
                           <p className="text-lg font-semibold text-green-600">
-                            {StudentMockDataService.formatCurrency(fee.amount)}
+                            {formatCurrency(fee.amount)}
                           </p>
                           <p className="text-sm text-gray-500">{fee.paymentMethod}</p>
                           <div className="flex gap-2 mt-2">
@@ -711,7 +797,7 @@ export default function StudentFeeDetailsPage() {
         payment={selectedPayment}
         studentInfo={student ? {
           name: student.name,
-          className: student.className,
+          className: student.classTitle || "",
           imageUrl: student.imageUrl,
           phone: student.phone,
           email: student.email,
@@ -731,6 +817,7 @@ export default function StudentFeeDetailsPage() {
         onClose={() => setPaymentModalOpen(false)}
         fee={selectedFeeForPayment}
         studentName={student?.name}
+        onPaymentSuccess={handlePaymentSuccess}
       />
 
       {/* Modal de report */}
@@ -738,8 +825,7 @@ export default function StudentFeeDetailsPage() {
         isOpen={postponeModalOpen}
         onClose={() => setPostponeModalOpen(false)}
         fee={selectedFeeForPostpone}
-        studentName={student?.name}
-      />
+        studentName={student?.name}        onConfirm={handleConfirmPostpone}      />
 
       {/* Modal de modification de frais */}
       <EditStudentFeeModal
@@ -748,6 +834,7 @@ export default function StudentFeeDetailsPage() {
         fee={selectedFeeForEdit}
         onUpdate={handleUpdateFee}
         onDelete={handleDeleteFee}
+        onDuplicate={handleDuplicateFee}
       />
     </div>
   );

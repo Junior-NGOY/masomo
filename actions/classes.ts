@@ -25,15 +25,35 @@ export async function createClass(data: ClassCreateProps) {
       throw new Error(message);
     }
     throw error;
-    console.log(error);
+  }
+}
+
+export async function updateClassById(id: string, data: ClassCreateProps) {
+  try {
+    const response = await api.put(`/classes/${id}`, data);
+    revalidatePath("/dashboard/academics/classes");
+    return response.data;
+  } catch (error: any) {
+    if (axios.isAxiosError(Error)) {
+      const message = error.response?.data?.message || "Failed to update class";
+      throw new Error(message);
+    }
+    throw error;
   }
 }
 
 export async function deleteClass(id: string) {
-  console.log("deleted", id);
-  return {
-    ok: true
-  };
+  try {
+    const response = await api.delete(`/classes/${id}`);
+    revalidatePath("/dashboard/academics/classes");
+    return response.data;
+  } catch (error: any) {
+    if (axios.isAxiosError(Error)) {
+      const message = error.response?.data?.message || "Failed to delete class";
+      throw new Error(message);
+    }
+    throw error;
+  }
 }
 
 export async function getAllClasses() {
@@ -49,7 +69,6 @@ export async function getAllClasses() {
       throw new Error(message);
     }
     throw error;
-    console.log(error);
   }
 }
 export async function getBriefClasses() {
@@ -65,7 +84,6 @@ export async function getBriefClasses() {
       throw new Error(message);
     }
     throw error;
-    console.log(error);
   }
 }
 export async function createStream(data: StreamCreateProps) {
@@ -81,15 +99,37 @@ export async function createStream(data: StreamCreateProps) {
       throw new Error(message);
     }
     throw error;
-    console.log(error);
+  }
+}
+
+export async function updateStreamById(id: string, data: StreamCreateProps) {
+  try {
+    const response = await api.put(`/streams/${id}`, data);
+    revalidatePath("/dashboard/academics/classes");
+    return response.data;
+  } catch (error: any) {
+    if (axios.isAxiosError(Error)) {
+      const message =
+        error.response?.data?.message || "Failed to update stream";
+      throw new Error(message);
+    }
+    throw error;
   }
 }
 
 export async function deleteStream(id: string) {
-  console.log("deleted", id);
-  return {
-    ok: true
-  };
+  try {
+    const response = await api.delete(`/streams/${id}`);
+    revalidatePath("/dashboard/academics/classes");
+    return response.data;
+  } catch (error: any) {
+    if (axios.isAxiosError(Error)) {
+      const message =
+        error.response?.data?.message || "Failed to delete stream";
+      throw new Error(message);
+    }
+    throw error;
+  }
 }
 
 export async function getAllStreams() {
@@ -106,6 +146,5 @@ export async function getAllStreams() {
       throw new Error(message);
     }
     throw error;
-    console.log(error);
   }
 }

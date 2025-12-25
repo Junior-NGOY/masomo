@@ -24,7 +24,9 @@ import { MoreHorizontal, Pencil, Trash } from "lucide-react";
 
 import toast from "react-hot-toast";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { deleteContact } from "@/actions/admin";
+import { deleteStudent } from "@/actions/students";
 
 type ActionColumnProps = {
   row: any;
@@ -39,15 +41,24 @@ export default function ActionColumn({
   editEndpoint,
   id = ""
 }: ActionColumnProps) {
+  const router = useRouter();
   const isActive = row.isActive;
   async function handleDelete() {
     try {
       if (model === "contact") {
         const res = await deleteContact(id);
         if (res?.ok) {
-          window.location.reload();
+          router.refresh();
         }
         toast.success(`${model} Deleted Successfully`);
+      } else if (model === "student") {
+        const res = await deleteStudent(id);
+        if (res?.ok) {
+          router.refresh();
+          toast.success(`${model} Deleted Successfully`);
+        } else {
+             toast.error(`${model} Couldn't be delete`);
+        }
       }
     } catch (error) {
       console.log(error);

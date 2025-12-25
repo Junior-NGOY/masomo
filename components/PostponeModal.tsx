@@ -27,15 +27,29 @@ interface PostponeModalProps {
   onClose: () => void;
   fee: StudentFee | null;
   studentName?: string;
+  onConfirm: (feeId: string, newDate: string, reason: string) => Promise<void>;
 }
 
-export default function PostponeModal({ isOpen, onClose, fee, studentName }: PostponeModalProps) {
+export default function PostponeModal({ isOpen, onClose, fee, studentName, onConfirm }: PostponeModalProps) {
   const [newDueDate, setNewDueDate] = useState<string>("");
   const [reason, setReason] = useState<string>("");
   const [notes, setNotes] = useState<string>("");
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
 
-  if (!fee) return null;
+  if (!fee) {
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Reporter un paiement</DialogTitle>
+          </DialogHeader>
+          <div className="text-center text-gray-500">
+            Aucun frais sélectionné
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   const outstandingAmount = fee.remainingAmount || fee.amount;
   const currentDueDate = new Date(fee.dueDate);
@@ -56,17 +70,19 @@ export default function PostponeModal({ isOpen, onClose, fee, studentName }: Pos
 
     setIsProcessing(true);
 
-    // Simulation du processus de report
-    setTimeout(() => {
-      alert(`Report approuvé! Nouvelle échéance: ${new Date(newDueDate).toLocaleDateString('fr-FR')}`);
-      setIsProcessing(false);
+    try {
+      await onConfirm(fee.id, newDueDate, reason);
       onClose();
-      
       // Reset form
       setNewDueDate("");
       setReason("");
       setNotes("");
-    }, 1500);
+    } catch (error) {
+      console.error("Error postponing fee:", error);
+      alert("Une erreur est survenue lors du report du paiement.");
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const commonReasons = [

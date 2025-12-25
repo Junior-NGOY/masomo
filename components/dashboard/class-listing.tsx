@@ -11,6 +11,21 @@ import StreamForm from "./forms/academics/stream-form";
 import { Class } from "@/types/types";
 import Image from "next/image";
 
+
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger
+} from "@/components/ui/alert-dialog";
+import { deleteClass, deleteStream } from "@/actions/classes";
+import toast from "react-hot-toast";
+
 /* interface ClassItem {
   id: number;
   name: string;
@@ -34,6 +49,29 @@ export function ClassListing({ classes }: { classes: Class[] }) {
   const filteredClasses = classes.filter((c) =>
     c.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  async function handleDeleteClass(id: string) {
+    try {
+      await deleteClass(id);
+      toast.success("Classe supprimée avec succès");
+      if (selectedClass === id) {
+        setSelectedClass("");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Erreur lors de la suppression de la classe");
+    }
+  }
+
+  async function handleDeleteStream(id: string) {
+    try {
+      await deleteStream(id);
+      toast.success("Section supprimée avec succès");
+    } catch (error) {
+      console.error(error);
+      toast.error("Erreur lors de la suppression de la section");
+    }
+  }
 
   const streams = classes.find((c) => c.id === selectedClass)?.streams || [];
   return (
@@ -82,14 +120,50 @@ export function ClassListing({ classes }: { classes: Class[] }) {
                     {classItem._count.students}
                   </div>
                   <div className="flex gap-1">
-                    <Button size="icon" variant="ghost" className="h-8 w-8">
-                      <Pencil className="h-4 w-4" />
-                      <span className="sr-only">Edit {classItem.id}</span>
-                    </Button>
-                    <Button size="icon" variant="ghost" className="h-8 w-8">
-                      <Trash2 className="h-4 w-4" />
-                      <span className="sr-only">Delete {classItem.id}</span>
-                    </Button>
+                    <ClassForm
+                      editingId={classItem.id}
+                      initialContent={classItem.title}
+                    />
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                          <span className="sr-only">Delete {classItem.id}</span>
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>
+                            Êtes-vous absolument sûr ?
+                          </AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Cette action ne peut pas être annulée. Cela
+                            supprimera définitivement la classe{" "}
+                            <span className="font-semibold text-foreground">
+                              {classItem.title}
+                            </span>{" "}
+                            et toutes ses données associées (sections, élèves,
+                            etc.).
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Annuler</AlertDialogCancel>
+                          <AlertDialogAction
+                            className="bg-red-500 hover:bg-red-600"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteClass(classItem.id);
+                            }}
+                          >
+                            Supprimer
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -144,21 +218,54 @@ export function ClassListing({ classes }: { classes: Class[] }) {
                     <div className="flex items-start justify-between mb-2">
                       <h3 className="text-xl font-semibold">{section.title}</h3>
                       <div className="flex gap-1">
-                        <Button size="icon" variant="ghost" className="h-8 w-8">
-                          <Pencil className="h-4 w-4" />
-                          <span className="sr-only">Edit {section.title}</span>
-                        </Button>
-                        <Button size="icon" variant="ghost" className="h-8 w-8">
-                          <Trash2 className="h-4 w-4" />
-                          <span className="sr-only">
-                            Delete {section.title}
-                          </span>
-                        </Button>
+                        <StreamForm
+                          classId={selectedClass}
+                          editingId={section.id}
+                          initialContent={section.title}
+                        />
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              size="icon"
+                              variant="ghost"
+                              className="h-8 w-8 text-red-500 hover:text-red-600 hover:bg-red-50"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                              <span className="sr-only">
+                                Delete {section.title}
+                              </span>
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>
+                                Êtes-vous absolument sûr ?
+                              </AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Cette action ne peut pas être annulée. Cela
+                                supprimera définitivement la section{" "}
+                                <span className="font-semibold text-foreground">
+                                  {section.title}
+                                </span>{" "}
+                                et toutes ses données associées.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Annuler</AlertDialogCancel>
+                              <AlertDialogAction
+                                className="bg-red-500 hover:bg-red-600"
+                                onClick={() => handleDeleteStream(section.id)}
+                              >
+                                Supprimer
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
                       </div>
                     </div>
                     <div className="space-y-1 text-sm text-muted-foreground">
                       <p>
-                        Class Teacher: {/* {section.teacher} */} Junior NGOY
+                        Class Teacher: <span className="text-muted-foreground/50 italic">Non assigné</span>
                       </p>
                       <div className="flex items-center gap-2">
                         <span className="size-1.5 rounded-full bg-primary" />

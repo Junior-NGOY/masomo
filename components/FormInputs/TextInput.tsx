@@ -80,7 +80,7 @@ export default function TextInput({
           )}
         </div>
         {errors[`${name}`] && (
-          <span className="text-xs text-red-600">{label} is required</span>
+          <span className="text-xs text-red-600">{errors[`${name}`]?.message as string}</span>
         )}
       </div>
     </div>

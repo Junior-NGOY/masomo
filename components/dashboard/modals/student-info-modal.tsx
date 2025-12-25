@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { format } from "date-fns";
 import {
   Dialog,
@@ -12,6 +12,19 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+import { deleteStudent } from "@/actions/students";
+import toast from "react-hot-toast";
+import {
+  AlertDialog,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger
+} from "@/components/ui/alert-dialog";
 import {
   User,
   Mail,
@@ -57,17 +70,30 @@ import { Student } from "@/types/types";
 
 interface StudentInfoModalProps {
   student: Student;
-  // onEdit: (student: Student) => void;
-  // onDelete: (student: Student) => void;
 }
 
 export function StudentInfoModal({
   student
-}: // onEdit,
-// onDelete
-StudentInfoModalProps) {
+}: StudentInfoModalProps) {
+  const [open, setOpen] = useState(false);
+  const router = useRouter();
+  async function handleDelete() {
+    try {
+      const res = await deleteStudent(student.id);
+      if (res?.ok) {
+        toast.success("Student Deleted Successfully");
+        setOpen(false);
+        router.refresh();
+      } else {
+         toast.error("Student Couldn't be delete");
+      }
+    } catch (error) {
+      console.log(error);
+      toast.error("Student Couldn't be delete");
+    }
+  }
   return (
-    <Dialog>
+    <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline">View Student Info</Button>
       </DialogTrigger>
@@ -158,15 +184,34 @@ StudentInfoModalProps) {
             />
           </div>
         </ScrollArea>
+       
         <div className="flex justify-end space-x-2 mt-4">
-          <Button variant="outline" /* onClick={onEdit} */>
+          <Button variant="outline" onClick={() => router.push(`/dashboard/students/update/${student.id}`)}>
             <Edit className="w-4 h-4 mr-2" />
             Edit
           </Button>
-          <Button variant="destructive" /* onClick={onDelete} */>
-            <Trash2 className="w-4 h-4 mr-2" />
-            Delete
-          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive">
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will permanently delete {student.firstName} {student.lastName}.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <Button variant={"destructive"} onClick={handleDelete}>
+                  Permanently Delete
+                </Button>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </DialogContent>
     </Dialog>

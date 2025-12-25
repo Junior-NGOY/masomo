@@ -34,7 +34,14 @@ export function useResources() {
           throw new Error('Failed to fetch resources');
         }
         const result = await response.json();
-        setResources(result.data || []);
+        const data = result.data || [];
+        
+        // Deduplicate resources by ID
+        const uniqueResources = Array.from(
+          new Map(data.map((item: Resource) => [item.id, item])).values()
+        ) as Resource[];
+        
+        setResources(uniqueResources);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
         console.error('Resources fetch error:', err);

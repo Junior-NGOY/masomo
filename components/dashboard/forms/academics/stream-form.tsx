@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/dialog";
 import { StreamCreateProps } from "@/types/types";
 import { Stream } from "stream";
-import { createStream } from "@/actions/classes";
+import { createStream, updateStreamById } from "@/actions/classes";
 import useSchoolStore from "@/store/school";
 export type ClassProps = {
   name: string;
@@ -53,10 +53,10 @@ export default function StreamForm({
     try {
       setLoading(true);
       if (editingId) {
-        /* await updateFolderById(editingId, data);
+        await updateStreamById(editingId, data);
         setLoading(false);
         // Toast
-        toast.success("Updated Successfully!"); */
+        toast.success("Updated Successfully!");
       } else {
         await createStream(data);
         setLoading(false);

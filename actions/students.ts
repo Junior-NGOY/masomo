@@ -26,10 +26,48 @@ export async function createStudent(data: StudentProps) {
 }
 
 export async function deleteStudent(id: string) {
-  console.log("deleted", id);
-  return {
-    ok: true
-  };
+  try {
+    await api.delete(`/students/${id}`);
+    revalidatePath("/dashboard/students");
+    return {
+      ok: true
+    };
+  } catch (error) {
+    console.log(error);
+    return {
+      ok: false,
+      error: "Failed to delete student"
+    };
+  }
+}
+
+export async function updateStudent(id: string, data: StudentProps) {
+  try {
+    const response = await api.put(`/students/${id}`, data);
+    revalidatePath("/dashboard/students");
+    return response.data;
+  } catch (error: any) {
+    if (axios.isAxiosError(Error)) {
+      const message =
+        error.response?.data?.message || "Failed to update student";
+      throw new Error(message);
+    }
+    throw error;
+  }
+}
+
+export async function getStudentById(id: string) {
+  try {
+    const response = await api.get(`/students/${id}`);
+    return response.data;
+  } catch (error: any) {
+    if (axios.isAxiosError(Error)) {
+      const message =
+        error.response?.data?.message || "Failed to get student";
+      throw new Error(message);
+    }
+    throw error;
+  }
 }
 
 export async function getStudentNextSequence() {

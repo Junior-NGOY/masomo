@@ -11,12 +11,14 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useStudentFees, StudentFee } from "@/hooks/useStudentFees";
+import { updateStudentFee, deleteStudentFee, createStudentFee } from "@/actions/studentFees";
 import { useStudentStats, useStudents } from "@/hooks/useStudents";
 import { formatCurrency } from "@/utils/format";
 import { Skeleton } from "@/components/ui/skeleton";
 import ReceiptModal from "@/components/ReceiptModal";
 import NewFeeModal from "@/components/NewFeeModal";
 import EditStudentFeeModal from "@/components/EditStudentFeeModal";
+import AssignFeesModal from "@/components/AssignFeesModal";
 import { ExportService } from "@/lib/exportUtils";
 import {
   DollarSign,
@@ -50,6 +52,7 @@ export default function StudentFeesPage() {
   const [newFeeModalOpen, setNewFeeModalOpen] = useState(false);
   const [editFeeModalOpen, setEditFeeModalOpen] = useState(false);
   const [selectedFeeForEdit, setSelectedFeeForEdit] = useState<StudentFee | null>(null);
+  const [assignFeesModalOpen, setAssignFeesModalOpen] = useState(false);
 
   // États pour la pagination et la vue par élève
   const [studentsSearchTerm, setStudentsSearchTerm] = useState("");
@@ -61,7 +64,7 @@ export default function StudentFeesPage() {
 
   // États pour la pagination des frais
   const [feesCurrentPage, setFeesCurrentPage] = useState(1);
-  const [feesItemsPerPage, setFeesItemsPerPage] = useState(20);
+  const [feesItemsPerPage, setFeesItemsPerPage] = useState(10);
 
   const { fees, loading: feesLoading } = useStudentFees();
   const { students, loading: studentsLoading } = useStudents();
@@ -102,22 +105,64 @@ export default function StudentFeesPage() {
     setEditFeeModalOpen(true);
   };
 
-  const handleUpdateFee = (updatedFee: StudentFee) => {
-    // Dans une vraie app, ceci serait une mise à jour via API
-    console.log('Frais mis à jour:', updatedFee);
-    setEditFeeModalOpen(false);
-    setSelectedFeeForEdit(null);
-    // Ici on rechargerait les données
-    window.location.reload();
+  const handleUpdateFee = async (updatedFee: StudentFee) => {
+    try {
+      // Calculer le montant payé basé sur le statut et le montant restant
+      let paidAmount = 0;
+      if (updatedFee.status === 'PAID') {
+        paidAmount = updatedFee.amount;
+      } else if (updatedFee.status === 'PARTIAL') {
+        paidAmount = updatedFee.amount - (updatedFee.remainingAmount || 0);
+      }
+
+      await updateStudentFee(updatedFee.id, {
+        totalAmount: updatedFee.amount,
+        status: updatedFee.status,
+        notes: updatedFee.notes,
+        paidAmount: paidAmount,
+        dueDate: updatedFee.dueDate
+      });
+      setEditFeeModalOpen(false);
+      setSelectedFeeForEdit(null);
+      window.location.reload();
+    } catch (error) {
+      console.error("Failed to update fee:", error);
+      alert("Erreur lors de la mise à jour du frais");
+    }
   };
 
-  const handleDeleteFee = (feeId: string) => {
-    // Dans une vraie app, ceci serait une suppression via API
-    console.log('Frais supprimé:', feeId);
-    setEditFeeModalOpen(false);
-    setSelectedFeeForEdit(null);
-    // Ici on rechargerait les données
-    window.location.reload();
+  const handleDeleteFee = async (feeId: string) => {
+    try {
+      await deleteStudentFee(feeId);
+      setEditFeeModalOpen(false);
+      setSelectedFeeForEdit(null);
+      window.location.reload();
+    } catch (error: any) {
+      console.error("Failed to delete fee:", error);
+      alert(error.message || "Erreur lors de la suppression du frais");
+    }
+  };
+
+  const handleDuplicateFee = async (fee: StudentFee) => {
+    if (!fee.feeId || !fee.academicYearId) {
+      alert("Impossible de dupliquer ce frais : informations manquantes (feeId ou academicYearId)");
+      return;
+    }
+
+    try {
+      await createStudentFee({
+        studentId: fee.studentId,
+        feeId: fee.feeId,
+        academicYearId: fee.academicYearId,
+        totalAmount: fee.amount,
+      });
+      setEditFeeModalOpen(false);
+      setSelectedFeeForEdit(null);
+      window.location.reload();
+    } catch (error) {
+      console.error("Failed to duplicate fee:", error);
+      alert("Erreur lors de la duplication du frais");
+    }
   };
 
   // Filtrage des données
@@ -213,19 +258,19 @@ export default function StudentFeesPage() {
       {
         indicateur: 'Frais payés',
         valeur: stats.paidFees,
-        pourcentage: Math.round((stats.paidFees / stats.totalFees) * 100),
+        pourcentage: stats.totalFees > 0 ? Math.round((stats.paidFees / stats.totalFees) * 100) : 0,
         type: 'Revenus collectés'
       },
       {
         indicateur: 'Frais en attente',
         valeur: stats.pendingFees,
-        pourcentage: Math.round((stats.pendingFees / stats.totalFees) * 100),
+        pourcentage: stats.totalFees > 0 ? Math.round((stats.pendingFees / stats.totalFees) * 100) : 0,
         type: 'Revenus attendus'
       },
       {
         indicateur: 'Élèves en retard',
         valeur: stats.overdueFees,
-        pourcentage: Math.round((stats.overdueFees / profiles.length) * 100),
+        pourcentage: profiles.length > 0 ? Math.round((stats.overdueFees / profiles.length) * 100) : 0,
         type: 'Élèves'
       }
     ];
@@ -299,6 +344,14 @@ export default function StudentFeesPage() {
             </Button>
           </Link>
           <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setAssignFeesModalOpen(true)}
+          >
+            <Users className="h-4 w-4 mr-2" />
+            Assigner les frais
+          </Button>
+          <Button
             size="sm"
             onClick={handleNewFee}
           >
@@ -320,7 +373,7 @@ export default function StudentFeesPage() {
         <StatsCard
           title="Frais payés"
           value={formatCurrency(stats.paidFees)}
-          description={`${Math.round((stats.paidFees / stats.totalFees) * 100)}% collecté`}
+          description={`${stats.totalFees > 0 ? Math.round((stats.paidFees / stats.totalFees) * 100) : 0}% collecté`}
           icon={CheckCircle}
           color="green"
         />
@@ -510,10 +563,7 @@ export default function StudentFeesPage() {
                                 variant="ghost"
                                 size="sm"
                                 title="Télécharger reçu"
-                                onClick={() => {
-                                  // TODO: Télécharger le reçu
-                                  console.log('Télécharger reçu:', fee.receiptNo);
-                                }}
+                                onClick={() => handlePrintReceipt(fee)}
                               >
                                 <Receipt className="h-4 w-4" />
                               </Button>
@@ -529,12 +579,11 @@ export default function StudentFeesPage() {
           </Card>
 
           {/* Pagination pour les frais */}
-          {totalFeesPages > 1 && (
-            <Card>
-              <CardContent className="p-4">
-                <div className="flex items-center justify-between">
-                  <div className="text-sm text-gray-600">
-                    Page {feesCurrentPage} sur {totalFeesPages}
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div className="text-sm text-gray-600">
+                  Page {feesCurrentPage} sur {totalFeesPages} (Total: {totalFees} frais)
                   </div>
 
                   <div className="flex items-center space-x-2">
@@ -604,7 +653,6 @@ export default function StudentFeesPage() {
                 </div>
               </CardContent>
             </Card>
-          )}
         </TabsContent>
 
         <TabsContent value="students" className="space-y-4">
@@ -768,12 +816,12 @@ export default function StudentFeesPage() {
                     <div className="pt-2">
                       <div className="flex justify-between text-xs text-gray-600 mb-1">
                         <span>Progression des paiements</span>
-                        <span>{Math.round((student.paidFees / student.totalFees) * 100)}%</span>
+                        <span>{student.totalFees > 0 ? Math.round((student.paidFees / student.totalFees) * 100) : 0}%</span>
                       </div>
                       <div className="w-full bg-gray-200 rounded-full h-2">
                         <div
                           className="bg-green-500 h-2 rounded-full transition-all duration-300"
-                          style={{ width: `${(student.paidFees / student.totalFees) * 100}%` }}
+                          style={{ width: `${student.totalFees > 0 ? (student.paidFees / student.totalFees) * 100 : 0}%` }}
                         />
                       </div>
                     </div>
@@ -836,11 +884,11 @@ export default function StudentFeesPage() {
                               <div className="flex-1 bg-gray-200 rounded-full h-2">
                                 <div
                                   className="bg-green-500 h-2 rounded-full transition-all duration-300"
-                                  style={{ width: `${(student.paidFees / student.totalFees) * 100}%` }}
+                                  style={{ width: `${student.totalFees > 0 ? (student.paidFees / student.totalFees) * 100 : 0}%` }}
                                 />
                               </div>
                               <span className="text-xs text-gray-600 min-w-[40px]">
-                                {Math.round((student.paidFees / student.totalFees) * 100)}%
+                                {student.totalFees > 0 ? Math.round((student.paidFees / student.totalFees) * 100) : 0}%
                               </span>
                             </div>
                           </td>
@@ -962,23 +1010,23 @@ export default function StudentFeesPage() {
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-green-600">Frais payés</span>
-                    <span className="font-medium">{Math.round((stats.paidFees / stats.totalFees) * 100)}%</span>
+                    <span className="font-medium">{stats.totalFees > 0 ? Math.round((stats.paidFees / stats.totalFees) * 100) : 0}%</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-3">
                     <div
                       className="bg-green-500 h-3 rounded-full"
-                      style={{ width: `${(stats.paidFees / stats.totalFees) * 100}%` }}
+                      style={{ width: `${stats.totalFees > 0 ? (stats.paidFees / stats.totalFees) * 100 : 0}%` }}
                     />
                   </div>
 
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-yellow-600">Frais en attente</span>
-                    <span className="font-medium">{Math.round((stats.pendingFees / stats.totalFees) * 100)}%</span>
+                    <span className="font-medium">{stats.totalFees > 0 ? Math.round((stats.pendingFees / stats.totalFees) * 100) : 0}%</span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-3">
                     <div
                       className="bg-yellow-500 h-3 rounded-full"
-                      style={{ width: `${(stats.pendingFees / stats.totalFees) * 100}%` }}
+                      style={{ width: `${stats.totalFees > 0 ? (stats.pendingFees / stats.totalFees) * 100 : 0}%` }}
                     />
                   </div>
                 </div>
@@ -1038,6 +1086,17 @@ export default function StudentFeesPage() {
         fee={selectedFeeForEdit}
         onUpdate={handleUpdateFee}
         onDelete={handleDeleteFee}
+        onDuplicate={handleDuplicateFee}
+      />
+
+      {/* Modal d'assignation de frais */}
+      <AssignFeesModal
+        isOpen={assignFeesModalOpen}
+        onClose={() => {
+          setAssignFeesModalOpen(false);
+          // Reload fees after assignment
+          window.location.reload();
+        }}
       />
     </div>
   );

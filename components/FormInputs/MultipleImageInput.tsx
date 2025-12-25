@@ -22,13 +22,17 @@ export default function MultipleImageInput({
       </CardHeader>
       <CardContent>
         <div className="grid gap-2">
-          <Image
-            alt={title}
-            className="h-40 w-full rounded-md object-cover"
-            height="300"
-            src={imageUrls[0]}
-            width="300"
-          />
+          {imageUrls[0] ? (
+            <Image
+              alt={title}
+              className="h-40 w-full rounded-md object-cover"
+              height="300"
+              src={imageUrls[0]}
+              width="300"
+            />
+          ) : (
+            <div className="h-40 w-full rounded-md bg-gray-300 flex items-center justify-center">📷 Aucune image</div>
+          )}
           <div className="grid grid-cols-3 gap-2">
             {imageUrls.map((imageUrl: string, i: number) => {
               return (

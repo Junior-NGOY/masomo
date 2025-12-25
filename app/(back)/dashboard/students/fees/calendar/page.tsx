@@ -5,7 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { StudentMockDataService } from "@/services/studentMockDataService";
+import { useStudentFees } from "@/hooks/useStudentFees";
+import { formatCurrency } from "@/utils/format";
+import { Skeleton } from "@/components/ui/skeleton";
 import { 
   Calendar,
   DollarSign,
@@ -26,7 +28,7 @@ export default function AcademicFeesCalendarPage() {
   const [selectedYear, setSelectedYear] = useState("2024-2025");
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
 
-  const allFees = StudentMockDataService.getStudentFees();
+  const { fees: allFees, loading } = useStudentFees();
 
   // Mois académiques de septembre à juin
   const academicMonths = [
@@ -44,10 +46,11 @@ export default function AcademicFeesCalendarPage() {
 
   // Calculer les statistiques par mois
   const getMonthStats = (monthKey: string) => {
-    const monthFees = allFees.filter(fee => 
-      fee.dueDate.startsWith(monthKey) && 
-      fee.feeType.includes("Frais de scolarité")
-    );
+    const monthFees = allFees.filter(fee => {
+      // Utiliser la date d'échéance ou la date de création si pas de date d'échéance
+      const dateToCheck = fee.dueDate || "";
+      return dateToCheck.startsWith(monthKey);
+    });
     
     const totalFees = monthFees.length;
     const paidFees = monthFees.filter(fee => fee.status === 'PAID').length;
@@ -122,6 +125,10 @@ export default function AcademicFeesCalendarPage() {
   const yearCollectionRate = yearStats.totalAmount > 0 ? 
     Math.round((yearStats.collectedAmount / yearStats.totalAmount) * 100) : 0;
 
+  if (loading) {
+    return <div className="p-6"><Skeleton className="h-96 w-full" /></div>;
+  }
+
   return (
     <div className="p-6 space-y-6">
       {/* En-tête */}
@@ -160,7 +167,7 @@ export default function AcademicFeesCalendarPage() {
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Total Annuel</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {StudentMockDataService.formatCurrency(yearStats.totalAmount)}
+                  {formatCurrency(yearStats.totalAmount)}
                 </p>
                 <p className="text-sm text-gray-500">10 mois académiques</p>
               </div>
@@ -177,7 +184,7 @@ export default function AcademicFeesCalendarPage() {
               <div className="ml-4">
                 <p className="text-sm font-medium text-gray-600">Collecté</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {StudentMockDataService.formatCurrency(yearStats.collectedAmount)}
+                  {formatCurrency(yearStats.collectedAmount)}
                 </p>
                 <p className="text-sm text-green-600">{yearCollectionRate}% du total</p>
               </div>
@@ -207,11 +214,11 @@ export default function AcademicFeesCalendarPage() {
                 <Calendar className="h-6 w-6 text-purple-600" />
               </div>
               <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Frais Mensuel</p>
+                <p className="text-sm font-medium text-gray-600">Frais Mensuel Moyen</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {StudentMockDataService.formatCurrency(50000)}
+                  {formatCurrency(yearStats.totalAmount / 10)}
                 </p>
-                <p className="text-sm text-gray-500">Par élève</p>
+                <p className="text-sm text-gray-500">Par mois</p>
               </div>
             </div>
           </CardContent>
@@ -303,7 +310,7 @@ export default function AcademicFeesCalendarPage() {
                       <div className="grid gap-2 md:grid-cols-3 text-sm mt-2">
                         <div>
                           <span className="text-gray-500">Montant:</span>
-                          <p className="font-medium">{StudentMockDataService.formatCurrency(fee.amount)}</p>
+                          <p className="font-medium">{formatCurrency(fee.amount)}</p>
                         </div>
                         {fee.paidDate && (
                           <div>
@@ -317,7 +324,7 @@ export default function AcademicFeesCalendarPage() {
                           <div>
                             <span className="text-gray-500">Restant:</span>
                             <p className="font-medium text-red-600">
-                              {StudentMockDataService.formatCurrency(fee.remainingAmount)}
+                              {formatCurrency(fee.remainingAmount)}
                             </p>
                           </div>
                         )}

@@ -17,7 +17,7 @@ import {
   DialogTitle,
   DialogTrigger
 } from "@/components/ui/dialog";
-import { createClass } from "@/actions/classes";
+import { createClass, updateClassById } from "@/actions/classes";
 import { ClassCreateProps } from "@/types/types";
 import useSchoolStore from "@/store/school";
 
@@ -48,8 +48,8 @@ export default function ClassForm({
     try {
       setLoading(true);
       if (editingId) {
-        //await updateClassById(editingId, data);
-        //setLoading(false);
+        await updateClassById(editingId, data);
+        setLoading(false);
         // Toast
         toast.success("Updated Successfully!");
       } else {

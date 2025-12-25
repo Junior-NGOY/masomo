@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { School } from "@/types/types";
 import { Slash } from "lucide-react";
 
-const BASE_API_URL = process.env.API_URL || "";
+const BASE_API_URL = process.env.NEXT_PUBLIC_BASE_URL + "/api/v1" || "";
 export const api = axios.create({
   baseURL: BASE_API_URL,
   timeout: 30000, // 30 seconds - increased from 5s to accommodate slow backend responses
@@ -48,5 +48,15 @@ export async function getSchoolById(id: string | null | undefined) {
     }
   } else {
     return null;
+  }
+}
+export async function getAllSchools() {
+  try {
+    const response = await api.get("/schools");
+    const schools = response.data;
+    return schools as School[];
+  } catch (error: any) {
+    console.log(error);
+    return [];
   }
 }

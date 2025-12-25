@@ -59,7 +59,11 @@ export default function DataTable<TData, TValue>({
   const [filteredData, setFilteredData] = useState(data);
   const [sorting, setSorting] = React.useState<SortingState>([]);
   const [isSearch, setIsSearch] = useState(true);
-  // console.log(isSearch);
+
+  React.useEffect(() => {
+    setSearchResults(data);
+    setFilteredData(data);
+  }, [data]);
   const table = useReactTable({
     data: isSearch ? searchResults : filteredData,
     columns,

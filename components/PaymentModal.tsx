@@ -22,67 +22,99 @@ import {
   X,
   AlertCircle
 } from "lucide-react";
-import { StudentMockDataService, StudentFee } from "@/services/studentMockDataService";
+import { StudentFee } from "@/hooks/useStudentFees";
+import { createPayment } from "@/actions/studentFees";
+import { formatCurrency } from "@/utils/format";
 
 interface PaymentModalProps {
   isOpen?: boolean;
   onClose?: () => void;
   fee?: StudentFee | null;
   studentName?: string;
+  onPaymentSuccess?: () => void;
 }
 
-export default function PaymentModal({ isOpen, onClose, fee, studentName }: PaymentModalProps = {}) {
+export default function PaymentModal({ isOpen, onClose, fee, studentName, onPaymentSuccess }: PaymentModalProps = {}) {
   const [internalOpen, setInternalOpen] = useState(false);
   const [paymentMethod, setPaymentMethod] = useState<string>("");
   const [amount, setAmount] = useState<string>("");
   const [transactionRef, setTransactionRef] = useState<string>("");
   const [notes, setNotes] = useState<string>("");
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const [error, setError] = useState<string>("");
 
   // Utilise l'état externe si fourni, sinon l'état interne
   const modalOpen = isOpen !== undefined ? isOpen : internalOpen;
-  const handleClose = onClose || (() => setInternalOpen(false));
-
-  // Mock fee pour le mode autonome
-  const defaultFee: StudentFee = {
-    id: "mock_fee",
-    studentId: "mock_student",
-    studentName: "Élève sélectionné",
-    className: "6ème A",
-    feeType: "Frais de scolarité",
-    amount: 150000,
-    remainingAmount: 150000,
-    dueDate: new Date().toISOString().split('T')[0],
-    status: "PENDING"
+  const handleClose = () => {
+    if (onClose) onClose();
+    else setInternalOpen(false);
+    // Reset form
+    setPaymentMethod("");
+    setAmount("");
+    setTransactionRef("");
+    setNotes("");
+    setError("");
   };
 
-  const activeFee = fee || defaultFee;
-  const activeStudentName = studentName || "Élève sélectionné";
-
-  const outstandingAmount = activeFee.remainingAmount || activeFee.amount;
+  // Montant dû
+  const outstandingAmount = fee?.remainingAmount || fee?.amount || 0;
   const isPartialPayment = amount && parseFloat(amount) < outstandingAmount;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError("");
+
     if (!paymentMethod || !amount) {
-      alert("Veuillez remplir tous les champs obligatoires");
+      setError("Veuillez remplir tous les champs obligatoires");
+      return;
+    }
+
+    const paymentAmount = parseFloat(amount);
+    if (paymentAmount <= 0) {
+      setError("Le montant doit être supérieur à 0");
+      return;
+    }
+
+    if (paymentAmount > outstandingAmount) {
+      setError(`Le montant ne peut pas dépasser ${formatCurrency(outstandingAmount)}`);
+      return;
+    }
+
+    if (!fee?.id) {
+      setError("Les informations sur les frais sont manquantes");
       return;
     }
 
     setIsProcessing(true);
 
-    // Simulation du processus de paiement
-    setTimeout(() => {
-      alert(`Paiement de ${StudentMockDataService.formatCurrency(parseFloat(amount))} enregistré avec succès!`);
-      setIsProcessing(false);
-      handleClose();
+    try {
+      // Appel à l'API pour enregistrer le paiement avec reçu
+      await createPayment({
+        studentFeeStructureId: fee.id,
+        studentId: fee.studentId,
+        amount: paymentAmount,
+        paymentMethod,
+        transactionReference: transactionRef,
+        notes,
+      });
       
-      // Reset form
-      setPaymentMethod("");
-      setAmount("");
-      setTransactionRef("");
-      setNotes("");
-    }, 2000);
+      // Succès
+      alert(`Paiement de ${formatCurrency(paymentAmount)} enregistré avec succès! Un reçu a été généré.`);
+      
+      // Callback pour rafraîchir les données
+      if (onPaymentSuccess) {
+        onPaymentSuccess();
+      } else {
+        window.location.reload();
+      }
+      
+      handleClose();
+    } catch (err: any) {
+      setError(err.message || "Erreur lors de l'enregistrement du paiement");
+      console.error("Payment error:", err);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const paymentMethods = [
@@ -105,6 +137,9 @@ export default function PaymentModal({ isOpen, onClose, fee, studentName }: Paym
       description: "Virement ou carte bancaire"
     }
   ];
+
+  // Valeurs affichées
+  const activeStudentName = studentName || "Élève sélectionné";
 
   return (
     <Dialog open={modalOpen} onOpenChange={handleClose}>
@@ -136,37 +171,47 @@ export default function PaymentModal({ isOpen, onClose, fee, studentName }: Paym
         </DialogHeader>
 
         {/* Informations sur les frais */}
-        <Card className="mb-4">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-lg">{activeFee.feeType}</CardTitle>
-          </CardHeader>
-          <CardContent className="grid gap-3 md:grid-cols-2">
-            <div>
-              <span className="text-sm text-gray-500">Montant total:</span>
-              <p className="font-semibold">{StudentMockDataService.formatCurrency(activeFee.amount)}</p>
-            </div>
-            <div>
-              <span className="text-sm text-gray-500">Montant dû:</span>
-              <p className="font-semibold text-red-600">
-                {StudentMockDataService.formatCurrency(outstandingAmount)}
-              </p>
-            </div>
-            <div>
-              <span className="text-sm text-gray-500">Date d'échéance:</span>
-              <p className="font-medium">{new Date(activeFee.dueDate).toLocaleDateString('fr-FR')}</p>
-            </div>
-            <div>
-              <span className="text-sm text-gray-500">Statut:</span>
-              <p className={`font-medium ${
-                activeFee.status === 'OVERDUE' ? 'text-red-600' : 
-                activeFee.status === 'PARTIAL' ? 'text-blue-600' : 'text-orange-600'
-              }`}>
-                {activeFee.status === 'OVERDUE' ? 'En retard' : 
-                 activeFee.status === 'PARTIAL' ? 'Partiel' : 'En attente'}
-              </p>
-            </div>
-          </CardContent>
-        </Card>
+        {fee && (
+          <Card className="mb-4">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-lg">{fee.feeType}</CardTitle>
+            </CardHeader>
+            <CardContent className="grid gap-3 md:grid-cols-2">
+              <div>
+                <span className="text-sm text-gray-500">Montant total:</span>
+                <p className="font-semibold">{formatCurrency(fee.amount)}</p>
+              </div>
+              <div>
+                <span className="text-sm text-gray-500">Montant dû:</span>
+                <p className="font-semibold text-red-600">
+                  {formatCurrency(outstandingAmount)}
+                </p>
+              </div>
+              <div>
+                <span className="text-sm text-gray-500">Date d'échéance:</span>
+                <p className="font-medium">{new Date(fee.dueDate).toLocaleDateString('fr-FR')}</p>
+              </div>
+              <div>
+                <span className="text-sm text-gray-500">Statut:</span>
+                <p className={`font-medium ${
+                  fee.status === 'OVERDUE' ? 'text-red-600' : 
+                  fee.status === 'PARTIAL' ? 'text-blue-600' : 'text-orange-600'
+                }`}>
+                  {fee.status === 'OVERDUE' ? 'En retard' : 
+                   fee.status === 'PARTIAL' ? 'Partiel' : 'En attente'}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Message d'erreur */}
+        {error && (
+          <div className="flex items-center gap-2 p-3 bg-red-100 border border-red-400 text-red-700 rounded-md mb-4">
+            <AlertCircle className="h-4 w-4" />
+            {error}
+          </div>
+        )}
 
         {/* Formulaire de paiement */}
         <form onSubmit={handleSubmit} className="space-y-6">
@@ -202,7 +247,7 @@ export default function PaymentModal({ isOpen, onClose, fee, studentName }: Paym
             <Label htmlFor="amount" className="text-base font-medium">
               Montant à payer * 
               <span className="text-sm font-normal text-gray-500">
-                (Max: {StudentMockDataService.formatCurrency(outstandingAmount)})
+                (Max: {formatCurrency(outstandingAmount)})
               </span>
             </Label>
             <Input
@@ -218,7 +263,7 @@ export default function PaymentModal({ isOpen, onClose, fee, studentName }: Paym
             {isPartialPayment && (
               <div className="flex items-center gap-2 text-amber-600 text-sm">
                 <AlertCircle className="h-4 w-4" />
-                Paiement partiel - Solde restant: {StudentMockDataService.formatCurrency(outstandingAmount - parseFloat(amount))}
+                Paiement partiel - Solde restant: {formatCurrency(outstandingAmount - parseFloat(amount))}
               </div>
             )}
           </div>
@@ -257,7 +302,7 @@ export default function PaymentModal({ isOpen, onClose, fee, studentName }: Paym
             </Button>
             <Button 
               type="submit" 
-              disabled={isProcessing || !paymentMethod || !amount}
+              disabled={isProcessing || !paymentMethod || !amount || !fee}
               className="flex-1 bg-green-600 hover:bg-green-700"
             >
               {isProcessing ? (

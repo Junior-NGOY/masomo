@@ -13,6 +13,8 @@ type FormSelectInputProps = {
   toolTipText?: string;
   isSearchable?: boolean;
   isMultiple?: boolean;
+  errors?: any;
+  name?: string;
 };
 export default function FormSelectInput({
   options,
@@ -23,7 +25,9 @@ export default function FormSelectInput({
   toolTipText,
   labelShown = true,
   isSearchable = true,
-  isMultiple = false
+  isMultiple = false,
+  errors,
+  name
 }: FormSelectInputProps) {
   return (
     <div className="">
@@ -46,6 +50,9 @@ export default function FormSelectInput({
           <AddNewButton toolTipText={toolTipText} href={href} />
         )}
       </div>
+      {name && errors && errors[name] && (
+        <span className="text-xs text-red-600">{errors[name]?.message as string}</span>
+      )}
     </div>
   );
 }

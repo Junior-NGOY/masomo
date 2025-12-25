@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { StudentFee } from "@/services/studentMockDataService";
+import { StudentFee } from "@/hooks/useStudentFees";
 import { 
   Calendar,
   DollarSign,
@@ -27,6 +27,7 @@ interface EditStudentFeeModalProps {
   fee: StudentFee | null;
   onUpdate: (updatedFee: StudentFee) => void;
   onDelete: (feeId: string) => void;
+  onDuplicate?: (fee: StudentFee) => void;
 }
 
 export default function EditStudentFeeModal({
@@ -34,7 +35,8 @@ export default function EditStudentFeeModal({
   onClose,
   fee,
   onUpdate,
-  onDelete
+  onDelete,
+  onDuplicate
 }: EditStudentFeeModalProps) {
   // États du formulaire
   const [formData, setFormData] = useState({
@@ -177,6 +179,12 @@ export default function EditStudentFeeModal({
   const handleDuplicate = () => {
     if (!fee) return;
 
+    if (onDuplicate) {
+      onDuplicate(fee);
+      onClose();
+      return;
+    }
+
     const duplicatedFee: StudentFee = {
       ...fee,
       id: `fee_${Date.now()}`,
@@ -212,7 +220,20 @@ export default function EditStudentFeeModal({
     return texts[status as keyof typeof texts] || "En attente";
   };
 
-  if (!fee) return null;
+  if (!fee) {
+    return (
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Modifier le frais scolaire</DialogTitle>
+          </DialogHeader>
+          <div className="text-center text-gray-500">
+            Aucun frais sélectionné
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -257,21 +278,13 @@ export default function EditStudentFeeModal({
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="feeType">Type de frais *</Label>
-              <Select
-                value={formData.feeType}
-                onValueChange={(value) => handleInputChange('feeType', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Sélectionner le type de frais" />
-                </SelectTrigger>
-                <SelectContent>
-                  {feeTypes.map(type => (
-                    <SelectItem key={type} value={type}>
-                      {type}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Input 
+                id="feeType" 
+                value={formData.feeType} 
+                disabled 
+                className="bg-gray-100"
+              />
+              <p className="text-xs text-gray-500">Le type de frais ne peut pas être modifié.</p>
             </div>
 
             <div className="space-y-2">

@@ -293,7 +293,7 @@ export default function StudentManagementClient({ students }: StudentManagementC
                   .map((student) => (
                     <div key={student.id} className="flex items-center gap-3 p-3 bg-green-50 rounded-lg">
                       <Avatar className="w-12 h-12">
-                        <AvatarImage src={student.imageUrl} alt={student.name} className="object-cover" />
+                        <AvatarImage src={student.imageUrl || undefined} alt={student.name} className="object-cover" />
                         <AvatarFallback>{student.name.substring(0, 2).toUpperCase()}</AvatarFallback>
                       </Avatar>
                       <div>

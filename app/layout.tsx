@@ -5,6 +5,21 @@ import { NextSSRPlugin } from "@uploadthing/react/next-ssr-plugin";
 import { extractRouterConfig } from "uploadthing/server";
 import { ourFileRouter } from "./api/uploadthing/core";
 import { Toaster } from "react-hot-toast";
+
+// Supprimer les avertissements de react-to-print en développement
+if (typeof window !== 'undefined') {
+  const originalError = console.error;
+  console.error = function(...args: any[]) {
+    if (
+      args[0]?.toString?.().includes?.('react-to-print') ||
+      args[0]?.toString?.().includes?.('Failed to load')
+    ) {
+      return;
+    }
+    originalError.apply(console, args);
+  };
+}
+
 //import { ourFileRouter } from "@/app/api/uploadthing/core";
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",

@@ -27,13 +27,17 @@ export default function ImageInput({
         </CardHeader>
         <CardContent>
           <div className="grid gap-2">
-            <Image
-              alt={title}
-              className={cn("h-20 w-full rounded-md object-cover", className)}
-              height="500"
-              src={imageUrl}
-              width="500"
-            />
+            {imageUrl ? (
+              <Image
+                alt={title}
+                className={cn("h-20 w-full rounded-md object-cover", className)}
+                height="500"
+                src={imageUrl}
+                width="500"
+              />
+            ) : (
+              <div className="h-20 w-full rounded-md bg-gray-300 flex items-center justify-center">📷</div>
+            )}
             <UploadButton
               className="col-span-full"
               endpoint={endpoint}

@@ -20,7 +20,7 @@ export const columns: ColumnDef<Student>[] = [
       return (
         <div className="flex items-center gap-1">
           <Avatar>
-            <AvatarImage src={student.imageUrl || ""} alt={student.firstName} />
+            <AvatarImage src={student.imageUrl || undefined} alt={student.firstName} />
             <AvatarFallback>{student.firstName[0]}{student.lastName[0]}</AvatarFallback>
           </Avatar>
           <div className="">
@@ -98,21 +98,7 @@ export const columns: ColumnDef<Student>[] = [
       );
     }
   },
-  {
-    id: "action",
-    cell: ({ row }) => {
-      const student = row.original;
-      return (
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={() => console.log("View", student.classId)}
-        >
-          View
-        </Button>
-      );
-    }
-  },
+
   {
     accessorKey: "view",
     header: "View",
@@ -137,7 +123,7 @@ export const columns: ColumnDef<Student>[] = [
         <ActionColumn
           row={row}
           model="student"
-          editEndpoint={`#`}
+          editEndpoint={`/dashboard/students/update/${student.id}`}
           id={student.id}
         />
       );

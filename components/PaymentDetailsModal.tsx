@@ -25,8 +25,6 @@ import {
   User,
   Phone,
   Mail,
-  Download,
-  Printer,
   Edit,
   Trash2,
 } from "lucide-react";
@@ -108,13 +106,18 @@ export default function PaymentDetailsModal({
               </CardHeader>
               <CardContent>
                 <div className="flex items-center gap-4">
-                  <Image
-                    src={studentInfo.imageUrl}
-                    alt={studentInfo.name}
-                    width={64}
-                    height={64}
-                    className="w-16 h-16 rounded-full object-cover border-2 border-gray-200"
-                  />
+                  {studentInfo.imageUrl && (
+                    <Image
+                      src={studentInfo.imageUrl}
+                      alt={studentInfo.name}
+                      width={64}
+                      height={64}
+                      className="w-16 h-16 rounded-full object-cover border-2 border-gray-200"
+                    />
+                  )}
+                  {!studentInfo.imageUrl && (
+                    <div className="w-16 h-16 rounded-full bg-gray-300 flex items-center justify-center border-2 border-gray-200">📷</div>
+                  )}
                   <div className="grid gap-1">
                     <h3 className="font-semibold text-lg">{studentInfo.name}</h3>
                     <p className="text-gray-600">{studentInfo.className}</p>
@@ -326,35 +329,9 @@ export default function PaymentDetailsModal({
         </div>
 
         <DialogFooter className="gap-2">
-          <div className="flex-1 flex gap-2">
-            {payment.receiptNo && (
-              <>
-                <Button variant="outline" size="sm">
-                  <Download className="h-4 w-4 mr-2" />
-                  Télécharger reçu
-                </Button>
-                <Button variant="outline" size="sm">
-                  <Printer className="h-4 w-4 mr-2" />
-                  Imprimer
-                </Button>
-              </>
-            )}
-            {payment.status !== 'PAID' && (
-              <Button variant="outline" size="sm">
-                <Edit className="h-4 w-4 mr-2" />
-                Modifier
-              </Button>
-            )}
-          </div>
           <Button variant="outline" onClick={onClose}>
             Fermer
           </Button>
-          {payment.status !== 'PAID' && (
-            <Button>
-              <DollarSign className="h-4 w-4 mr-2" />
-              Effectuer le paiement
-            </Button>
-          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>

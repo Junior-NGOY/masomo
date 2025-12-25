@@ -49,16 +49,7 @@ export default function StudentScheduleRoute() {
   // Get today's schedule
   const todaySchedule = getScheduleForDay(todayIndex);
 
-  // Check for duplicate IDs and warn
-  React.useEffect(() => {
-    if (!activeTimetable) return;
-    const ids = activeTimetable.schedule.map(s => s.id);
-    const duplicates = ids.filter((id, index) => ids.indexOf(id) !== index);
-    if (duplicates.length > 0) {
-      console.warn('⚠️ Duplicate timetable period IDs detected:', [...new Set(duplicates)]);
-      console.warn('This is a database integrity issue. Please check your TimetablePeriod table.');
-    }
-  }, [activeTimetable]);
+
 
   if (loading) {
     return <div className="p-6">Chargement...</div>;

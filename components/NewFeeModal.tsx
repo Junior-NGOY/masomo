@@ -12,6 +12,20 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -27,9 +41,16 @@ import {
   Bus,
   FileText,
   Shirt,
-  CheckCircle
+  CheckCircle,
+  Check,
+  ChevronsUpDown
 } from "lucide-react";
 import { StudentMockDataService } from "@/services/studentMockDataService";
+import { useClasses } from "@/hooks/useClasses";
+import { createFee } from "@/actions/fees";
+import { getActiveAcademicYear } from "@/actions/academicYears";
+import useSchoolStore from "@/store/school";
+import toast from "react-hot-toast";
 
 interface NewFeeModalProps {
   isOpen?: boolean;
@@ -40,7 +61,7 @@ export default function NewFeeModal({ isOpen, onClose }: NewFeeModalProps = {}) 
   const [internalOpen, setInternalOpen] = useState(false);
   const [feeType, setFeeType] = useState<string>("");
   const [customFeeType, setCustomFeeType] = useState<string>("");
-  const [selectedClass, setSelectedClass] = useState<string>("");
+  const [selectedClasses, setSelectedClasses] = useState<string[]>([]);
   const [amount, setAmount] = useState<string>("");
   const [dueDate, setDueDate] = useState<string>("");
   const [description, setDescription] = useState<string>("");
@@ -49,9 +70,26 @@ export default function NewFeeModal({ isOpen, onClose }: NewFeeModalProps = {}) 
   const [recurringType, setRecurringType] = useState<string>("");
   const [dueDayOfMonth, setDueDayOfMonth] = useState<string>("15");
   const [excludedMonths, setExcludedMonths] = useState<string[]>([]);
+  const [activeYearId, setActiveYearId] = useState<string>("");
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const [openCombobox, setOpenCombobox] = useState(false);
 
-  const classes = ["6ème Primaire A", "5ème Primaire B", "4ème Primaire C", "3ème Primaire A", "2ème Primaire B"];
+  const { school } = useSchoolStore();
+  const { classes: classList, loading: classesLoading } = useClasses();
+
+  React.useEffect(() => {
+    const fetchYear = async () => {
+      if (school?.id) {
+        const year = await getActiveAcademicYear(school.id);
+        if (year) {
+          setActiveYearId(year.id);
+        }
+      }
+    };
+    fetchYear();
+  }, [school?.id]);
+
+  //const classes = ["6ème Primaire A", "5ème Primaire B", "4ème Primaire C", "3ème Primaire A", "2ème Primaire B"];
 
   const feeTypeOptions = [
     { 
@@ -59,56 +97,64 @@ export default function NewFeeModal({ isOpen, onClose }: NewFeeModalProps = {}) 
       name: "Frais de scolarité", 
       icon: GraduationCap,
       category: "Académique",
-      description: "Frais mensuels ou trimestriels de scolarité"
+      description: "Frais mensuels ou trimestriels de scolarité",
+      feeTypeEnum: "TUITION"
     },
     { 
       id: "inscription", 
       name: "Frais d'inscription", 
       icon: FileText,
       category: "Administration",
-      description: "Frais d'inscription pour l'année scolaire"
+      description: "Frais d'inscription pour l'année scolaire",
+      feeTypeEnum: "REGISTRATION"
     },
     { 
       id: "uniform", 
       name: "Uniforme scolaire", 
       icon: Shirt,
       category: "Matériel",
-      description: "Achat d'uniformes et accessoires"
+      description: "Achat d'uniformes et accessoires",
+      feeTypeEnum: "UNIFORM"
     },
     { 
       id: "transport", 
       name: "Transport scolaire", 
       icon: Bus,
       category: "Service",
-      description: "Frais de transport mensuel"
+      description: "Frais de transport mensuel",
+      feeTypeEnum: "TRANSPORT"
     },
     { 
       id: "cantine", 
       name: "Cantine", 
       icon: Users,
       category: "Service",
-      description: "Repas et collations"
+      description: "Repas et collations",
+      feeTypeEnum: "OTHER"
     },
     { 
       id: "books", 
       name: "Manuels scolaires", 
       icon: BookOpen,
       category: "Matériel",
-      description: "Livres et supports pédagogiques"
+      description: "Livres et supports pédagogiques",
+      feeTypeEnum: "BOOKS"
     },
     { 
       id: "excursion", 
       name: "Sortie éducative", 
       icon: Users,
       category: "Activité",
-      description: "Voyages et sorties pédagogiques"
+      description: "Voyages et sorties pédagogiques",
+      feeTypeEnum: "TRIP"
     },
     { 
       id: "custom", 
       name: "Autre (personnalisé)", 
       icon: Plus,
       category: "Autre",
-      description: "Frais personnalisé"
+      description: "Frais personnalisé",
+      feeTypeEnum: "OTHER"
     }
   ];
 
@@ -125,7 +171,7 @@ export default function NewFeeModal({ isOpen, onClose }: NewFeeModalProps = {}) 
     e.preventDefault();
     
     // Validation de base
-    if (!feeType || !selectedClass || !amount) {
+    if (!feeType || selectedClasses.length === 0 || !amount) {
       alert("Veuillez remplir tous les champs obligatoires");
       return;
     }
@@ -149,59 +195,57 @@ export default function NewFeeModal({ isOpen, onClose }: NewFeeModalProps = {}) 
 
     setIsProcessing(true);
 
-    const finalFeeType = feeType === "custom" ? customFeeType : 
-                        feeTypeOptions.find(option => option.id === feeType)?.name || feeType;
-    
-    const finalCategory = category || 
-                         feeTypeOptions.find(option => option.id === feeType)?.category || "Autre";
-
-    const newClassFee = {
-      className: selectedClass,
-      feeType: finalFeeType,
-      category: finalCategory,
-      amount: parseFloat(amount),
-      dueDate: !isRecurring ? dueDate : undefined,
-      description,
-      isRecurring,
-      recurringType: isRecurring ? recurringType as any : undefined,
-      dueDayOfMonth: recurringType === "MONTHLY" ? parseInt(dueDayOfMonth) : undefined,
-      excludedMonths,
-      academicYear: "2024-2025",
-      status: 'ACTIVE'
-    };
-
-    // Simulation de l'enregistrement
-    setTimeout(() => {
-      let message = `Frais "${finalFeeType}" créé avec succès pour la classe ${selectedClass}!\n`;
-      
-      if (isRecurring) {
-        message += `\n🔄 Frais récurrent (${recurringType}):\n`;
-        if (recurringType === "MONTHLY") {
-          message += `• Échéances générées pour septembre à juin\n`;
-          message += `• Jour d'échéance: ${dueDayOfMonth} de chaque mois\n`;
-        } else if (recurringType === "QUARTERLY") {
-          message += `• 3 échéances trimestrielles générées\n`;
-        } else if (recurringType === "SEMESTER") {
-          message += `• 2 échéances semestrielles générées\n`;
-        } else {
-          message += `• 1 échéance annuelle générée\n`;
-        }
-      } else {
-        message += `\n📅 Échéance unique: ${new Date(dueDate).toLocaleDateString('fr-FR')}\n`;
+    try {
+      if (!school?.id) {
+        toast.error("École non trouvée");
+        setIsProcessing(false);
+        return;
       }
+
+      if (!activeYearId) {
+        toast.error("Aucune année académique active trouvée. Veuillez en configurer une.");
+        setIsProcessing(false);
+        return;
+      }
+
+      const finalFeeType = feeType === "custom" ? customFeeType : 
+                          feeTypeOptions.find(option => option.id === feeType)?.name || feeType;
       
-      const studentsCount = StudentMockDataService.getStudentProfiles()
-        .filter(s => s.className === selectedClass).length;
-      message += `\n👥 ${studentsCount} élève(s) concerné(s)`;
+      const selectedOption = feeTypeOptions.find(option => option.id === feeType);
+      const feeTypeEnum = selectedOption ? selectedOption.feeTypeEnum : "OTHER";
+
+      // Iterate over each selected class title to create a fee
+      const promises = selectedClasses.map(async (className) => {
+        const selectedClassObj = classList.find(c => c.title === className);
+        
+        const newClassFee = {
+          name: finalFeeType,
+          amount: parseFloat(amount),
+          type: feeTypeEnum as any,
+          classLevel: "PRIMAIRE", // TODO: Déduire du selectedClassObj if possible or allow user selection
+          classIds: selectedClassObj ? [selectedClassObj.id] : [],
+          schoolId: school.id,
+          academicYearId: activeYearId,
+          dueDate: !isRecurring ? new Date(dueDate) : undefined,
+          description,
+          isRecurring,
+          recurringType: isRecurring ? recurringType : undefined,
+          dueDayOfMonth: (isRecurring && recurringType === "MONTHLY") ? parseInt(dueDayOfMonth) : undefined,
+          excludedMonths: (isRecurring && recurringType === "MONTHLY") ? excludedMonths : undefined,
+          isOptional: false 
+        };
+
+        return createFee(newClassFee);
+      });
+
+      await Promise.all(promises);
       
-      alert(message);
-      console.log("Nouveau frais créé:", newClassFee);
-      setIsProcessing(false);
+      toast.success(`${selectedClasses.length} frais créés avec succès!`);
       
       // Reset form
       setFeeType("");
       setCustomFeeType("");
-      setSelectedClass("");
+      setSelectedClasses([]);
       setAmount("");
       setDueDate("");
       setDescription("");
@@ -210,13 +254,18 @@ export default function NewFeeModal({ isOpen, onClose }: NewFeeModalProps = {}) 
       setRecurringType("");
       setDueDayOfMonth("15");
       setExcludedMonths([]);
-      
+
       if (onClose) {
         onClose();
       } else {
         setInternalOpen(false);
       }
-    }, 1500);
+    } catch (error) {
+      console.error(error);
+      toast.error("Erreur lors de la création des frais");
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const selectedFeeOption = feeTypeOptions.find(option => option.id === feeType);
@@ -303,24 +352,88 @@ export default function NewFeeModal({ isOpen, onClose }: NewFeeModalProps = {}) 
             )}
           </div>
 
-          {/* Sélection de la classe */}
+          {/* Sélection des classes */}
           <div className="space-y-2">
-            <Label className="text-base font-medium">Classe concernée *</Label>
-            <Select value={selectedClass} onValueChange={setSelectedClass} required>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Choisir une classe" />
-              </SelectTrigger>
-              <SelectContent>
-                {classes.map((className) => (
-                  <SelectItem key={className} value={className}>
-                    <div className="flex items-center gap-2">
-                      <Users className="h-4 w-4" />
-                      {className}
-                    </div>
-                  </SelectItem>
+            <Label className="text-base font-medium">Classes concernées ({selectedClasses.length}) *</Label>
+            <Popover open={openCombobox} onOpenChange={setOpenCombobox}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  aria-expanded={openCombobox}
+                  className="w-full justify-between"
+                >
+                  {selectedClasses.length > 0
+                    ? ` ${selectedClasses.length} classe(s) sélectionnée(s)`
+                    : "Choisir des classes..."}
+                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[400px] p-0" align="start">
+                <Command>
+                  <CommandInput placeholder="Rechercher une classe..." />
+                  <CommandList>
+                    <CommandEmpty>Aucune classe trouvée.</CommandEmpty>
+                    <CommandGroup>
+                         {/* Option pour tout sélectionner (à implémenter si besoin) */}
+                      {classList.map((cls) => (
+                        <CommandItem
+                          key={cls.id}
+                          value={cls.title}
+                          onSelect={(currentValue) => {
+                            // Toggle selection
+                            setSelectedClasses(prev => 
+                              prev.includes(currentValue)
+                                ? prev.filter(c => c !== currentValue)
+                                : [...prev, currentValue]
+                            );
+                            // Keep open for multiple selection
+                          }}
+                        >
+                          <Check
+                            className={cn(
+                              "mr-2 h-4 w-4",
+                              selectedClasses.includes(cls.title)
+                                ? "opacity-100"
+                                : "opacity-0"
+                            )}
+                          />
+                          {cls.title}
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  </CommandList>
+                </Command>
+              </PopoverContent>
+            </Popover>
+            
+            {/* Badges pour les classes sélectionnées */}
+            {selectedClasses.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-2">
+                {selectedClasses.map((cls) => (
+                  <Badge key={cls} variant="secondary" className="px-2 py-1">
+                    {cls}
+                    <button
+                      type="button"
+                      className="ml-2 hover:text-red-500 focus:outline-none"
+                      onClick={() => setSelectedClasses(prev => prev.filter(c => c !== cls))}
+                    >
+                      <X className="h-3 w-3" />
+                    </button>
+                  </Badge>
                 ))}
-              </SelectContent>
-            </Select>
+                {selectedClasses.length > 1 && (
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="h-6 text-xs text-red-600 hover:text-red-700 hover:bg-red-50"
+                    onClick={() => setSelectedClasses([])}
+                  >
+                    Tout effacer
+                  </Button>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Montant et date d'échéance */}
@@ -500,7 +613,7 @@ export default function NewFeeModal({ isOpen, onClose }: NewFeeModalProps = {}) 
           </Card>
 
           {/* Résumé avant création */}
-          {selectedClass && amount && (
+          {selectedClasses.length > 0 && amount && (
             <Card className="bg-green-50 border-green-200">
               <CardContent className="p-4">
                 <div className="flex items-center gap-2 mb-2">
@@ -508,12 +621,12 @@ export default function NewFeeModal({ isOpen, onClose }: NewFeeModalProps = {}) 
                   <span className="font-medium text-green-800">Résumé de création</span>
                 </div>
                 <div className="text-sm text-green-700 space-y-1">
-                  <p><strong>Classe:</strong> {selectedClass}</p>
+                  <p><strong>Classes:</strong> {selectedClasses.length} classe(s) sélectionnée(s)</p>
                   <p><strong>Type:</strong> {feeType === "custom" ? customFeeType : selectedFeeOption?.name}</p>
                   <p><strong>Montant:</strong> {StudentMockDataService.formatCurrency(parseFloat(amount) || 0)}</p>
                   <p><strong>Échéance:</strong> {dueDate && new Date(dueDate).toLocaleDateString('fr-FR')}</p>
                   <p className="text-xs mt-2">
-                    Ce frais sera automatiquement assigné à tous les élèves de la classe {selectedClass}.
+                    Ce frais sera automatiquement assigné à tous les élèves des {selectedClasses.length} classes sélectionnées.
                   </p>
                 </div>
               </CardContent>
@@ -527,7 +640,7 @@ export default function NewFeeModal({ isOpen, onClose }: NewFeeModalProps = {}) 
             </Button>
             <Button 
               type="submit" 
-              disabled={isProcessing || !feeType || !selectedClass || !amount || !dueDate}
+              disabled={isProcessing || !feeType || selectedClasses.length === 0 || !amount || !dueDate}
               className="flex-1 bg-blue-600 hover:bg-blue-700"
             >
               {isProcessing ? (
