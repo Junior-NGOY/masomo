@@ -36,108 +36,32 @@ import {
 } from "@/components/ui/select";
 import GradeEntryModal from "@/components/GradeEntryModal";
 import StatsCard from "@/components/dashboard/StatsCard";
-
-// Mock data - remplacer par des appels API réels
-const mockGrades = [
-  {
-    id: "grade_001",
-    studentName: "Mukendi Jean",
-    subject: "Mathématiques",
-    examName: "Contrôle Q1",
-    marks: 85,
-    totalMarks: 100,
-    grade: "A",
-    percentage: 85,
-    date: "2025-01-20",
-    className: "6ème Primaire A"
-  },
-  {
-    id: "grade_002",
-    studentName: "Kasongo Marie", 
-    subject: "Mathématiques",
-    examName: "Contrôle Q1",
-    marks: 92,
-    totalMarks: 100,
-    grade: "A+",
-    percentage: 92,
-    date: "2025-01-20",
-    className: "6ème Primaire A"
-  },
-  {
-    id: "grade_003",
-    studentName: "Mbuyi Pierre",
-    subject: "Français",
-    examName: "Interrogation",
-    marks: 38,
-    totalMarks: 50,
-    grade: "B",
-    percentage: 76,
-    date: "2025-01-22",
-    className: "6ème Primaire A"
-  },
-  {
-    id: "grade_004",
-    studentName: "Tshiala Grace",
-    subject: "Sciences",
-    examName: "Test pratique",
-    marks: 45,
-    totalMarks: 50,
-    grade: "A",
-    percentage: 90,
-    date: "2025-01-18",
-    className: "6ème Primaire A"
-  }
-];
-
-const mockSubjects = [
-  { id: "subj_001", name: "Mathématiques", code: "MATH", teacher: "M. Kabongo" },
-  { id: "subj_002", name: "Français", code: "FR", teacher: "Mme. Mwanza" },
-  { id: "subj_003", name: "Sciences", code: "SCI", teacher: "M. Tshimanga" },
-  { id: "subj_004", name: "Histoire", code: "HIST", teacher: "Mme. Kasongo" }
-];
-
-const mockExams = [
-  {
-    id: "exam_001",
-    name: "Contrôle Mathématiques Q1",
-    subject: "Mathématiques",
-    date: "2025-01-20",
-    status: "COMPLETED",
-    totalStudents: 25,
-    gradedStudents: 25
-  },
-  {
-    id: "exam_002",
-    name: "Interrogation Français",
-    subject: "Français", 
-    date: "2025-01-22",
-    status: "COMPLETED",
-    totalStudents: 25,
-    gradedStudents: 20
-  },
-  {
-    id: "exam_003",
-    name: "Examen Sciences Q1",
-    subject: "Sciences",
-    date: "2025-01-25",
-    status: "SCHEDULED",
-    totalStudents: 25,
-    gradedStudents: 0
-  }
-];
+import { useStudentGrades } from "@/hooks/useStudentGrades";
+import { useSubjects } from "@/hooks/useSubjects";
+import { useExaminations } from "@/hooks/useExaminations";
+import { useClasses } from "@/hooks/useClasses";
 
 export default function AcademicGradesPage() {
+  const { grades, loading: gradesLoading } = useStudentGrades();
+  const { subjects, loading: subjectsLoading } = useSubjects();
+  const { examinations: exams, loading: examsLoading } = useExaminations();
+  const { classes, loading: classesLoading } = useClasses();
+
   const [searchQuery, setSearchQuery] = useState("");
   const [subjectFilter, setSubjectFilter] = useState("all");
   const [classFilter, setClassFilter] = useState("all");
   const [activeTab, setActiveTab] = useState("grades");
 
+  if (gradesLoading || subjectsLoading || examsLoading || classesLoading) {
+    return <div className="p-6">Chargement...</div>;
+  }
+
   // Filtrer les notes
-  const filteredGrades = mockGrades.filter(grade => {
+  const filteredGrades = grades.filter(grade => {
     const matchesSearch = grade.studentName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         grade.subject.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         grade.subjectName.toLowerCase().includes(searchQuery.toLowerCase()) ||
                          grade.examName.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesSubject = subjectFilter === "all" || grade.subject === subjectFilter;
+    const matchesSubject = subjectFilter === "all" || grade.subjectName === subjectFilter;
     const matchesClass = classFilter === "all" || grade.className === classFilter;
     
     return matchesSearch && matchesSubject && matchesClass;
@@ -148,8 +72,10 @@ export default function AcademicGradesPage() {
       case "A+":
       case "A":
         return "bg-green-100 text-green-800 border-green-200";
+      case "B+":
       case "B":
         return "bg-blue-100 text-blue-800 border-blue-200";
+      case "C+":
       case "C":
         return "bg-yellow-100 text-yellow-800 border-yellow-200";
       case "D":
@@ -188,10 +114,12 @@ export default function AcademicGradesPage() {
   };
 
   // Calculer les statistiques
-  const totalGrades = mockGrades.length;
-  const averagePercentage = mockGrades.reduce((sum, grade) => sum + grade.percentage, 0) / totalGrades;
-  const excellentGrades = mockGrades.filter(grade => grade.percentage >= 90).length;
-  const completedExams = mockExams.filter(exam => exam.status === "COMPLETED").length;
+  const totalGrades = grades.length;
+  const averagePercentage = totalGrades > 0 
+    ? grades.reduce((sum, grade) => sum + grade.percentage, 0) / totalGrades 
+    : 0;
+  const excellentGrades = grades.filter(grade => grade.percentage >= 90).length;
+  const completedExams = exams.filter(exam => exam.status === "COMPLETED").length;
 
   return (
     <div className="flex-1 space-y-6 p-4">
@@ -286,7 +214,7 @@ export default function AcademicGradesPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Toutes les matières</SelectItem>
-                    {mockSubjects.map(subject => (
+                    {subjects.map(subject => (
                       <SelectItem key={subject.id} value={subject.name}>
                         {subject.name}
                       </SelectItem>
@@ -299,9 +227,11 @@ export default function AcademicGradesPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">Toutes les classes</SelectItem>
-                    <SelectItem value="6ème Primaire A">6ème Primaire A</SelectItem>
-                    <SelectItem value="6ème Primaire B">6ème Primaire B</SelectItem>
-                    <SelectItem value="5ème Primaire A">5ème Primaire A</SelectItem>
+                    {classes.map(cls => (
+                      <SelectItem key={cls.id} value={cls.title}>
+                        {cls.title}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -327,7 +257,7 @@ export default function AcademicGradesPage() {
                         <TableCell className="font-medium">
                           {grade.studentName}
                         </TableCell>
-                        <TableCell>{grade.subject}</TableCell>
+                        <TableCell>{grade.subjectName}</TableCell>
                         <TableCell>{grade.examName}</TableCell>
                         <TableCell className="font-semibold">
                           {grade.marks}
@@ -350,7 +280,7 @@ export default function AcademicGradesPage() {
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          {new Date(grade.date).toLocaleDateString('fr-FR')}
+                          {new Date(grade.createdAt).toLocaleDateString('fr-FR')}
                         </TableCell>
                       </TableRow>
                     ))}
@@ -378,24 +308,25 @@ export default function AcademicGradesPage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {mockExams.map((exam) => (
+                {exams.map((exam) => (
                   <div key={exam.id} className="flex items-center justify-between p-4 border rounded-lg">
                     <div className="flex-1">
                       <h4 className="font-medium">{exam.name}</h4>
                       <p className="text-sm text-gray-600">
-                        {exam.subject} • {new Date(exam.date).toLocaleDateString('fr-FR')}
+                        {exam.subject} • {new Date(exam.startDate).toLocaleDateString('fr-FR')}
                       </p>
                       <div className="flex items-center gap-4 mt-2">
                         <Badge className={getStatusColor(exam.status)}>
                           {getStatusText(exam.status)}
                         </Badge>
                         <span className="text-sm text-gray-500">
-                          {exam.gradedStudents}/{exam.totalStudents} notes saisies
+                          {/* TODO: Add real counts */}
+                          0/0 notes saisies
                         </span>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      {exam.status === "COMPLETED" && exam.gradedStudents < exam.totalStudents && (
+                      {exam.status === "COMPLETED" && (
                         <Button size="sm" variant="outline">
                           Compléter les notes
                         </Button>
@@ -422,13 +353,13 @@ export default function AcademicGradesPage() {
             </CardHeader>
             <CardContent>
               <div className="grid gap-4 md:grid-cols-2">
-                {mockSubjects.map((subject) => (
+                {subjects.map((subject) => (
                   <Card key={subject.id} className="p-4">
                     <div className="flex items-center justify-between">
                       <div>
                         <h4 className="font-medium">{subject.name}</h4>
                         <p className="text-sm text-gray-600">Code: {subject.code}</p>
-                        <p className="text-sm text-gray-600">Prof: {subject.teacher}</p>
+                        <p className="text-sm text-gray-600">Département: {subject.departmentName || 'N/A'}</p>
                       </div>
                       <div className="flex flex-col gap-2">
                         <Button size="sm" variant="outline">

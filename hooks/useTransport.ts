@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useUserSession } from "@/store/auth";
 
 export interface Vehicle {
   id: string;
@@ -60,11 +61,14 @@ export function useVehicles() {
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const user = useUserSession((state) => state.user);
+  const schoolId = user?.schoolId;
 
   useEffect(() => {
     const fetchVehicles = async () => {
+      if (!schoolId) return;
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/transport/vehicles`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000'}/api/v1/transport/vehicles?schoolId=${schoolId}`);
         if (!response.ok) throw new Error('Failed to fetch vehicles');
         const result = await response.json();
         setVehicles(result.data || []);
@@ -77,7 +81,7 @@ export function useVehicles() {
       }
     };
     fetchVehicles();
-  }, []);
+  }, [schoolId]);
 
   return { vehicles, loading, error };
 }
@@ -86,11 +90,14 @@ export function useDrivers() {
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const user = useUserSession((state) => state.user);
+  const schoolId = user?.schoolId;
 
   useEffect(() => {
     const fetchDrivers = async () => {
+      if (!schoolId) return;
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/transport/drivers`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000'}/api/v1/transport/drivers?schoolId=${schoolId}`);
         if (!response.ok) throw new Error('Failed to fetch drivers');
         const result = await response.json();
         setDrivers(result.data || []);
@@ -103,7 +110,7 @@ export function useDrivers() {
       }
     };
     fetchDrivers();
-  }, []);
+  }, [schoolId]);
 
   return { drivers, loading, error };
 }
@@ -112,11 +119,14 @@ export function useTransportRoutes() {
   const [routes, setRoutes] = useState<TransportRoute[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const user = useUserSession((state) => state.user);
+  const schoolId = user?.schoolId;
 
   useEffect(() => {
     const fetchRoutes = async () => {
+      if (!schoolId) return;
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/transport/routes`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000'}/api/v1/transport/routes?schoolId=${schoolId}`);
         if (!response.ok) throw new Error('Failed to fetch routes');
         const result = await response.json();
         setRoutes(result.data || []);
@@ -129,7 +139,7 @@ export function useTransportRoutes() {
       }
     };
     fetchRoutes();
-  }, []);
+  }, [schoolId]);
 
   return { routes, loading, error };
 }
@@ -138,12 +148,21 @@ export function useMaintenanceRecords() {
   const [records, setRecords] = useState<MaintenanceRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const user = useUserSession((state) => state.user);
+  const schoolId = user?.schoolId;
 
   useEffect(() => {
     const fetchRecords = async () => {
+      if (!schoolId) return;
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/transport/maintenance`);
-        if (!response.ok) throw new Error('Failed to fetch maintenance records');
+        const url = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000'}/api/v1/transport/maintenance?schoolId=${schoolId}`;
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+          console.error(`Failed to fetch maintenance records: ${response.status} ${response.statusText}`);
+          throw new Error('Failed to fetch maintenance records');
+        }
+        
         const result = await response.json();
         setRecords(result.data || []);
       } catch (err) {
@@ -155,7 +174,7 @@ export function useMaintenanceRecords() {
       }
     };
     fetchRecords();
-  }, []);
+  }, [schoolId]);
 
   return { records, loading, error };
 }
@@ -164,23 +183,46 @@ export function useTransportStats() {
   const [stats, setStats] = useState<TransportStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const user = useUserSession((state) => state.user);
+  const schoolId = user?.schoolId;
 
   useEffect(() => {
     const fetchStats = async () => {
+      if (!schoolId) return;
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/transport/stats`);
-        if (!response.ok) throw new Error('Failed to fetch transport stats');
+        const url = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000'}/api/v1/transport/stats?schoolId=${schoolId}`;
+        const response = await fetch(url);
+        
+        if (!response.ok) {
+          console.error(`Failed to fetch transport stats: ${response.status} ${response.statusText}`);
+          throw new Error('Failed to fetch transport stats');
+        }
+        
         const result = await response.json();
-        setStats(result.data);
+        setStats(result.data || {
+          totalVehicles: 0,
+          activeVehicles: 0,
+          totalDrivers: 0,
+          activeDrivers: 0,
+          totalRoutes: 0
+        });
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
         console.error('Transport stats fetch error:', err);
+        // Set default stats to avoid UI crashes
+        setStats({
+          totalVehicles: 0,
+          activeVehicles: 0,
+          totalDrivers: 0,
+          activeDrivers: 0,
+          totalRoutes: 0
+        });
       } finally {
         setLoading(false);
       }
     };
     fetchStats();
-  }, []);
+  }, [schoolId]);
 
   return { stats, loading, error };
 }

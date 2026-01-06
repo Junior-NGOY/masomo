@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL;
 
@@ -24,10 +25,14 @@ export async function getStudentFees(params?: {
     
     console.log("Fetching student fees from:", url);
     
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get("accessToken")?.value;
+
     const response = await fetch(url, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${accessToken}`
       },
       cache: "no-store",
     });
@@ -51,10 +56,14 @@ export async function getStudentFees(params?: {
 
 export async function getStudentFeeById(id: string) {
   try {
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get("accessToken")?.value;
+
     const response = await fetch(`${BASE_URL}/api/v1/student-fees/${id}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${accessToken}`
       },
       cache: "no-store",
     });
@@ -79,10 +88,14 @@ export async function createStudentFee(data: {
   totalAmount: number;
 }) {
   try {
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get("accessToken")?.value;
+
     const response = await fetch(`${BASE_URL}/api/v1/student-fees`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${accessToken}`
       },
       body: JSON.stringify(data),
     });
@@ -161,6 +174,9 @@ export async function createPayment(paymentData: {
       throw new Error("API URL configuration is missing");
     }
 
+    const cookieStore = await cookies();
+    const accessToken = cookieStore.get("accessToken")?.value;
+
     // Mapper les méthodes de paiement frontend vers le backend
     const methodMap: Record<string, string> = {
       mobile_money: "MOBILE_MONEY",
@@ -182,6 +198,7 @@ export async function createPayment(paymentData: {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${accessToken}`
         },
         cache: "no-store",
       }
@@ -198,6 +215,7 @@ export async function createPayment(paymentData: {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "Authorization": `Bearer ${accessToken}`
       },
       body: JSON.stringify({
         studentId: paymentData.studentId,

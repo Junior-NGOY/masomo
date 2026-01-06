@@ -1,15 +1,27 @@
 "use server";
 import axios from "axios";
-import { api } from "./schools";
+import { api } from "@/lib/api";
 
 import { Contact, Parent } from "@/types/types";
 import { ParentProps } from "@/components/dashboard/forms/users/parent-form";
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 
 //const BASE_API_URL = process.env.API_URL || "";
 
 export async function createParent(data: ParentProps) {
   try {
+    const cookieStore = await cookies();
+    const userCookie = cookieStore.get("user");
+    const user = userCookie ? JSON.parse(userCookie.value) : null;
+    const schoolId = user?.schoolId;
+    const schoolName = user?.schoolName;
+
+    if (schoolId) {
+      (data as any).schoolId = schoolId;
+      (data as any).schoolName = schoolName;
+    }
+
     //send the data to the api
     const response = await api.post("/parents", data);
     revalidatePath("/dashboard/users/parents");

@@ -24,6 +24,7 @@ export interface StudentFee {
     signature?: string;
     notes?: string;
     schoolLogo?: string; // School logo URL
+    schoolName?: string;
 }
 
 export function useStudentFees() {
@@ -116,6 +117,7 @@ export function useStudentFees() {
                         signature: lastPayment?.signature,
                         notes: sfs.notes || sfs.fee?.description,
                         schoolLogo: sfs.student?.school?.logo,
+                        schoolName: sfs.student?.school?.name,
                     };
                 });
 

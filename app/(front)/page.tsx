@@ -4,7 +4,6 @@ import { Badge } from "@/components/ui/badge"
 import { ArrowRight, Check, Star, Users, School, DollarSign, Calendar, Shield, Globe, BookOpen, GraduationCap, Award, Clock, CheckCircle, Crown } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
-import DemoVideo from "@/components/DemoVideo"
 import PricingSection from "@/components/PricingSection"
 import OptimizedHeroCarousel from "@/components/OptimizedHeroCarousel"
 import AnimatedSection, { AnimatedCounter } from "@/components/AnimatedSection"
@@ -30,6 +29,7 @@ export const metadata = generateSEOMetadata({
 })
 
 export default function Home() {
+  console.log("Rendering Home Page");
   return (
     <>
       {/* Données structurées pour SEO */}
@@ -61,22 +61,13 @@ export default function Home() {
                 </div>
                 
                 <div className="flex flex-col sm:flex-row gap-4">
-                  <Link href="/demo">
+                  <Link href="/school-onboarding">
                     <Button 
                       size="lg" 
                       className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-6 text-lg shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
                     >
-                      Tester la démo
-                      <ArrowRight className="ml-2 h-5 w-5" />
-                    </Button>
-                  </Link>
-                  <Link href="/school-onboarding">
-                    <Button 
-                      variant="outline" 
-                      size="lg" 
-                      className="border-gray-300 text-gray-700 hover:bg-gray-50 px-8 py-6 text-lg transition-all duration-300 transform hover:scale-105"
-                    >
                       Commencer gratuitement
+                      <ArrowRight className="ml-2 h-5 w-5" />
                     </Button>
                   </Link>
                 </div>
@@ -359,127 +350,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Demo Section avec images et vidéos */}
-      <section className="py-20 bg-gradient-to-br from-gray-50 to-blue-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-              Découvrez Masomo Pro en action
-            </h2>
-            <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-              Explorez notre interface intuitive et nos fonctionnalités avancées 
-              à travers ces captures d'écran et vidéos de démonstration.
-            </p>
-          </div>
 
-          {/* Vidéos de démonstration */}
-          <div className="grid md:grid-cols-2 gap-8 mb-16">
-            <DemoVideo
-              title="Gestion des élèves"
-              description="Inscription, profils, suivi académique"
-              thumbnail="Voyez comment les écoles peuvent gérer facilement les inscriptions, les profils d'élèves et le suivi académique en temps réel."
-              gradient="bg-gradient-to-br from-blue-500 to-purple-600"
-            />
-            
-            <DemoVideo
-              title="Gestion financière"
-              description="Paiements, frais scolaires, rapports"
-              thumbnail="Découvrez comment automatiser les paiements, suivre les frais et générer des rapports financiers détaillés."
-              gradient="bg-gradient-to-br from-green-500 to-blue-600"
-            />
-          </div>
-
-          {/* Captures d'écran de l'application */}
-          <div className="grid md:grid-cols-3 gap-8">
-            <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-              <div className="aspect-[4/3] bg-gradient-to-br from-blue-100 to-purple-100 p-4">
-                <Image
-                  src="/images/demo/dashboard-preview.svg"
-                  alt="Tableau de bord Masomo Pro"
-                  width={400}
-                  height={300}
-                  className="w-full h-full object-contain"
-                />
-              </div>
-              <div className="p-6">
-                <h4 className="font-semibold mb-2">Tableau de bord intuitif</h4>
-                <p className="text-gray-600 text-sm">
-                  Interface moderne avec statistiques en temps réel et navigation simplifiée pour les directeurs d'école.
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-              <div className="aspect-[4/3] bg-gradient-to-br from-green-100 to-blue-100 p-4">
-                <Image
-                  src="/images/demo/students-management.svg"
-                  alt="Gestion des élèves"
-                  width={400}
-                  height={300}
-                  className="w-full h-full object-contain"
-                />
-              </div>
-              <div className="p-6">
-                <h4 className="font-semibold mb-2">Gestion des élèves</h4>
-                <p className="text-gray-600 text-sm">
-                  Recherche avancée, profils détaillés et suivi académique personnalisé pour chaque élève.
-                </p>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-              <div className="aspect-[4/3] bg-gradient-to-br from-purple-100 to-pink-100 p-4">
-                <Image
-                  src="/images/demo/financial-management.svg"
-                  alt="Gestion financière"
-                  width={400}
-                  height={300}
-                  className="w-full h-full object-contain"
-                />
-              </div>
-              <div className="p-6">
-                <h4 className="font-semibold mb-2">Analyses financières</h4>
-                <p className="text-gray-600 text-sm">
-                  Graphiques détaillés, rapports automatisés et prévisions budgétaires pour une gestion optimale.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* CTA pour essayer */}
-          <div className="text-center mt-16">
-            <h3 className="text-2xl font-bold text-gray-900 mb-4">
-              Prêt à essayer Masomo Pro ?
-            </h3>
-            <p className="text-gray-600 mb-8">
-              Commencez votre essai gratuit de 30 jours dès aujourd'hui. 
-              Aucune carte de crédit requise.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <Button 
-                size="lg" 
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-lg px-8"
-                asChild
-              >
-                <Link href="/school-onboarding">
-                  Essai gratuit
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Link>
-              </Button>
-              <Button 
-                size="lg" 
-                variant="outline" 
-                className="text-lg px-8"
-                asChild
-              >
-                <Link href="/contact">
-                  Programmer une démo
-                </Link>
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
 
       {/* Education System Section */}
       <section className="py-20 bg-white">

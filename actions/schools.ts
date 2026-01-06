@@ -1,16 +1,15 @@
 "use server";
+import { api } from "@/lib/api";
 import axios from "axios";
-import { SchoolProps } from "@/components/dashboard/forms/school/school-onboarding-form";
 import { revalidatePath } from "next/cache";
 import { School } from "@/types/types";
 import { Slash } from "lucide-react";
 
-const BASE_API_URL = process.env.NEXT_PUBLIC_BASE_URL + "/api/v1" || "";
-export const api = axios.create({
-  baseURL: BASE_API_URL,
-  timeout: 30000, // 30 seconds - increased from 5s to accommodate slow backend responses
-  headers: { "Content-Type": "application/json" }
-});
+export type SchoolProps = {
+  name: string;
+  logo: string;
+};
+
 export async function createSchool(data: SchoolProps) {
   //const endpoint = `${BASE_API_URL}/schools`;
   try {
@@ -38,13 +37,8 @@ export async function getSchoolById(id: string | null | undefined) {
       const school = response.data.data;
       return school as School;
     } catch (error: any) {
-      if (axios.isAxiosError(Error)) {
-        //type-safe error
-        const message = error.response?.data?.message || "Failed to get school";
-        throw new Error(message);
-      }
-      throw error;
-      console.log(error);
+      console.error("Error fetching school:", error);
+      return null;
     }
   } else {
     return null;

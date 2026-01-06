@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { BiometricService } from '@/services/biometricService';
 import { BiometricNotificationService, type BiometricNotification } from '@/services/biometricNotificationService';
 import { toast } from 'sonner';
+import { useUserSession } from "@/store/auth";
 
 interface UseBiometricOptions {
   enableNotifications?: boolean;
@@ -15,10 +16,18 @@ interface BiometricStats {
   averageConfidence: number;
   devicesOnline: number;
   recentActivity: number;
+  totalAttempts: number;
+  successRate: number;
+  byUserType: {
+    students: number;
+    staff: number;
+  };
 }
 
 export function useBiometric(options: UseBiometricOptions = {}) {
   const { enableNotifications = true, autoLoadStats = true } = options;
+  const user = useUserSession((state) => state.user);
+  const schoolId = user?.schoolId;
 
   // États
   const [isSupported, setIsSupported] = useState<boolean | null>(null);
@@ -27,15 +36,17 @@ export function useBiometric(options: UseBiometricOptions = {}) {
   const [stats, setStats] = useState<BiometricStats | null>(null);
   const [notifications, setNotifications] = useState<BiometricNotification[]>([]);
   const [devices, setDevices] = useState<any[]>([]);
+  const [records, setRecords] = useState<any[]>([]);
 
   // Vérifier le support WebAuthn au montage
   useEffect(() => {
     const supported = BiometricService.isWebAuthnSupported();
     setIsSupported(supported);
     
-    if (autoLoadStats) {
+    if (autoLoadStats && schoolId) {
       loadStats();
       loadDevices();
+      loadRecords();
     }
 
     if (enableNotifications) {
@@ -53,43 +64,105 @@ export function useBiometric(options: UseBiometricOptions = {}) {
 
       return () => unsubscribe();
     }
-  }, [autoLoadStats, enableNotifications]);
+  }, [autoLoadStats, enableNotifications, schoolId]);
 
   // Charger les statistiques
   const loadStats = useCallback(async () => {
+    if (!schoolId) return;
     try {
-      const biometricStats = await BiometricService.getBiometricStats();
-      const notificationStats = BiometricNotificationService.getNotificationStats();
-      const devices = BiometricService.getDevices();
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000';
+      const response = await fetch(`${baseUrl}/api/v1/biometric/stats?schoolId=${schoolId}`);
       
-      setStats({
-        totalEnrollments: biometricStats.totalAttempts || 0,
-        successfulVerifications: biometricStats.successful || 0,
-        failedVerifications: biometricStats.failed || 0,
-        averageConfidence: biometricStats.averageConfidence || 0,
-        devicesOnline: devices.filter((d: any) => d.status === 'ONLINE').length || 0,
-        recentActivity: notificationStats.recent || 0
-      });
+      if (!response.ok) {
+        console.error(`Failed to fetch stats: ${response.status}`);
+        return;
+      }
+
+      const result = await response.json();
+      const apiStats = result.data;
+      
+      if (apiStats) {
+        const todayVerifications = apiStats.todayVerifications || 0;
+        const failedAttempts = apiStats.failedAttempts || 0;
+        const totalAttempts = todayVerifications + failedAttempts;
+        const successRate = totalAttempts > 0 ? (todayVerifications / totalAttempts) * 100 : 0;
+
+        setStats({
+          totalEnrollments: apiStats.totalUsers || 0,
+          successfulVerifications: todayVerifications,
+          failedVerifications: failedAttempts,
+          averageConfidence: 98, // Placeholder
+          devicesOnline: apiStats.activeDevices || 0,
+          recentActivity: 0, // Placeholder
+          totalAttempts: totalAttempts,
+          successRate: successRate,
+          byUserType: {
+            students: apiStats.studentsCount || 0,
+            staff: apiStats.staffCount || 0
+          }
+        });
+      }
     } catch (error) {
       console.error('Erreur lors du chargement des statistiques:', error);
     }
-  }, []);
+  }, [schoolId]);
 
   // Charger les appareils
   const loadDevices = useCallback(async () => {
+    if (!schoolId) return;
     try {
-      const deviceList = BiometricService.getDevices();
-      setDevices(deviceList);
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000';
+      const response = await fetch(`${baseUrl}/api/v1/biometric/devices?schoolId=${schoolId}`);
+      
+      if (!response.ok) {
+        console.error(`Failed to fetch devices: ${response.status}`);
+        return;
+      }
+
+      const result = await response.json();
+      setDevices(result.data || []);
     } catch (error) {
       console.error('Erreur lors du chargement des appareils:', error);
     }
-  }, []);
+  }, [schoolId]);
+
+  // Charger les enregistrements récents
+  const loadRecords = useCallback(async () => {
+    if (!schoolId) return;
+    try {
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000';
+      const response = await fetch(`${baseUrl}/api/v1/biometric/records?schoolId=${schoolId}`);
+      
+      if (!response.ok) {
+        console.error(`Failed to fetch records: ${response.status} ${response.statusText}`);
+        return;
+      }
+
+      const result = await response.json();
+      setRecords(result.data || []);
+    } catch (error) {
+      console.error('Erreur lors du chargement des enregistrements:', error);
+    }
+  }, [schoolId]);
 
   // Charger les notifications
-  const loadNotifications = useCallback(() => {
-    const recentNotifications = BiometricNotificationService.getNotifications(50);
-    setNotifications(recentNotifications);
-  }, []);
+  const loadNotifications = useCallback(async () => {
+    if (!schoolId) return;
+    try {
+      const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000';
+      const response = await fetch(`${baseUrl}/api/v1/biometric/notifications?schoolId=${schoolId}`);
+      
+      if (!response.ok) {
+        console.error(`Failed to fetch notifications: ${response.status}`);
+        return;
+      }
+
+      const result = await response.json();
+      setNotifications(result.data || []);
+    } catch (error) {
+      console.error('Erreur lors du chargement des notifications:', error);
+    }
+  }, [schoolId]);
 
   // Enrôlement biométrique
   const enroll = useCallback(async (userId: string, userType: 'STUDENT' | 'STAFF', userName?: string) => {
@@ -264,6 +337,7 @@ export function useBiometric(options: UseBiometricOptions = {}) {
     stats,
     notifications,
     devices,
+    records,
     
     // Actions principales
     enroll,
@@ -287,6 +361,7 @@ export function useBiometric(options: UseBiometricOptions = {}) {
       loadStats();
       loadNotifications();
       loadDevices();
+      loadRecords();
     }
   };
 }

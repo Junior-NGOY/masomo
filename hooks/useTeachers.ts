@@ -1,15 +1,22 @@
 import { useState, useEffect } from 'react';
 import { Teacher } from '@/types/types';
+import { useUserSession } from "@/store/auth";
 
 export function useTeachers() {
     const [teachers, setTeachers] = useState<Teacher[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const user = useUserSession((state) => state.user);
+    const schoolId = user?.schoolId;
 
     useEffect(() => {
         const fetchTeachers = async () => {
+            if (!schoolId) {
+                setLoading(false);
+                return;
+            }
             try {
-                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/teachers`);
+                const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000'}/api/v1/teachers?schoolId=${schoolId}`);
                 if (!response.ok) {
                     throw new Error('Failed to fetch teachers');
                 }
@@ -30,7 +37,7 @@ export function useTeachers() {
         };
 
         fetchTeachers();
-    }, []);
+    }, [schoolId]);
 
     return { teachers, loading, error };
 }

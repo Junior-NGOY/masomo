@@ -1092,11 +1092,8 @@ export default function StudentFeesPage() {
       {/* Modal d'assignation de frais */}
       <AssignFeesModal
         isOpen={assignFeesModalOpen}
-        onClose={() => {
-          setAssignFeesModalOpen(false);
-          // Reload fees after assignment
-          window.location.reload();
-        }}
+        onClose={() => setAssignFeesModalOpen(false)}
+        onSuccess={() => window.location.reload()}
       />
     </div>
   );

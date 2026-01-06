@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Student } from "@/types/types";
-import useSchoolStore from "@/store/school";
+import { useUserSession } from "@/store/auth";
 
 export interface StudentStats {
   totalStudents: number;
@@ -17,8 +17,8 @@ export function useStudents() {
   const [students, setStudents] = useState<Student[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { school } = useSchoolStore();
-  const schoolId = school?.id;
+  const user = useUserSession((state) => state.user);
+  const schoolId = user?.schoolId;
 
   useEffect(() => {
     const fetchStudents = async () => {
@@ -29,7 +29,7 @@ export function useStudents() {
       try {
         const response = await fetch(
           `${
-            process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
+            process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:8000"
           }/api/v1/students?schoolId=${schoolId}`
         );
         const text = await response.text();
@@ -75,8 +75,8 @@ export function useStudentStats() {
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { school } = useSchoolStore();
-  const schoolId = school?.id;
+  const user = useUserSession((state) => state.user);
+  const schoolId = user?.schoolId;
 
   useEffect(() => {
     const fetchStats = async () => {
@@ -87,7 +87,7 @@ export function useStudentStats() {
       try {
         const response = await fetch(
           `${
-            process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
+            process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:8000"
           }/api/v1/students/stats?schoolId=${schoolId}`
         );
         const text = await response.text();

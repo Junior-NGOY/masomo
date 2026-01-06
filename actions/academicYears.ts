@@ -1,6 +1,6 @@
 "use server";
 
-import { api } from "./schools";
+import { api } from "@/lib/api";
 import axios from "axios";
 
 export async function getActiveAcademicYear(schoolId: string) {

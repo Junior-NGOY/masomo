@@ -463,12 +463,12 @@ const sidebarLinks: {
     },
     {
       title: "Settings",
-      url: "#",
+      url: "/dashboard/settings",
       icon: Settings2,
       items: [
         {
           title: "General",
-          url: "#"
+          url: "/dashboard/settings/general"
         },
         {
           title: "Team",
@@ -515,7 +515,24 @@ const sidebarLinks: {
   ]
 };
 export default function AppSidebar() {
-  const [activeTeam, setActiveTeam] = React.useState(sidebarLinks.teams[0]);
+  const { school } = useSchoolStore();
+  const [activeTeam, setActiveTeam] = React.useState(
+    school 
+      ? { name: school.name, logo: GalleryVerticalEnd, plan: "Enterprise" }
+      : sidebarLinks.teams[0]
+  );
+
+  // Mettre à jour l'équipe active si l'école change (ex: après hydratation)
+  React.useEffect(() => {
+    if (school) {
+      setActiveTeam({
+        name: school.name,
+        logo: GalleryVerticalEnd,
+        plan: "Enterprise"
+      });
+    }
+  }, [school]);
+
   const { user: data } = useUserSession();
   const user = {
     name: data?.name,

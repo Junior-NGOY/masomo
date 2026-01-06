@@ -21,7 +21,7 @@ export function useStudentAttendance() {
     useEffect(() => {
         const fetchAttendance = async () => {
             try {
-                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/students/attendance`);
+                const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000'}/api/v1/students/attendance`);
                 if (!response.ok) {
                     throw new Error('Failed to fetch student attendance');
                 }

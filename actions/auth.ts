@@ -1,7 +1,7 @@
 "use server";
 import axios from "axios";
 import { revalidatePath } from "next/cache";
-import { api } from "./schools";
+import { api } from "@/lib/api";
 import { cookies } from "next/headers";
 import { User } from "@/types/types";
 
@@ -88,11 +88,16 @@ export async function createServerSession(data: SessionData) {
 export async function logout() {
   try {
     const cookieStore = await cookies();
-    //Delete all authentification-related cookies
-    cookieStore.delete("user");
-    cookieStore.delete("accessToken");
-    cookieStore.delete("refreshToken");
+    //Delete all authentification-related cookies with explicit path
+    cookieStore.delete({ name: "user", path: "/" });
+    cookieStore.delete({ name: "accessToken", path: "/" });
+    cookieStore.delete({ name: "refreshToken", path: "/" });
+    
+    // Also delete legacy/middleware cookies if they exist
+    cookieStore.delete({ name: "auth-token", path: "/" });
+    cookieStore.delete({ name: "user-type", path: "/" });
 
+    revalidatePath("/");
     return { success: true };
   } catch (error) {
     console.log("Logout error:", error);

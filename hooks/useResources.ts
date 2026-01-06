@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useUserSession } from "@/store/auth";
 
 export interface Resource {
   id: string;
@@ -25,11 +26,14 @@ export function useResources() {
   const [resources, setResources] = useState<Resource[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const user = useUserSession((state) => state.user);
+  const schoolId = user?.schoolId;
 
   useEffect(() => {
     const fetchResources = async () => {
+      if (!schoolId) return;
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/resources`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000'}/api/v1/resources?schoolId=${schoolId}`);
         if (!response.ok) {
           throw new Error('Failed to fetch resources');
         }
@@ -52,7 +56,7 @@ export function useResources() {
     };
 
     fetchResources();
-  }, []);
+  }, [schoolId]);
 
   return { resources, loading, error };
 }
@@ -61,11 +65,14 @@ export function useResourceStats() {
   const [stats, setStats] = useState<ResourceStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const user = useUserSession((state) => state.user);
+  const schoolId = user?.schoolId;
 
   useEffect(() => {
     const fetchStats = async () => {
+      if (!schoolId) return;
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/resources/stats`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000'}/api/v1/resources/stats?schoolId=${schoolId}`);
         if (!response.ok) {
           throw new Error('Failed to fetch resource stats');
         }
@@ -80,7 +87,7 @@ export function useResourceStats() {
     };
 
     fetchStats();
-  }, []);
+  }, [schoolId]);
 
   return { stats, loading, error };
 }

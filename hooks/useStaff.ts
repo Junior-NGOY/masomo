@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useUserSession } from "@/store/auth";
 
 export interface Leave {
   id: string;
@@ -73,11 +74,14 @@ export function useLeaveRequests() {
   const [leaves, setLeaves] = useState<Leave[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const user = useUserSession((state) => state.user);
+  const schoolId = user?.schoolId;
 
   useEffect(() => {
     const fetchLeaves = async () => {
+      if (!schoolId) return;
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/staff/leaves`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000'}/api/v1/staff/leaves?schoolId=${schoolId}`);
         if (!response.ok) throw new Error('Failed to fetch leave requests');
         const result = await response.json();
         setLeaves(result.data || []);
@@ -90,7 +94,7 @@ export function useLeaveRequests() {
       }
     };
     fetchLeaves();
-  }, []);
+  }, [schoolId]);
 
   return { leaves, loading, error };
 }
@@ -99,11 +103,14 @@ export function usePayrollRecords() {
   const [payrolls, setPayrolls] = useState<Payroll[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const user = useUserSession((state) => state.user);
+  const schoolId = user?.schoolId;
 
   useEffect(() => {
     const fetchPayrolls = async () => {
+      if (!schoolId) return;
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/staff/payroll`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000'}/api/v1/staff/payroll?schoolId=${schoolId}`);
         if (!response.ok) throw new Error('Failed to fetch payroll records');
         const result = await response.json();
         setPayrolls(result.data || []);
@@ -116,7 +123,7 @@ export function usePayrollRecords() {
       }
     };
     fetchPayrolls();
-  }, []);
+  }, [schoolId]);
 
   return { payrolls, loading, error };
 }
@@ -125,11 +132,14 @@ export function usePerformanceReviews() {
   const [performances, setPerformances] = useState<Performance[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const user = useUserSession((state) => state.user);
+  const schoolId = user?.schoolId;
 
   useEffect(() => {
     const fetchPerformances = async () => {
+      if (!schoolId) return;
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/staff/performance`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000'}/api/v1/staff/performance?schoolId=${schoolId}`);
         if (!response.ok) throw new Error('Failed to fetch performance reviews');
         const result = await response.json();
         setPerformances(result.data || []);
@@ -142,7 +152,7 @@ export function usePerformanceReviews() {
       }
     };
     fetchPerformances();
-  }, []);
+  }, [schoolId]);
 
   return { performances, loading, error };
 }
@@ -151,11 +161,14 @@ export function useStaffStats() {
   const [stats, setStats] = useState<StaffStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const user = useUserSession((state) => state.user);
+  const schoolId = user?.schoolId;
 
   useEffect(() => {
     const fetchStats = async () => {
+      if (!schoolId) return;
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/staff/stats`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000'}/api/v1/staff/stats?schoolId=${schoolId}`);
         if (!response.ok) throw new Error('Failed to fetch staff stats');
         const result = await response.json();
         setStats(result.data);
@@ -167,7 +180,7 @@ export function useStaffStats() {
       }
     };
     fetchStats();
-  }, []);
+  }, [schoolId]);
 
   return { stats, loading, error };
 }

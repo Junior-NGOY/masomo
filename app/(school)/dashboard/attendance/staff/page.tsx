@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { useTeachers } from "@/hooks/useTeachers";
 import { 
   Users,
   ArrowLeft,
@@ -35,53 +36,17 @@ interface StaffInfo {
 export default function StaffAttendancePage() {
   const router = useRouter();
   const [searchTerm, setSearchTerm] = useState("");
+  const { teachers, loading } = useTeachers();
   
-  // Données mockées du personnel - À remplacer par des données réelles
-  const [staff] = useState<StaffInfo[]>([
-    {
-      id: "staff001",
-      name: "Prof. Jean Mukendi",
-      position: "Professeur de Mathématiques",
-      department: "Enseignement",
-      status: "PRESENT",
-      checkInTime: "07:45",
-      isPresent: true
-    },
-    {
-      id: "staff002", 
-      name: "Marie Kasongo",
-      position: "Secrétaire Académique",
-      department: "Administration",
-      status: "PRESENT",
-      checkInTime: "08:00",
-      isPresent: true
-    },
-    {
-      id: "staff003",
-      name: "Prof. David Mbayo",
-      position: "Professeur de Sciences",
-      department: "Enseignement", 
-      status: "LATE",
-      checkInTime: "08:15",
-      isPresent: true
-    },
-    {
-      id: "staff004",
-      name: "Grace Tshiombe",
-      position: "Comptable",
-      department: "Finance",
-      status: "ABSENT",
-      isPresent: false
-    },
-    {
-      id: "staff005",
-      name: "Prof. Paul Kalume",
-      position: "Directeur Adjoint",
-      department: "Direction",
-      status: "LEAVE",
-      isPresent: false
-    }
-  ]);
+  // Transform teachers data to match StaffInfo interface
+  const staff: StaffInfo[] = teachers.map(teacher => ({
+    id: teacher.id,
+    name: `${teacher.firstName} ${teacher.lastName}`,
+    position: teacher.designation || "Enseignant",
+    department: teacher.departmentName || "Enseignement",
+    status: "ABSENT", // Default status, should be fetched from attendance API
+    isPresent: false
+  }));
 
   const today = new Date().toLocaleDateString('fr-FR');
   

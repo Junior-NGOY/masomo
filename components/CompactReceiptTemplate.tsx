@@ -61,7 +61,7 @@ export default function CompactReceiptTemplate({ fee, paymentAmount: propPayment
     paidDate: fee.paidDate,
     paymentMethod: fee.paymentMethod,
     signature: fee.signature,
-    school: "École Masomo Pro"
+    school: fee.schoolName || "École Masomo Pro"
   }) : null;
 
   // URL pour générer le QR code avec les données de paiement
@@ -125,7 +125,7 @@ export default function CompactReceiptTemplate({ fee, paymentAmount: propPayment
           )}
           {/* Infos école */}
           <div style={{ flex: 1 }}>
-            <div style={{ fontWeight: 'bold', fontSize: '10px' }}>ÉCOLE MASOMO PRO</div>
+            <div style={{ fontWeight: 'bold', fontSize: '10px' }}>{fee.schoolName || "ÉCOLE MASOMO PRO"}</div>
             <div style={{ fontSize: '7px' }}>Avenue de l'Education, Lubumbashi</div>
             <div style={{ fontSize: '7px' }}>Tél: +243 85 123 4567</div>
           </div>

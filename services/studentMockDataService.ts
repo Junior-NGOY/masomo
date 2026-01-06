@@ -66,6 +66,8 @@ export interface StudentFee {
   receiptNo?: string;
   notes?: string;
   classFeeId?: string; // Nouveau : référence vers le frais de classe
+  schoolLogo?: string;
+  schoolName?: string;
 }
 
 export interface StudentAttendance {

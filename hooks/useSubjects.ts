@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { SubjectCategory, SubjectType } from "@/types/types";
+import { useUserSession } from "@/store/auth";
 
 export interface Subject {
   id: string;
@@ -27,11 +28,17 @@ export function useSubjects() {
   const [subjects, setSubjects] = useState<Subject[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const user = useUserSession((state) => state.user);
+  const schoolId = user?.schoolId;
 
   useEffect(() => {
     const fetchSubjects = async () => {
+      if (!schoolId) {
+        setLoading(false);
+        return;
+      }
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/subjects`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000'}/api/v1/subjects?schoolId=${schoolId}`);
         if (!response.ok) {
           throw new Error('Failed to fetch subjects');
         }
@@ -46,7 +53,7 @@ export function useSubjects() {
     };
 
     fetchSubjects();
-  }, []);
+  }, [schoolId]);
 
   return { subjects, loading, error };
 }

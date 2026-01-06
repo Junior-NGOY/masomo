@@ -15,8 +15,21 @@ import {
   GraduationCap,
   Target
 } from "lucide-react";
+import { UpcomingClass } from "@/actions/dashboard";
 
-export default function AcademicQuickAccess() {
+interface AcademicQuickAccessProps {
+  averageGrade?: number;
+  passRate?: number;
+  attendanceRate?: number;
+  upcomingClasses?: UpcomingClass[];
+}
+
+export default function AcademicQuickAccess({
+  averageGrade = 0,
+  passRate = 0,
+  attendanceRate = 0,
+  upcomingClasses = []
+}: AcademicQuickAccessProps) {
   return (
     <div className="space-y-6">
       <Card>
@@ -35,7 +48,7 @@ export default function AcademicQuickAccess() {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Moyenne</p>
-                <p className="text-lg font-bold">14.5/20</p>
+                <p className="text-lg font-bold">{averageGrade}%</p>
               </div>
             </div>
 
@@ -44,8 +57,8 @@ export default function AcademicQuickAccess() {
                 <Target className="h-5 w-5 text-green-600" />
               </div>
               <div>
-                <p className="text-sm text-gray-600">Rang</p>
-                <p className="text-lg font-bold">3/28</p>
+                <p className="text-sm text-gray-600">Réussite</p>
+                <p className="text-lg font-bold">{passRate}%</p>
               </div>
             </div>
 
@@ -55,7 +68,7 @@ export default function AcademicQuickAccess() {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Présence</p>
-                <p className="text-lg font-bold">96.5%</p>
+                <p className="text-lg font-bold">{attendanceRate}%</p>
               </div>
             </div>
           </div>
@@ -71,7 +84,7 @@ export default function AcademicQuickAccess() {
                         <BookOpen className="h-5 w-5 text-blue-600" />
                       </div>
                       <div>
-                        <h3 className="font-semibold">Voir mes notes</h3>
+                        <h3 className="font-semibold">Voir les notes</h3>
                         <p className="text-sm text-gray-600">Consulter les évaluations</p>
                       </div>
                     </div>
@@ -90,7 +103,7 @@ export default function AcademicQuickAccess() {
                         <Calendar className="h-5 w-5 text-green-600" />
                       </div>
                       <div>
-                        <h3 className="font-semibold">Mon horaire</h3>
+                        <h3 className="font-semibold">Horaire</h3>
                         <p className="text-sm text-gray-600">Planning des cours</p>
                       </div>
                     </div>
@@ -103,31 +116,33 @@ export default function AcademicQuickAccess() {
 
           {/* Prochains cours */}
           <div className="space-y-2">
-            <h4 className="font-medium text-gray-900">Prochains cours</h4>
+            <h4 className="font-medium text-gray-900">Prochains cours (École)</h4>
             <div className="space-y-2">
-              <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
-                  <span className="text-sm font-medium">Mathématiques</span>
-                  <Badge variant="outline" className="text-xs">08:25</Badge>
+              {upcomingClasses.length > 0 ? (
+                upcomingClasses.map((cls) => (
+                  <div key={cls.id} className="flex items-center justify-between p-2 bg-gray-50 rounded">
+                    <div className="flex items-center gap-2">
+                      <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                      <span className="text-sm font-medium">{cls.subject}</span>
+                      <Badge variant="outline" className="text-xs">{cls.startTime}</Badge>
+                    </div>
+                    <div className="text-right">
+                      <span className="text-xs text-gray-500 block">{cls.teacher}</span>
+                      <span className="text-[10px] text-gray-400 block">{cls.className}</span>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-sm text-gray-500 text-center py-2">
+                  Aucun cours à venir aujourd'hui
                 </div>
-                <span className="text-xs text-gray-500">Prof. Kabamba</span>
-              </div>
-              
-              <div className="flex items-center justify-between p-2 bg-gray-50 rounded">
-                <div className="flex items-center gap-2">
-                  <div className="w-2 h-2 bg-green-600 rounded-full"></div>
-                  <span className="text-sm font-medium">Physique</span>
-                  <Badge variant="outline" className="text-xs">09:20</Badge>
-                </div>
-                <span className="text-xs text-gray-500">Prof. Mbuyi</span>
-              </div>
+              )}
             </div>
           </div>
 
           {/* Lien vers le portail complet */}
           <div className="pt-3 border-t">
-            <Link href="/demo/academic-system">
+            <Link href="/dashboard/academic">
               <Button variant="outline" className="w-full">
                 <GraduationCap className="h-4 w-4 mr-2" />
                 Accéder au portail académique complet

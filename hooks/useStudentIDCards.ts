@@ -24,7 +24,7 @@ export function useStudentIDCards() {
   useEffect(() => {
     const fetchIDCards = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/students/id-cards`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000'}/api/v1/students/id-cards`);
         if (!response.ok) {
           throw new Error('Failed to fetch ID cards');
         }

@@ -254,6 +254,9 @@ export default function SingleStudentForm({
           dob: initialData.dob ? new Date(initialData.dob).toISOString().split("T")[0] : "",
           admissionDate: initialData.admissionDate ? new Date(initialData.admissionDate).toISOString().split("T")[0] : "",
        };
+       // Ensure password is not populated with hashed value
+       delete sanitizedData.password;
+
        reset(sanitizedData);
     }
   }, [initialData, reset]);

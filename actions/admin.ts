@@ -1,6 +1,6 @@
 "use server";
 import axios from "axios";
-import { api } from "./schools";
+import { api } from "@/lib/api";
 import { ContactProps } from "@/components/frontend/contact-us";
 import { Contact } from "@/types/types";
 import { revalidatePath } from "next/cache";

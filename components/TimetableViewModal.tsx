@@ -23,7 +23,17 @@ import {
   X,
   Eye
 } from "lucide-react";
-import { TimetableMockService, Timetable } from "@/services/timetableMockService";
+import { Timetable } from "@/hooks/useTimetable";
+
+const timeSlots = [
+  '08:00-09:00',
+  '09:15-10:15',
+  '10:30-11:30',
+  '11:45-12:45',
+  '14:00-15:00',
+  '15:15-16:15',
+  '16:30-17:30'
+];
 
 interface TimetableViewModalProps {
   isOpen?: boolean;
@@ -41,25 +51,38 @@ export default function TimetableViewModal({
   const handleClose = onClose || (() => setInternalOpen(false));
 
   const [timetable, setTimetable] = React.useState<Timetable | null>(null);
+  const [loading, setLoading] = React.useState(false);
 
   // Charger l'emploi du temps
   React.useEffect(() => {
-    if (timetableId && modalOpen) {
-      const tt = TimetableMockService.getTimetableById(timetableId);
-      setTimetable(tt);
-    }
+    const fetchTimetable = async () => {
+      if (timetableId && modalOpen) {
+        setLoading(true);
+        try {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000'}/api/v1/timetables/${timetableId}`);
+          if (response.ok) {
+            const result = await response.json();
+            setTimetable(result.data);
+          }
+        } catch (error) {
+          console.error("Failed to fetch timetable", error);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    fetchTimetable();
   }, [timetableId, modalOpen]);
 
   const days = React.useMemo(() => [
-    { value: 'MONDAY', label: 'Lundi' },
-    { value: 'TUESDAY', label: 'Mardi' },
-    { value: 'WEDNESDAY', label: 'Mercredi' },
-    { value: 'THURSDAY', label: 'Jeudi' },
-    { value: 'FRIDAY', label: 'Vendredi' },
-    { value: 'SATURDAY', label: 'Samedi' }
+    { value: 1, label: 'Lundi' },
+    { value: 2, label: 'Mardi' },
+    { value: 3, label: 'Mercredi' },
+    { value: 4, label: 'Jeudi' },
+    { value: 5, label: 'Vendredi' },
+    { value: 6, label: 'Samedi' }
   ], []);
-
-  const timeSlots = TimetableMockService.getAvailableTimeSlots();
 
   // Organiser les créneaux par jour et heure
   const scheduleGrid = React.useMemo(() => {
@@ -81,7 +104,7 @@ export default function TimetableViewModal({
     });
     
     return grid;
-  }, [timetable, days, timeSlots]);
+  }, [timetable, days]);
 
   const getSubjectColor = (subjectName: string) => {
     const colors = {
@@ -306,29 +329,29 @@ export default function TimetableViewModal({
                       return (
                         <div key={key} className="min-h-[100px]">
                           {slot ? (
-                            <Card className={`h-full ${getSubjectColor(slot.subjectName)}`}>
+                            <Card className={`h-full ${getSubjectColor(slot.subject)}`}>
                               <CardContent className="p-3 h-full flex flex-col justify-between">
                                 <div className="space-y-2">
                                   <div className="font-semibold text-sm truncate">
-                                    {slot.subjectName}
+                                    {slot.subject}
                                   </div>
                                   
                                   <div className="space-y-1 text-xs">
                                     <div className="flex items-center gap-1 truncate">
                                       <User className="h-3 w-3" />
-                                      <span className="truncate">{slot.teacherName}</span>
+                                      <span className="truncate">{slot.teacher}</span>
                                     </div>
                                     
-                                    {slot.room && (
+                                    {slot.roomId && (
                                       <div className="flex items-center gap-1 truncate">
                                         <MapPin className="h-3 w-3" />
-                                        <span className="truncate">{slot.room}</span>
+                                        <span className="truncate">{slot.roomId}</span>
                                       </div>
                                     )}
                                     
                                     <div className="flex items-center gap-1">
                                       <BookOpen className="h-3 w-3" />
-                                      <span className="capitalize">{slot.type.toLowerCase()}</span>
+                                      <span className="capitalize">{(slot.type || '').toLowerCase()}</span>
                                     </div>
                                   </div>
                                 </div>
@@ -361,17 +384,17 @@ export default function TimetableViewModal({
               <div className="space-y-3">
                 {Object.entries(
                   timetable.schedule.reduce((acc, slot) => {
-                    if (!acc[slot.subjectName]) {
-                      acc[slot.subjectName] = {
+                    if (!acc[slot.subject]) {
+                      acc[slot.subject] = {
                         hours: 0,
-                        teacher: slot.teacherName,
+                        teacher: slot.teacher,
                         sessions: 0
                       };
                     }
                     const start = parseFloat(slot.startTime.replace(':', '.'));
                     const end = parseFloat(slot.endTime.replace(':', '.'));
-                    acc[slot.subjectName].hours += (end - start);
-                    acc[slot.subjectName].sessions += 1;
+                    acc[slot.subject].hours += (end - start);
+                    acc[slot.subject].sessions += 1;
                     return acc;
                   }, {} as Record<string, {hours: number, teacher: string, sessions: number}>)
                 ).map(([subject, data]) => (
@@ -403,7 +426,7 @@ export default function TimetableViewModal({
                   Version {timetable.version} - Créé par {timetable.createdBy}
                 </div>
                 <div>
-                  Dernière modification: {TimetableMockService.formatDate(timetable.lastModified)}
+                  Dernière modification: {new Date(timetable.lastModified).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
                 </div>
               </div>
             </CardContent>

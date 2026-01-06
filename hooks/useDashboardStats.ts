@@ -1,60 +1,59 @@
 import { useState, useEffect } from 'react';
-
-export interface MonthlyData {
-    month: string;
-    revenue: number;
-    expenses: number;
-    students: number;
-}
-
-export interface ClassPerformance {
-    className: string;
-    averageGrade: number;
-    studentCount: number;
-}
-
-export interface DashboardStats {
-    totalStudents: number;
-    totalTeachers: number;
-    totalClasses: number;
-    totalSubjects: number;
-    totalParents: number;
-    activeClasses: number;
-    pendingFees: number;
-    monthlyRevenue: number;
-    monthlyData: MonthlyData[];
-    classPerformance: ClassPerformance[];
-    academicPerformance: {
-        averageGrade: number;
-        passRate: number;
-        attendanceRate: number;
-    };
-}
+import { useUserSession } from "@/store/auth";
+import { getDashboardStats, DashboardStats } from "@/actions/dashboard";
 
 export function useDashboardStats() {
     const [stats, setStats] = useState<DashboardStats | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
 
+    const user = useUserSession((state) => state.user);
+    const schoolId = user?.schoolId;
+
+    const emptyStats: DashboardStats = {
+        totalStudents: 0,
+        totalTeachers: 0,
+        totalClasses: 0,
+        totalSubjects: 0,
+        totalParents: 0,
+        activeClasses: 0,
+        pendingFees: 0,
+        monthlyRevenue: 0,
+        monthlyData: [],
+        classPerformance: [],
+        academicPerformance: {
+            averageGrade: 0,
+            passRate: 0,
+            attendanceRate: 0,
+        },
+        upcomingClasses: [],
+    };
+
     useEffect(() => {
         const fetchStats = async () => {
+            if (!schoolId) {
+                setStats(emptyStats);
+                setError(null);
+                setLoading(false);
+                return;
+            }
+
+            setLoading(true);
             try {
-                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/dashboard/stats`);
-                if (!response.ok) {
-                    throw new Error('Failed to fetch dashboard stats');
-                }
-                const fetchedData = await response.json();
-                setStats(fetchedData);
+                const data = await getDashboardStats(schoolId);
+                setStats(data);
+                setError(null);
             } catch (err) {
                 setError(err instanceof Error ? err.message : 'An error occurred');
                 console.error(err);
+                setStats(emptyStats);
             } finally {
                 setLoading(false);
             }
         };
 
         fetchStats();
-    }, []);
+    }, [schoolId]);
 
     return { stats, loading, error };
 }

@@ -5,7 +5,6 @@ import Link from "next/link";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { DashboardMockDataService } from "@/services/dashboardMockData";
 import StatsCard from "@/components/dashboard/StatsCard";
 import AcademicQuickAccess from "@/components/dashboard/AcademicQuickAccess";
 import {
@@ -38,6 +37,15 @@ const Progress = ({ value, className }: { value: number; className?: string }) =
 
 export default function OverviewPage() {
   const { stats, loading, error } = useDashboardStats();
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('fr-CD', {
+      style: 'currency',
+      currency: 'USD',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
 
   if (loading) {
     return (
@@ -77,6 +85,14 @@ export default function OverviewPage() {
   const averageClassSize = stats.totalClasses > 0 ? Math.round(stats.totalStudents / stats.totalClasses) : 0;
   const teacherStudentRatio = stats.totalTeachers > 0 ? Math.round(stats.totalStudents / stats.totalTeachers) : 0;
 
+  const getRatioDescription = (ratio: number) => {
+    if (ratio === 0) return "Pas de données";
+    if (ratio < 15) return "Excellent encadrement";
+    if (ratio < 25) return "Ratio optimal";
+    if (ratio < 35) return "Classes chargées";
+    return "Surcharge des classes";
+  };
+
   return (
     <div className="flex-1 space-y-6 p-4">
       {/* En-tête */}
@@ -103,7 +119,7 @@ export default function OverviewPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <StatsCard
           title="Revenus Totaux (6 mois)"
-          value={DashboardMockDataService.formatCurrency(totalRevenue6Months)}
+          value={formatCurrency(totalRevenue6Months)}
           description="Derniers 6 mois"
           icon={TrendingUp}
           trend={{ value: 12.5, isPositive: true }}
@@ -111,14 +127,14 @@ export default function OverviewPage() {
         <StatsCard
           title="Marge Bénéficiaire"
           value={`${profitMargin}%`}
-          description={DashboardMockDataService.formatCurrency(netProfit)}
+          description={formatCurrency(netProfit)}
           icon={Target}
           trend={{ value: 3.2, isPositive: true }}
         />
         <StatsCard
           title="Ratio Enseignant/Élève"
           value={`1:${teacherStudentRatio}`}
-          description="Ratio optimal"
+          description={getRatioDescription(teacherStudentRatio)}
           icon={Users}
           className="border-blue-200"
         />
@@ -133,7 +149,12 @@ export default function OverviewPage() {
       {/* Widget d'Accès Académique */}
       <div className="grid gap-6 md:grid-cols-3">
         <div className="md:col-span-1">
-          <AcademicQuickAccess />
+          <AcademicQuickAccess 
+            averageGrade={stats.academicPerformance?.averageGrade}
+            passRate={stats.academicPerformance?.passRate}
+            attendanceRate={stats.academicPerformance?.attendanceRate}
+            upcomingClasses={stats.upcomingClasses}
+          />
         </div>
 
         <div className="md:col-span-2">
@@ -220,7 +241,7 @@ export default function OverviewPage() {
                       Frais en retard
                     </p>
                     <p className="text-xs text-yellow-600">
-                      {DashboardMockDataService.formatCurrency(stats.pendingFees)} en souffrance
+                      {formatCurrency(stats.pendingFees)} en souffrance
                     </p>
                   </div>
                 </div>
@@ -282,13 +303,13 @@ export default function OverviewPage() {
                       <td className="py-3 font-medium">{month.month}</td>
                       <td className="text-right py-3">{month.students}</td>
                       <td className="text-right py-3 text-green-600">
-                        {DashboardMockDataService.formatCurrency(month.revenue)}
+                        {formatCurrency(month.revenue)}
                       </td>
                       <td className="text-right py-3 text-red-600">
-                        {DashboardMockDataService.formatCurrency(month.expenses)}
+                        {formatCurrency(month.expenses)}
                       </td>
                       <td className="text-right py-3 font-medium">
-                        {DashboardMockDataService.formatCurrency(profit)}
+                        {formatCurrency(profit)}
                       </td>
                       <td className="text-right py-3">
                         <Badge variant="outline" className="text-xs">

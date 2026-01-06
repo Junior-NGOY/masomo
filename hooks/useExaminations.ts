@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useClasses } from './useClasses';
 import { useSubjects } from './useSubjects';
+import { useUserSession } from "@/store/auth";
 
 export interface Exam {
     id: string;
@@ -25,14 +26,17 @@ export function useExaminations() {
     const [examinations, setExaminations] = useState<Exam[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const user = useUserSession((state) => state.user);
+    const schoolId = user?.schoolId;
 
     const { classes, loading: classesLoading } = useClasses();
     const { subjects, loading: subjectsLoading } = useSubjects();
 
     useEffect(() => {
         const fetchExaminations = async () => {
+            if (!schoolId) return;
             try {
-                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/exams`);
+                const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000'}/api/v1/exams?schoolId=${schoolId}`);
                 if (!response.ok) {
                     throw new Error('Failed to fetch examinations');
                 }
@@ -55,8 +59,22 @@ export function useExaminations() {
 
                     // Map class IDs to names
                     const classNames = exam.classIds?.map((id: string) => {
+                        // Try to find in classes (Levels)
                         const cls = classes.find(c => c.id === id);
-                        return cls ? cls.title : id;
+                        if (cls) return cls.title;
+
+                        // Try to find in streams (Sections)
+                        for (const c of classes) {
+                            // Ensure streams exists and is an array
+                            if (Array.isArray(c.streams)) {
+                                const stream = c.streams.find(s => s.id === id);
+                                if (stream) {
+                                    return `${c.title} ${stream.title}`;
+                                }
+                            }
+                        }
+                        
+                        return id;
                     }) || [];
                     
                     // Map subject IDs to names
@@ -88,7 +106,7 @@ export function useExaminations() {
         if (!classesLoading && !subjectsLoading) {
             fetchExaminations();
         }
-    }, [classesLoading, subjectsLoading, classes, subjects]);
+    }, [classesLoading, subjectsLoading, classes, subjects, schoolId]);
 
     return { examinations, loading: loading || classesLoading || subjectsLoading, error };
 }

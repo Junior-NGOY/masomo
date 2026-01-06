@@ -56,7 +56,7 @@ export default function AnnouncementsPage() {
     totalAnnouncements: announcements.length,
     activeAnnouncements: announcements.filter(a => a.isActive).length,
     urgentAnnouncements: announcements.filter(a => a.type === 'URGENT' && a.isActive).length,
-    viewRate: 85 // Placeholder - would need view tracking
+    expiredAnnouncements: announcements.filter(a => a.expiryDate && new Date(a.expiryDate) < new Date()).length
   };
 
   if (loading) {
@@ -158,12 +158,11 @@ export default function AnnouncementsPage() {
           className="border-red-200"
         />
         <StatsCard
-          title="Taux de Vue"
-          value={`${announcementStats.viewRate}%`}
-          description="Consultation moyenne"
-          icon={Eye}
-          trend={{ value: 4.5, isPositive: true }}
-          className="border-blue-200"
+          title="Annonces Expirées"
+          value={announcementStats.expiredAnnouncements}
+          description="Passées"
+          icon={Clock}
+          className="border-gray-200"
         />
       </div>
 

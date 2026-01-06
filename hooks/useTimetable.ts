@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useUserSession } from "@/store/auth";
 
 export interface TimetableSlot {
     id: string;
@@ -23,6 +24,8 @@ export interface Timetable {
     lastModified: string;
     totalHours: number;
     schedule: TimetableSlot[];
+    version?: number;
+    createdBy?: string;
 }
 
 export interface TimetableStats {
@@ -38,11 +41,15 @@ export function useTimetable() {
     const [stats, setStats] = useState<TimetableStats | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const user = useUserSession((state) => state.user);
+    const schoolId = user?.schoolId;
 
     useEffect(() => {
         const fetchTimetables = async () => {
+            if (!schoolId) return;
+
             try {
-                const url = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/timetables`;
+                const url = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000'}/api/v1/timetables?schoolId=${schoolId}`;
                 console.log('Fetching timetables from:', url);
                 const response = await fetch(url);
                 if (!response.ok) {
@@ -77,7 +84,7 @@ export function useTimetable() {
                     classesCovered: uniqueClasses.size,
                     totalClasses: 12, // Placeholder or fetch from classes API
                     totalHours,
-                    conflicts: 0 // Placeholder
+                    conflicts: 0 // Will be updated by useTimetableConflicts in the component
                 });
 
             } catch (err) {
@@ -98,11 +105,11 @@ export function useTimetable() {
         };
 
         fetchTimetables();
-    }, []);
+    }, [schoolId]);
 
     const deleteTimetable = async (id: string) => {
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/timetables/${id}`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000'}/api/v1/timetables/${id}`, {
                 method: 'DELETE',
             });
             if (!response.ok) throw new Error('Failed to delete timetable');
@@ -129,7 +136,7 @@ export function useTimetable() {
                 academicYear: original.academicYear // Ensure required fields are present
             };
 
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/timetables`, {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000'}/api/v1/timetables`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(newTimetable)
@@ -165,11 +172,16 @@ export function useTimetableConflicts() {
     const [conflicts, setConflicts] = useState<TimetableConflict[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const user = useUserSession((state) => state.user);
+    const schoolId = user?.schoolId;
 
     useEffect(() => {
         const fetchConflicts = async () => {
+            if (!schoolId) return;
+
             try {
-                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/timetables/conflicts`);
+                const url = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000'}/api/v1/timetables/conflicts?schoolId=${schoolId}`;
+                const response = await fetch(url);
                 if (!response.ok) {
                     throw new Error('Failed to fetch conflicts');
                 }
@@ -185,7 +197,7 @@ export function useTimetableConflicts() {
         };
 
         fetchConflicts();
-    }, []);
+    }, [schoolId]);
 
     return { conflicts, loading, error };
 }

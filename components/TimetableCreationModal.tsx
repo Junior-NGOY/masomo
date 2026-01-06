@@ -31,31 +31,10 @@ import {
   User,
   MapPin
 } from "lucide-react";
-import { MockDataService } from "@/services/mockServices";
-import { TimetableMockService, Timetable, TimeSlot } from "@/services/timetableMockService";
-
-interface ClassType {
-  id: string;
-  name: string;
-  level: string;
-  section: string;
-  capacity: number;
-  currentStudents: number;
-}
-
-interface SubjectType {
-  id: string;
-  name: string;
-  code: string;
-  category: string;
-}
-
-interface TeacherType {
-  id: string;
-  name: string;
-  subject: string;
-  email: string;
-}
+import { useClasses } from "@/hooks/useClasses";
+import { useSubjects } from "@/hooks/useSubjects";
+import { useTeachers } from "@/hooks/useTeachers";
+import { Timetable, TimetableSlot } from "@/hooks/useTimetable";
 
 interface TimetableCreationModalProps {
   isOpen?: boolean;
@@ -72,17 +51,22 @@ export default function TimetableCreationModal({
   const modalOpen = isOpen ?? internalOpen;
   const handleClose = onClose || (() => setInternalOpen(false));
 
+  // Hooks pour les données
+  const { classes } = useClasses();
+  const { subjects } = useSubjects();
+  const { teachers } = useTeachers();
+
   // États du formulaire
   const [formData, setFormData] = React.useState({
     classId: '',
     academicYear: '2024-2025',
-    term: 'TRIMESTRE_1' as Timetable['term'],
-    status: 'DRAFT' as Timetable['status']
+    term: 'TRIMESTRE_1',
+    status: 'DRAFT'
   });
   
-  const [schedule, setSchedule] = React.useState<TimeSlot[]>([]);
-  const [currentSlot, setCurrentSlot] = React.useState<Partial<TimeSlot>>({
-    day: 'MONDAY',
+  const [schedule, setSchedule] = React.useState<any[]>([]);
+  const [currentSlot, setCurrentSlot] = React.useState<any>({
+    day: 1, // 1 = Lundi
     startTime: '08:00',
     endTime: '09:00',
     subjectId: '',
@@ -94,46 +78,61 @@ export default function TimetableCreationModal({
   const [isProcessing, setIsProcessing] = React.useState(false);
   const [errors, setErrors] = React.useState<{[key: string]: string}>({});
 
-  // Données de référence
-  const classes: ClassType[] = MockDataService.classes.getAll();
-  const subjects: SubjectType[] = MockDataService.subjects.getAll();
-  const teachers: TeacherType[] = MockDataService.teachers.getAll();
-  const timeSlots = TimetableMockService.getAvailableTimeSlots();
+  const timeSlots = [
+    '08:00-09:00',
+    '09:15-10:15',
+    '10:30-11:30',
+    '11:45-12:45',
+    '14:00-15:00',
+    '15:15-16:15',
+    '16:30-17:30'
+  ];
+  
   const days = [
-    { value: 'MONDAY', label: 'Lundi' },
-    { value: 'TUESDAY', label: 'Mardi' },
-    { value: 'WEDNESDAY', label: 'Mercredi' },
-    { value: 'THURSDAY', label: 'Jeudi' },
-    { value: 'FRIDAY', label: 'Vendredi' },
-    { value: 'SATURDAY', label: 'Samedi' }
+    { value: 1, label: 'Lundi' },
+    { value: 2, label: 'Mardi' },
+    { value: 3, label: 'Mercredi' },
+    { value: 4, label: 'Jeudi' },
+    { value: 5, label: 'Vendredi' },
+    { value: 6, label: 'Samedi' }
   ];
 
   // Charger les données si on édite un emploi du temps existant
   React.useEffect(() => {
-    if (timetableId && modalOpen) {
-      const timetable = TimetableMockService.getTimetableById(timetableId);
-      if (timetable) {
+    const fetchTimetable = async () => {
+      if (timetableId && modalOpen) {
+        try {
+          const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000'}/api/v1/timetables/${timetableId}`);
+          if (response.ok) {
+            const result = await response.json();
+            const timetable = result.data;
+            setFormData({
+              classId: timetable.classId,
+              academicYear: timetable.academicYear,
+              term: timetable.term,
+              status: timetable.status
+            });
+            setSchedule(timetable.schedule || []);
+          }
+        } catch (error) {
+          console.error("Failed to fetch timetable", error);
+        }
+      } else {
+        // Réinitialiser pour un nouvel emploi du temps
         setFormData({
-          classId: timetable.classId,
-          academicYear: timetable.academicYear,
-          term: timetable.term,
-          status: timetable.status
+          classId: '',
+          academicYear: '2024-2025',
+          term: 'TRIMESTRE_1',
+          status: 'DRAFT'
         });
-        setSchedule([...timetable.schedule]);
+        setSchedule([]);
       }
-    } else {
-      // Réinitialiser pour un nouvel emploi du temps
-      setFormData({
-        classId: '',
-        academicYear: '2024-2025',
-        term: 'TRIMESTRE_1',
-        status: 'DRAFT'
-      });
-      setSchedule([]);
-    }
+    };
+
+    fetchTimetable();
   }, [timetableId, modalOpen]);
 
-  const validateSlot = (slot: Partial<TimeSlot>): boolean => {
+  const validateSlot = (slot: any): boolean => {
     const newErrors: {[key: string]: string} = {};
     
     if (!slot.subjectId) newErrors.subject = "Sélectionnez une matière";
@@ -159,27 +158,27 @@ export default function TimetableCreationModal({
   const addTimeSlot = () => {
     if (!validateSlot(currentSlot)) return;
     
-    const selectedSubject = subjects.find((s: SubjectType) => s.id === currentSlot.subjectId);
-    const selectedTeacher = teachers.find((t: TeacherType) => t.id === currentSlot.teacherId);
+    const selectedSubject = subjects.find((s: any) => s.id === currentSlot.subjectId);
+    const selectedTeacher = teachers.find((t: any) => t.id === currentSlot.teacherId);
     
-    const newSlot: TimeSlot = {
+    const newSlot = {
       id: `slot-${Date.now()}`,
-      day: currentSlot.day as TimeSlot['day'],
+      day: currentSlot.day,
       startTime: currentSlot.startTime!,
       endTime: currentSlot.endTime!,
       subjectId: currentSlot.subjectId!,
-      subjectName: selectedSubject?.name || '',
+      subject: selectedSubject?.name || '',
       teacherId: currentSlot.teacherId!,
-      teacherName: selectedTeacher?.name || '',
-      room: currentSlot.room || '',
-      type: currentSlot.type as TimeSlot['type']
+      teacher: selectedTeacher ? `${selectedTeacher.firstName} ${selectedTeacher.lastName}` : '',
+      roomId: currentSlot.room || '',
+      type: currentSlot.type
     };
     
     setSchedule([...schedule, newSlot]);
     
     // Réinitialiser le formulaire de créneau
     setCurrentSlot({
-      day: 'MONDAY',
+      day: 1,
       startTime: '08:00',
       endTime: '09:00',
       subjectId: '',
@@ -218,26 +217,35 @@ export default function TimetableCreationModal({
     setIsProcessing(true);
     
     try {
-      const selectedClass = classes.find((c: ClassType) => c.id === formData.classId);
+      const selectedClass = classes.find((c: any) => c.id === formData.classId);
       const timetableData = {
         ...formData,
-        className: selectedClass?.name || '',
+        className: selectedClass?.title || '',
         schedule,
-        totalHours: Math.round(calculateTotalHours()),
-        createdBy: 'current-user'
+        totalHours: Math.round(calculateTotalHours())
       };
       
-      if (timetableId) {
-        TimetableMockService.updateTimetable(timetableId, timetableData);
-        alert("Emploi du temps mis à jour avec succès!");
-      } else {
-        TimetableMockService.createTimetable(timetableData);
-        alert("Emploi du temps créé avec succès!");
-      }
+      const url = timetableId 
+        ? `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000'}/api/v1/timetables/${timetableId}`
+        : `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000'}/api/v1/timetables`;
+        
+      const method = timetableId ? 'PUT' : 'POST';
+
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(timetableData)
+      });
+
+      if (!response.ok) throw new Error('Failed to save timetable');
       
+      alert(timetableId ? "Emploi du temps mis à jour avec succès!" : "Emploi du temps créé avec succès!");
       handleClose();
+      // Idéalement, rafraîchir la liste des emplois du temps ici
+      window.location.reload(); 
     } catch (error) {
       setErrors({ form: "Erreur lors de la sauvegarde" });
+      console.error(error);
     } finally {
       setIsProcessing(false);
     }
@@ -248,7 +256,7 @@ export default function TimetableCreationModal({
     return { startTime: start, endTime: end };
   };
 
-  const getDayLabel = (day: string) => {
+  const getDayLabel = (day: number) => {
     return days.find(d => d.value === day)?.label || day;
   };
 
@@ -310,9 +318,9 @@ export default function TimetableCreationModal({
                     <SelectValue placeholder="Sélectionnez une classe" />
                   </SelectTrigger>
                   <SelectContent>
-                    {classes.map((classe: ClassType) => (
+                    {classes.map((classe: any) => (
                       <SelectItem key={classe.id} value={classe.id}>
-                        {classe.name}
+                        {classe.title || classe.name}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -375,15 +383,15 @@ export default function TimetableCreationModal({
                 <div className="space-y-2">
                   <Label>Jour</Label>
                   <Select
-                    value={currentSlot.day}
-                    onValueChange={(value) => setCurrentSlot({...currentSlot, day: value as TimeSlot['day']})}
+                    value={currentSlot.day.toString()}
+                    onValueChange={(value) => setCurrentSlot({...currentSlot, day: parseInt(value)})}
                   >
                     <SelectTrigger>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       {days.map((day) => (
-                        <SelectItem key={day.value} value={day.value}>
+                        <SelectItem key={day.value} value={day.value.toString()}>
                           {day.label}
                         </SelectItem>
                       ))}
@@ -423,7 +431,7 @@ export default function TimetableCreationModal({
                       <SelectValue placeholder="Matière" />
                     </SelectTrigger>
                     <SelectContent>
-                      {subjects.map((subject: SubjectType) => (
+                      {subjects.map((subject: any) => (
                         <SelectItem key={subject.id} value={subject.id}>
                           {subject.name}
                         </SelectItem>
@@ -442,9 +450,9 @@ export default function TimetableCreationModal({
                       <SelectValue placeholder="Enseignant" />
                     </SelectTrigger>
                     <SelectContent>
-                      {teachers.map((teacher: TeacherType) => (
+                      {teachers.map((teacher: any) => (
                         <SelectItem key={teacher.id} value={teacher.id}>
-                          {teacher.name}
+                          {teacher.firstName} {teacher.lastName}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -464,7 +472,7 @@ export default function TimetableCreationModal({
                   <Label>Type</Label>
                   <Select
                     value={currentSlot.type}
-                    onValueChange={(value) => setCurrentSlot({...currentSlot, type: value as TimeSlot['type']})}
+                    onValueChange={(value) => setCurrentSlot({...currentSlot, type: value})}
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -517,17 +525,17 @@ export default function TimetableCreationModal({
                           <Clock className="h-4 w-4 text-gray-500" />
                           <span className="text-sm">{slot.startTime}-{slot.endTime}</span>
                         </div>
-                        <Badge className={getSubjectColor(slot.subjectName)}>
-                          {slot.subjectName}
+                        <Badge className={getSubjectColor(slot.subject)}>
+                          {slot.subject}
                         </Badge>
                         <div className="flex items-center gap-1">
                           <User className="h-4 w-4 text-gray-500" />
-                          <span className="text-sm">{slot.teacherName}</span>
+                          <span className="text-sm">{slot.teacher}</span>
                         </div>
-                        {slot.room && (
+                        {slot.roomId && (
                           <div className="flex items-center gap-1">
                             <MapPin className="h-4 w-4 text-gray-500" />
-                            <span className="text-sm">{slot.room}</span>
+                            <span className="text-sm">{slot.roomId}</span>
                           </div>
                         )}
                       </div>

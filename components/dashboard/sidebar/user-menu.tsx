@@ -23,17 +23,32 @@ import { useUserSession } from "@/store/auth";
 import { getInitials } from "@/lib/getInitials";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
+import { Skeleton } from "@/components/ui/skeleton";
 //import { useRouter } from "next/router";
 
 export default function UserMenu() {
   const { user: data, clearSession } = useUserSession();
+  const router = useRouter();
+  
+  if (!data) {
+    return (
+      <SidebarMenuButton size="lg">
+        <Skeleton className="h-8 w-8 rounded-lg" />
+        <div className="grid flex-1 gap-1 text-left text-sm leading-tight">
+          <Skeleton className="h-4 w-24" />
+          <Skeleton className="h-3 w-16" />
+        </div>
+        <ChevronsUpDown className="ml-auto size-4 opacity-50" />
+      </SidebarMenuButton>
+    );
+  }
+
   const user = {
     name: data?.name,
     email: data?.email,
     avatar: data?.image ?? "/avatars/shadcn.jpg"
   };
   const initials = getInitials(user.name);
-  const router = useRouter();
   async function handleLogout() {
     await clearSession();
     router.push("/login");

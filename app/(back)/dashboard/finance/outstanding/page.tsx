@@ -182,10 +182,9 @@ export default function OutstandingFeesPage() {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Toutes les classes</SelectItem>
-                <SelectItem value="6ème A">6ème A</SelectItem>
-                <SelectItem value="5ème B">5ème B</SelectItem>
-                <SelectItem value="4ème C">4ème C</SelectItem>
-                <SelectItem value="3ème A">3ème A</SelectItem>
+                {Array.from(new Set(outstandingPayments.map(p => p.className))).map((className) => (
+                  <SelectItem key={className} value={className}>{className}</SelectItem>
+                ))}
               </SelectContent>
             </Select>
             <Select value={statusFilter} onValueChange={setStatusFilter}>
@@ -341,7 +340,7 @@ export default function OutstandingFeesPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-3">
-                  {filteredPayments.slice(0, 3).map((payment) => (
+                  {filteredPayments.filter(p => p.lastReminder).slice(0, 5).map((payment) => (
                     <div key={payment.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                       <div>
                         <div className="font-medium">{payment.studentName}</div>
@@ -359,6 +358,9 @@ export default function OutstandingFeesPage() {
                       </div>
                     </div>
                   ))}
+                  {filteredPayments.filter(p => p.lastReminder).length === 0 && (
+                    <div className="text-center text-gray-500 py-4">Aucun historique de rappel récent</div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -373,9 +375,9 @@ export default function OutstandingFeesPage() {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {['6ème A', '5ème B', '4ème C', '3ème A'].map((className) => {
+                  {Array.from(new Set(outstandingPayments.map(p => p.className))).map((className) => {
                     const classPayments = outstandingPayments.filter(p => p.className === className);
-                    const classTotal = classPayments.reduce((sum, p) => sum + (p.amount - p.paidAmount), 0);
+                    const classTotal = classPayments.reduce((sum, p) => sum + p.outstandingAmount, 0);
                     
                     return (
                       <div key={className} className="space-y-2">
@@ -386,12 +388,15 @@ export default function OutstandingFeesPage() {
                         <div className="w-full bg-gray-200 rounded-full h-2">
                           <div 
                             className="bg-red-500 h-2 rounded-full" 
-                            style={{ width: `${(classTotal / stats.totalOutstanding) * 100}%` }}
+                            style={{ width: `${stats.totalOutstanding > 0 ? (classTotal / stats.totalOutstanding) * 100 : 0}%` }}
                           ></div>
                         </div>
                       </div>
                     );
                   })}
+                  {outstandingPayments.length === 0 && (
+                    <div className="text-center text-gray-500 py-4">Aucune donnée disponible</div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -410,15 +415,21 @@ export default function OutstandingFeesPage() {
                   
                   <div className="grid grid-cols-3 gap-4 text-center">
                     <div className="space-y-1">
-                      <div className="text-lg font-bold text-red-600">+15%</div>
-                      <div className="text-xs text-gray-600">Ce mois</div>
+                      <div className="text-lg font-bold text-red-600">
+                        {formatCurrency(stats.totalOutstanding)}
+                      </div>
+                      <div className="text-xs text-gray-600">Total Impayés</div>
                     </div>
                     <div className="space-y-1">
-                      <div className="text-lg font-bold text-orange-600">-8%</div>
-                      <div className="text-xs text-gray-600">Mois dernier</div>
+                      <div className="text-lg font-bold text-orange-600">
+                        {stats.overdueCount}
+                      </div>
+                      <div className="text-xs text-gray-600">Dossiers en retard</div>
                     </div>
                     <div className="space-y-1">
-                      <div className="text-lg font-bold text-blue-600">12j</div>
+                      <div className="text-lg font-bold text-blue-600">
+                        {Math.round(stats.averageDelay)}j
+                      </div>
                       <div className="text-xs text-gray-600">Retard moyen</div>
                     </div>
                   </div>

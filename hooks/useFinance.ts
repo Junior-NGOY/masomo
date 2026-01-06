@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useUserSession } from "@/store/auth";
 
 export interface OutstandingFee {
   id: string;
@@ -32,11 +33,14 @@ export function useOutstandingFees() {
   const [fees, setFees] = useState<OutstandingFee[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const user = useUserSession((state) => state.user);
+  const schoolId = user?.schoolId;
 
   useEffect(() => {
     const fetchFees = async () => {
+      if (!schoolId) return;
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/finance/outstanding`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000'}/api/v1/finance/outstanding?schoolId=${schoolId}`);
         if (!response.ok) throw new Error('Failed to fetch outstanding fees');
         const result = await response.json();
         setFees(result.data || []);
@@ -49,7 +53,7 @@ export function useOutstandingFees() {
       }
     };
     fetchFees();
-  }, []);
+  }, [schoolId]);
 
   return { fees, loading, error };
 }
@@ -58,11 +62,14 @@ export function useFinancialSummary() {
   const [summary, setSummary] = useState<FinancialSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const user = useUserSession((state) => state.user);
+  const schoolId = user?.schoolId;
 
   useEffect(() => {
     const fetchSummary = async () => {
+      if (!schoolId) return;
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/finance/summary`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000'}/api/v1/finance/summary?schoolId=${schoolId}`);
         if (!response.ok) throw new Error('Failed to fetch financial summary');
         const result = await response.json();
         setSummary(result.data);
@@ -74,7 +81,7 @@ export function useFinancialSummary() {
       }
     };
     fetchSummary();
-  }, []);
+  }, [schoolId]);
 
   return { summary, loading, error };
 }
@@ -83,11 +90,14 @@ export function useRevenueByMonth() {
   const [revenue, setRevenue] = useState<MonthlyRevenue[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const user = useUserSession((state) => state.user);
+  const schoolId = user?.schoolId;
 
   useEffect(() => {
     const fetchRevenue = async () => {
+      if (!schoolId) return;
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/finance/revenue`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000'}/api/v1/finance/revenue?schoolId=${schoolId}`);
         if (!response.ok) throw new Error('Failed to fetch revenue data');
         const result = await response.json();
         setRevenue(result.data || []);
@@ -100,7 +110,7 @@ export function useRevenueByMonth() {
       }
     };
     fetchRevenue();
-  }, []);
+  }, [schoolId]);
 
   return { revenue, loading, error };
 }

@@ -6,8 +6,9 @@ import RecentActivities from "@/components/dashboard/RecentActivities";
 import ClassPerformanceCard from "@/components/dashboard/ClassPerformanceCard";
 import MonthlyStatsChart from "@/components/dashboard/MonthlyStatsChart";
 import TopPerformers from "@/components/dashboard/TopPerformers";
-import { DashboardMockDataService } from "@/services/dashboardMockData";
 import { getDashboardStats } from "@/actions/dashboard";
+import { getServerUser } from "@/actions/auth";
+import { redirect } from "next/navigation";
 import { 
   Users, 
   UserCheck, 
@@ -22,18 +23,13 @@ import {
 export const dynamic = 'force-dynamic';
 
 export default async function Dashboard() {
-  // Données fictives pour le mode démo (User)
-  const mockUser = {
-    id: "user_demo_123",
-    name: "Administrateur",
-    email: "admin@masomo.pro",
-    role: "ADMIN",
-    schoolId: "school_demo_123",
-    schoolName: "Masomo Pro School"
-  };
+  const user = await getServerUser();
+  if (!user) {
+    redirect("/login");
+  }
 
   // Récupération des données réelles
-  const stats = await getDashboardStats();
+  const stats = await getDashboardStats(user.schoolId || "");
   
   // Helper functions for formatting
   const formatCurrency = (amount: number) => {
@@ -52,9 +48,9 @@ export default async function Dashboard() {
   return (
     <div className="flex-1 space-y-6 p-4">
       <WelcomeBanner
-        userSchool={mockUser?.schoolName ?? "École Demo"}
-        userName={mockUser?.name}
-        userRole={mockUser?.role}
+        userSchool={user.schoolName ?? "École Demo"}
+        userName={user.name}
+        userRole={user.role}
       />
       
       {/* Cartes de statistiques principales */}

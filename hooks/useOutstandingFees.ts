@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useUserSession } from "@/store/auth";
 
 export interface OutstandingPayment {
     id: string;
@@ -32,32 +33,31 @@ export function useOutstandingFees() {
     const [stats, setStats] = useState<OutstandingStats | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const user = useUserSession((state) => state.user);
+    const schoolId = user?.schoolId;
 
     useEffect(() => {
         const fetchFees = async () => {
+            if (!schoolId) return;
+            
             try {
-                // In a real app, this would be a specific endpoint for outstanding fees
-                // For now, we might need to fetch students and calculate, or assume an endpoint exists
-                // Let's assume an endpoint exists for now as per instructions to use real data
-                const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/finance/outstanding`);
+                const url = `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000'}/api/v1/finance/outstanding?schoolId=${schoolId}`;
+                console.log('Fetching outstanding fees from:', url);
+                const response = await fetch(url);
                 
                 if (!response.ok) {
-                    // If endpoint doesn't exist, we might need to fallback or throw
-                    // For this task, let's try to fetch and if it fails (404), we might need to mock it TEMPORARILY 
-                    // BUT the user asked for REAL data. 
-                    // If the endpoint is not implemented in backend, I should probably implement it or use available data.
-                    // Let's check if I can construct this from available data.
-                    throw new Error('Failed to fetch outstanding fees');
+                    const errorText = await response.text();
+                    console.error(`Fetch failed: ${response.status} ${response.statusText}`, errorText);
+                    throw new Error(`Failed to fetch outstanding fees: ${response.status} ${response.statusText}`);
                 }
                 
                 const result = await response.json();
-                setPayments(result.data.payments);
-                setStats(result.data.stats);
+                setPayments(result.data.payments || []);
+                setStats(result.data.stats || null);
 
             } catch (err) {
                 console.error('Error fetching outstanding fees:', err);
                 setError(err instanceof Error ? err.message : 'An error occurred');
-                // Fallback to empty to avoid crash
                 setPayments([]);
                 setStats({
                     totalOutstanding: 0,
@@ -73,7 +73,7 @@ export function useOutstandingFees() {
         };
 
         fetchFees();
-    }, []);
+    }, [schoolId]);
 
     return { payments, stats, loading, error };
 }

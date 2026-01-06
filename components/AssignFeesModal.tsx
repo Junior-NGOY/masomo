@@ -31,7 +31,9 @@ import {
   UserPlus,
   DollarSign,
   Calendar as CalendarIcon,
-  AlertCircle
+  AlertCircle,
+  GraduationCap,
+  Hash
 } from "lucide-react";
 import { useStudents } from "@/hooks/useStudents";
 import { getFees } from "@/actions/fees";
@@ -44,9 +46,10 @@ import toast from "react-hot-toast";
 interface AssignFeesModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
 }
 
-export default function AssignFeesModal({ isOpen, onClose }: AssignFeesModalProps) {
+export default function AssignFeesModal({ isOpen, onClose, onSuccess }: AssignFeesModalProps) {
   const [selectedStudentId, setSelectedStudentId] = useState<string>("");
   const [selectedFeeIds, setSelectedFeeIds] = useState<string[]>([]);
   const [availableFees, setAvailableFees] = useState<any[]>([]);
@@ -168,6 +171,9 @@ export default function AssignFeesModal({ isOpen, onClose }: AssignFeesModalProp
         setAvailableFees([]);
         
         onClose();
+        if (onSuccess) {
+          onSuccess();
+        }
       } else {
         toast.error("Aucun frais n'a pu être assigné");
       }
@@ -217,7 +223,7 @@ export default function AssignFeesModal({ isOpen, onClose }: AssignFeesModalProp
                   className="w-full justify-between"
                 >
                   {selectedStudent 
-                    ? `${selectedStudent.name} (${selectedStudent.classTitle || 'Sans classe'})`
+                    ? `${selectedStudent.firstName} ${selectedStudent.lastName} (${selectedStudent.classTitle || 'Sans classe'})`
                     : "Choisir un élève..."}
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
@@ -247,7 +253,7 @@ export default function AssignFeesModal({ isOpen, onClose }: AssignFeesModalProp
                             )}
                           />
                           <div className="flex flex-col">
-                            <span>{student.name}</span>
+                            <span>{student.firstName} {student.lastName}</span>
                             <span className="text-xs text-gray-500">
                               {student.classTitle || 'Sans classe'}
                             </span>
@@ -260,6 +266,28 @@ export default function AssignFeesModal({ isOpen, onClose }: AssignFeesModalProp
               </PopoverContent>
             </Popover>
           </div>
+
+          {/* Selected Student Details */}
+          {selectedStudent && (
+            <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 flex items-start gap-4">
+              <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 font-bold text-xl shrink-0">
+                {selectedStudent.firstName.charAt(0)}{selectedStudent.lastName.charAt(0)}
+              </div>
+              <div>
+                <h4 className="font-bold text-lg text-blue-900">{selectedStudent.firstName} {selectedStudent.lastName}</h4>
+                <div className="text-sm text-blue-700 flex flex-wrap gap-x-4 gap-y-1 mt-1">
+                  <span className="flex items-center gap-1">
+                    <GraduationCap className="h-4 w-4" />
+                    {selectedStudent.classTitle || 'Sans classe'}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <Hash className="h-4 w-4" />
+                    {selectedStudent.regNo || 'N/A'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Available Fees Selection */}
           {selectedStudentId && (

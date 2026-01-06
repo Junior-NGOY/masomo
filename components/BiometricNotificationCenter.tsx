@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -24,54 +24,39 @@ import {
   BiometricNotificationService, 
   type BiometricNotification 
 } from '@/services/biometricNotificationService';
+import { useBiometric } from "@/hooks/useBiometric";
 
 export function BiometricNotificationCenter() {
-  const [notifications, setNotifications] = useState<BiometricNotification[]>([]);
-  const [stats, setStats] = useState<any>(null);
+  const { notifications, refresh } = useBiometric();
   const [showAll, setShowAll] = useState(false);
 
-  useEffect(() => {
-    // Charger les notifications existantes
-    loadNotifications();
-    loadStats();
-
-    // S'abonner aux nouvelles notifications
-    const unsubscribe = BiometricNotificationService.subscribe((notification) => {
-      setNotifications(prev => [notification, ...prev]);
-      loadStats(); // Mettre à jour les stats
-      
-      // Toast pour les nouvelles notifications importantes
-      if (notification.type === 'SECURITY_ALERT') {
-        toast.error(notification.message);
-      } else if (notification.status === 'SUCCESS') {
-        toast.success(notification.message);
+  const stats = useMemo(() => {
+    const now = new Date();
+    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    
+    return {
+      total: notifications.length,
+      today: notifications.filter(n => new Date(n.timestamp) >= today).length,
+      errors: notifications.filter(n => n.status === 'FAILED').length,
+      warnings: notifications.filter(n => n.status === 'WARNING').length,
+      recent: notifications.filter(n => (now.getTime() - new Date(n.timestamp).getTime()) < 3600000).length,
+      byStatus: {
+        SUCCESS: notifications.filter(n => n.status === 'SUCCESS').length,
+        FAILED: notifications.filter(n => n.status === 'FAILED').length,
+        WARNING: notifications.filter(n => n.status === 'WARNING').length
       }
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  const loadNotifications = () => {
-    const allNotifications = BiometricNotificationService.getNotifications(50);
-    setNotifications(allNotifications);
-  };
-
-  const loadStats = () => {
-    const statistics = BiometricNotificationService.getNotificationStats();
-    setStats(statistics);
-  };
+    };
+  }, [notifications]);
 
   const handleClearAll = () => {
     BiometricNotificationService.clearNotifications();
-    setNotifications([]);
-    loadStats();
+    refresh();
     toast.success('Toutes les notifications ont été supprimées');
   };
 
   const handleGenerateTest = () => {
     BiometricNotificationService.generateTestNotifications();
-    loadNotifications();
-    loadStats();
+    refresh();
     toast.success('Notifications de test générées');
   };
 

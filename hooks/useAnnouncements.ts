@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useUserSession } from "@/store/auth";
 
 export interface Announcement {
   id: string;
@@ -18,11 +19,14 @@ export function useAnnouncements() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const user = useUserSession((state) => state.user);
+  const schoolId = user?.schoolId;
 
   useEffect(() => {
     const fetchAnnouncements = async () => {
+      if (!schoolId) return;
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/announcements`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000'}/api/v1/announcements?schoolId=${schoolId}`);
         if (!response.ok) {
           throw new Error('Failed to fetch announcements');
         }
@@ -38,7 +42,7 @@ export function useAnnouncements() {
     };
 
     fetchAnnouncements();
-  }, []);
+  }, [schoolId]);
 
   return { announcements, loading, error };
 }

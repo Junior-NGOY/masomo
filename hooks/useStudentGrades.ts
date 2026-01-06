@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useUserSession } from "@/store/auth";
 
 export interface Grade {
   id: string;
@@ -33,11 +34,17 @@ export function useStudentGrades() {
   const [grades, setGrades] = useState<Grade[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const user = useUserSession((state) => state.user);
+  const schoolId = user?.schoolId;
 
   useEffect(() => {
     const fetchGrades = async () => {
+      if (!schoolId) {
+        setLoading(false);
+        return;
+      }
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/grades`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000'}/api/v1/grades?schoolId=${schoolId}`);
         if (!response.ok) {
           throw new Error('Failed to fetch grades');
         }
@@ -76,7 +83,7 @@ export function useStudentGrades() {
     };
 
     fetchGrades();
-  }, []);
+  }, [schoolId]);
 
   return { grades, loading, error };
 }
@@ -85,16 +92,19 @@ export function useGradeStats() {
   const [stats, setStats] = useState<GradeStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const user = useUserSession((state) => state.user);
+  const schoolId = user?.schoolId;
 
   useEffect(() => {
     const fetchStats = async () => {
+      if (!schoolId) return;
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/api/v1/grades/stats`);
+        const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:8000'}/api/v1/grades/stats?schoolId=${schoolId}`);
         if (!response.ok) {
           throw new Error('Failed to fetch grade stats');
         }
-        const data = await response.json();
-        setStats(data);
+        const result = await response.json();
+        setStats(result.data || result);
       } catch (err) {
         setError(err instanceof Error ? err.message : 'An error occurred');
         console.error(err);
@@ -104,7 +114,7 @@ export function useGradeStats() {
     };
 
     fetchStats();
-  }, []);
+  }, [schoolId]);
 
   return { stats, loading, error };
 }

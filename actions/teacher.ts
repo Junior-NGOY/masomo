@@ -1,6 +1,6 @@
 "use server";
 import axios from "axios";
-import { api } from "./schools";
+import { api } from "@/lib/api";
 
 import { Teacher, TeacherCreateProps } from "@/types/types";
 import { revalidatePath } from "next/cache";

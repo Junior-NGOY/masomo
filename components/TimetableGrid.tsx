@@ -5,28 +5,38 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Clock, MapPin, User, BookOpen } from "lucide-react";
-import { TimetableMockService, TimeSlot } from "@/services/timetableMockService";
+import { Timetable, TimetableSlot } from "@/hooks/useTimetable";
 
 interface TimetableGridProps {
   selectedClass: string | null;
-  onSlotClick?: (slot: TimeSlot) => void;
+  timetables: Timetable[];
+  onSlotClick?: (slot: TimetableSlot) => void;
   editable?: boolean;
 }
 
-export default function TimetableGrid({ selectedClass, onSlotClick, editable = false }: TimetableGridProps) {
-  const timeSlots = TimetableMockService.getAvailableTimeSlots();
-  const days = TimetableMockService.getDays();
+const timeSlots = [
+  '08:00-09:00',
+  '09:15-10:15',
+  '10:30-11:30',
+  '11:45-12:45',
+  '14:00-15:00',
+  '15:15-16:15',
+  '16:30-17:30'
+];
+const days = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi'];
+
+export default function TimetableGrid({ selectedClass, timetables, onSlotClick, editable = false }: TimetableGridProps) {
   
   // Récupérer les emplois du temps pour la classe sélectionnée
-  const timetables = selectedClass 
-    ? TimetableMockService.getTimetablesByClass(selectedClass)
-    : TimetableMockService.getTimetablesByStatus('ACTIVE');
+  const filteredTimetables = selectedClass 
+    ? timetables.filter(t => t.classId === selectedClass)
+    : timetables;
     
-  const activeTimetable = timetables.find(tt => tt.status === 'ACTIVE');
+  const activeTimetable = filteredTimetables.find(tt => tt.status === 'ACTIVE');
   
   // Organiser les créneaux par jour et heure
   const scheduleGrid = React.useMemo(() => {
-    const grid: { [key: string]: TimeSlot | null } = {};
+    const grid: { [key: string]: TimetableSlot | null } = {};
     
     days.forEach(day => {
       timeSlots.forEach(timeSlot => {
@@ -37,27 +47,29 @@ export default function TimetableGrid({ selectedClass, onSlotClick, editable = f
     
     if (activeTimetable) {
       activeTimetable.schedule.forEach(slot => {
-        const dayFr = translateDayToFrench(slot.day);
-        const timeSlotKey = `${slot.startTime}-${slot.endTime}`;
-        const key = `${dayFr}-${timeSlotKey}`;
-        grid[key] = slot;
+        // Convertir le numéro du jour en nom français (1 = Lundi, etc.)
+        // Note: Ajuster selon la convention de la DB (0=Dimanche ou 1=Lundi)
+        // Ici on suppose 1=Lundi pour correspondre à l'index 0 du tableau days
+        const dayIndex = slot.day - 1;
+        if (dayIndex >= 0 && dayIndex < days.length) {
+          const dayFr = days[dayIndex];
+          const timeSlotKey = `${slot.startTime}-${slot.endTime}`;
+          const key = `${dayFr}-${timeSlotKey}`;
+          // On vérifie si le créneau existe dans nos timeSlots prédéfinis
+          // Sinon on essaie de trouver le créneau le plus proche ou on l'ajoute
+          if (grid.hasOwnProperty(key)) {
+             grid[key] = slot;
+          } else {
+             // Fallback: si le créneau exact n'existe pas, on essaie de le mapper
+             // Pour l'instant on log juste
+             console.warn(`Slot time ${timeSlotKey} not matching predefined slots`);
+          }
+        }
       });
     }
     
     return grid;
-  }, [activeTimetable, days, timeSlots]);
-
-  function translateDayToFrench(day: string): string {
-    const translations = {
-      'MONDAY': 'Lundi',
-      'TUESDAY': 'Mardi',
-      'WEDNESDAY': 'Mercredi',
-      'THURSDAY': 'Jeudi',
-      'FRIDAY': 'Vendredi',
-      'SATURDAY': 'Samedi'
-    };
-    return translations[day as keyof typeof translations] || day;
-  }
+  }, [activeTimetable]);
 
   function getSubjectColor(subjectName: string): string {
     const colors = {
@@ -88,7 +100,7 @@ export default function TimetableGrid({ selectedClass, onSlotClick, editable = f
     }
   }
 
-  function handleSlotClick(slot: TimeSlot | null) {
+  function handleSlotClick(slot: TimetableSlot | null) {
     if (onSlotClick && slot) {
       onSlotClick(slot);
     } else if (editable && !slot) {
@@ -150,28 +162,28 @@ export default function TimetableGrid({ selectedClass, onSlotClick, editable = f
                 <div key={key} className="aspect-square">
                   {slot ? (
                     <Card 
-                      className={`h-full cursor-pointer transition-all hover:shadow-md ${getSubjectColor(slot.subjectName)}`}
+                      className={`h-full cursor-pointer transition-all hover:shadow-md ${getSubjectColor(slot.subject)}`}
                       onClick={() => handleSlotClick(slot)}
                     >
                       <CardContent className="p-2 h-full flex flex-col justify-between">
                         <div className="space-y-1">
                           <div className="flex items-center justify-between">
                             <span className="text-xs font-semibold truncate">
-                              {slot.subjectName}
+                              {slot.subject}
                             </span>
-                            {getTypeIcon(slot.type)}
+                            {getTypeIcon(slot.type || '')}
                           </div>
                           
                           <div className="space-y-0.5 text-xs">
                             <div className="flex items-center gap-1 truncate">
                               <User className="h-2.5 w-2.5" />
-                              <span className="truncate">{slot.teacherName}</span>
+                              <span className="truncate">{slot.teacher}</span>
                             </div>
                             
-                            {slot.room && (
+                            {slot.roomId && (
                               <div className="flex items-center gap-1 truncate">
                                 <MapPin className="h-2.5 w-2.5" />
-                                <span className="truncate">{slot.room}</span>
+                                <span className="truncate">{slot.roomId}</span>
                               </div>
                             )}
                           </div>

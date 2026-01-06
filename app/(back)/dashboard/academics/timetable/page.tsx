@@ -21,9 +21,7 @@ import {
   Copy,
   Settings
 } from "lucide-react";
-import { MockDataService } from "@/services/mockServices";
-import { TimetableMockService } from "@/services/timetableMockService";
-import { useTimetable } from "@/hooks/useTimetable";
+import { useTimetable, useTimetableConflicts } from "@/hooks/useTimetable";
 import { useClasses } from "@/hooks/useClasses";
 import { useSubjects } from "@/hooks/useSubjects";
 import StatsCard from "@/components/dashboard/StatsCard";
@@ -79,25 +77,28 @@ export default function TimetablePage() {
 
   // Récupération des données
   const { timetables, stats: timetableStats, loading: timetableLoading, deleteTimetable, duplicateTimetable } = useTimetable();
+  const { conflicts } = useTimetableConflicts();
   const { classes, loading: classesLoading } = useClasses();
   const { subjects, loading: subjectsLoading } = useSubjects();
+
+  // Filtrage des emplois du temps
+  const filteredTimetables = React.useMemo(() => {
+    return timetables.filter(timetable => {
+      const matchesSearch = timetable.className.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           timetable.academicYear.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesClass = classFilter === "all" || timetable.classId === classFilter;
+      const matchesSubject = subjectFilter === "all" || 
+                            timetable.schedule.some(slot => slot.subjectId === subjectFilter);
+      
+      return matchesSearch && matchesClass && matchesSubject;
+    });
+  }, [timetables, searchQuery, classFilter, subjectFilter]);
 
   if (timetableLoading || classesLoading || subjectsLoading) {
     return <div className="p-6">Chargement...</div>;
   }
 
   if (!timetableStats) return null;
-
-  // Filtrage des emplois du temps
-  const filteredTimetables = timetables.filter(timetable => {
-    const matchesSearch = timetable.className.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                         timetable.academicYear.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesClass = classFilter === "all" || timetable.classId === classFilter;
-    const matchesSubject = subjectFilter === "all" || 
-                          timetable.schedule.some(slot => slot.subjectId === subjectFilter);
-    
-    return matchesSearch && matchesClass && matchesSubject;
-  });
 
   const handleViewTimetable = (timetableId: string) => {
     setSelectedTimetable(timetableId);
@@ -196,7 +197,7 @@ export default function TimetablePage() {
         />
         <StatsCard
           title="Conflits Détectés"
-          value={timetableStats.conflicts.toString()}
+          value={conflicts.length.toString()}
           description="À résoudre"
           icon={BookOpen}
           className="border-red-200"
@@ -238,6 +239,7 @@ export default function TimetablePage() {
             <CardContent>
               <TimetableGrid 
                 selectedClass={classFilter === "all" ? null : classFilter}
+                timetables={filteredTimetables}
                 onSlotClick={(slot: any) => console.log("Slot clicked:", slot)}
               />
             </CardContent>
@@ -319,7 +321,7 @@ export default function TimetablePage() {
                         <TableCell>{timetable.term}</TableCell>
                         <TableCell>{timetable.totalHours}h</TableCell>
                         <TableCell>
-                          {MockDataService.formatDate(timetable.lastModified)}
+                          {new Date(timetable.lastModified).toLocaleDateString()}
                         </TableCell>
                         <TableCell>
                           <Badge variant="outline" className={getStatusColor(timetable.status)}>
@@ -384,18 +386,16 @@ export default function TimetablePage() {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                {TimetableMockService.getConflicts().map((conflict, index) => (
+                {conflicts.map((conflict, index) => (
                   <div key={index} className="p-4 border border-red-200 rounded-lg bg-red-50">
                     <div className="flex items-start justify-between">
                       <div>
                         <h4 className="font-semibold text-red-800">{conflict.type}</h4>
                         <p className="text-sm text-red-600 mt-1">{conflict.description}</p>
                         <div className="mt-2 space-y-1">
-                          {conflict.affectedSlots.map((slot, slotIndex) => (
-                            <p key={slotIndex} className="text-xs text-gray-600">
-                              {slot.day} {slot.time} - {slot.subject} ({slot.class})
+                            <p className="text-xs text-gray-600">
+                              {conflict.details}
                             </p>
-                          ))}
                         </div>
                       </div>
                       <div className="flex gap-2">
@@ -410,7 +410,7 @@ export default function TimetablePage() {
                   </div>
                 ))}
                 
-                {TimetableMockService.getConflicts().length === 0 && (
+                {conflicts.length === 0 && (
                   <div className="text-center py-8 text-green-600">
                     <Calendar className="h-12 w-12 mx-auto mb-4 opacity-50" />
                     Aucun conflit détecté dans les emplois du temps !

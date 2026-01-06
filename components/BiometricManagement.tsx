@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -23,26 +23,23 @@ import {
   AlertTriangle,
   Clock
 } from "lucide-react";
-import { BiometricService, BiometricDevice, BiometricRecord } from "@/services/biometricService";
+import { BiometricDevice, BiometricRecord } from "@/services/biometricService";
+import { useBiometric } from "@/hooks/useBiometric";
 
 export default function BiometricManagement() {
-  const [devices, setDevices] = useState<BiometricDevice[]>([]);
-  const [recentRecords, setRecentRecords] = useState<BiometricRecord[]>([]);
+  const { 
+    devices, 
+    records: recentRecords, 
+    stats, 
+    enroll, 
+    verify, 
+    refresh,
+    isEnrolling,
+    isVerifying
+  } = useBiometric();
+
   const [selectedUserId, setSelectedUserId] = useState("");
-  const [isEnrolling, setIsEnrolling] = useState(false);
-  const [isVerifying, setIsVerifying] = useState(false);
   const [message, setMessage] = useState<{type: 'success' | 'error' | 'info', text: string} | null>(null);
-  const [stats, setStats] = useState<any>(null);
-
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  const loadData = () => {
-    setDevices(BiometricService.getDevices());
-    setRecentRecords(BiometricService.getRecentRecords(20));
-    setStats(BiometricService.getBiometricStats());
-  };
 
   const handleWebAuthnEnroll = async () => {
     if (!selectedUserId.trim()) {
@@ -50,25 +47,19 @@ export default function BiometricManagement() {
       return;
     }
 
-    setIsEnrolling(true);
     setMessage(null);
 
     try {
-      const result = await BiometricService.registerWebAuthnBiometric(
-        selectedUserId,
-        "STUDENT"
-      );
+      const result = await enroll(selectedUserId, "STUDENT");
 
       if (result.success) {
         setMessage({type: 'success', text: 'Empreinte biométrique enregistrée avec succès!'});
-        loadData();
+        refresh();
       } else {
         setMessage({type: 'error', text: result.error || 'Erreur lors de l\'enregistrement'});
       }
     } catch (error) {
       setMessage({type: 'error', text: 'Erreur système lors de l\'enregistrement'});
-    } finally {
-      setIsEnrolling(false);
     }
   };
 
@@ -78,25 +69,22 @@ export default function BiometricManagement() {
       return;
     }
 
-    setIsVerifying(true);
     setMessage(null);
 
     try {
-      const result = await BiometricService.authenticateWebAuthnBiometric(selectedUserId);
+      const result = await verify(selectedUserId);
 
       if (result.success) {
         setMessage({
           type: 'success', 
           text: `Authentification réussie! Confiance: ${result.confidence}%`
         });
-        loadData();
+        refresh();
       } else {
         setMessage({type: 'error', text: result.error || 'Authentification échouée'});
       }
     } catch (error) {
       setMessage({type: 'error', text: 'Erreur système lors de l\'authentification'});
-    } finally {
-      setIsVerifying(false);
     }
   };
 
