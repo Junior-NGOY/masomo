@@ -2,6 +2,13 @@ import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
   /* config options here */
+  experimental: {
+    turbopack: {
+      rules: {
+        // Configure specific rules if needed
+      }
+    }
+  },
   eslint: {
     ignoreDuringBuilds: true,
   },
