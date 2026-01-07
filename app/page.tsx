@@ -1,5 +1,5 @@
-import Home, { metadata as homeMetadata } from "./(front)/page";
-import FontLayout from "./(front)/layout";
+import Home, { metadata as homeMetadata } from "./(marketing)/page";
+import FontLayout from "./(marketing)/layout";
 
 export const metadata = homeMetadata;
 
